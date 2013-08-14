@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "main": "./lib/spell-check",
   "description": "Highlight misspelled words in the current text or Markdown editor.\n\nDisplay corrections for the misspelling under the cursor with `meta-0`.",
+  "dependencies": {
+    "spellchecker": "~0.6.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/atom/spell-check.git"
