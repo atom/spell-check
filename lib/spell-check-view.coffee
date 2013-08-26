@@ -22,7 +22,7 @@ class SpellCheckView extends View
 
   beforeRemove: ->
     @unsubscribeFromBuffer()
-    @task?.terminate
+    @task?.terminate()
 
   unsubscribeFromBuffer: ->
     @destroyViews()
