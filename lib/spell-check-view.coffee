@@ -12,7 +12,7 @@ class SpellCheckView extends View
   views: []
 
   initialize: (@editor) ->
-    @task = new Task('spell-check/lib/spell-check-handler')
+    @task = new Task(require.resolve('./spell-check-handler'))
     @subscribe @editor, 'editor:path-changed', @subscribeToBuffer
     @subscribe @editor, 'editor:grammar-changed', @subscribeToBuffer
     @observeConfig 'editor.fontSize', @subscribeToBuffer
