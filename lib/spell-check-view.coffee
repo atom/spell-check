@@ -44,9 +44,8 @@ class SpellCheckView extends View
     _.contains config.get('spell-check.grammars'), grammar
 
   destroyViews: ->
-    if @views
-      view.destroy() for view in @views
-      @views = []
+    while view = @views.shift()
+      view.destroy()
 
   addViews: (misspellings) ->
     for misspelling in misspellings
