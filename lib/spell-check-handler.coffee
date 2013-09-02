@@ -2,7 +2,7 @@
 
 wordRegex = /(?:^|[\s\[\]])([a-zA-Z']+)(?=[\s\.\[\]:,]|$)/g
 
-module.exports = (text, queue) ->
+module.exports = (text) ->
   row = 0
   misspellings = []
   for line in text.split('\n')
