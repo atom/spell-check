@@ -1,3 +1,5 @@
+SpellCheckView = null
+
 module.exports =
   configDefaults:
     grammars: [
@@ -7,8 +9,8 @@ module.exports =
     ]
 
   createView: (editor) ->
-    @spellCheckViewClass ?= require './spell-check-view'
-    new @spellCheckViewClass(editor)
+    SpellCheckView ?= require './spell-check-view'
+    new SpellCheckView(editor)
 
   activate: ->
     rootView.eachEditor (editor) =>
