@@ -1,4 +1,4 @@
-{View} = require 'space-pen'
+{View} = require 'atom-api'
 {Range} = require 'telepath'
 CorrectionsView = require './corrections-view'
 

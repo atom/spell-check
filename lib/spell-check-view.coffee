@@ -1,6 +1,4 @@
-{View} = require 'space-pen'
-_ = require 'underscore'
-Task = require 'task'
+{_, Task, View} = require 'atom-api'
 MisspellingView = require './misspelling-view'
 
 module.exports =
