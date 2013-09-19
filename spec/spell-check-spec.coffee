@@ -1,4 +1,4 @@
-RootView = require 'root-view'
+{RootView} = require 'atom'
 
 describe "Spell check", ->
   [editor] = []

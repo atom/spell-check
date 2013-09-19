@@ -1,6 +1,4 @@
-{$$} = require 'space-pen'
-{Range} = require 'telepath'
-SelectList = require 'select-list'
+{$$, Range, SelectList} = require 'atom'
 
 module.exports =
 class CorrectionsView extends SelectList

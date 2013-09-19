@@ -1,5 +1,4 @@
-{View} = require 'space-pen'
-{Range} = require 'telepath'
+{Range, View} = require 'atom'
 CorrectionsView = require './corrections-view'
 
 module.exports =
