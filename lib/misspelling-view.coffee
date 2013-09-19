@@ -1,4 +1,4 @@
-{Range, View} = require 'atom-api'
+{Range, View} = require 'atom'
 CorrectionsView = require './corrections-view'
 
 module.exports =

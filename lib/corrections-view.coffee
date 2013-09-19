@@ -1,4 +1,4 @@
-{$$, Range, SelectList} = require 'atom-api'
+{$$, Range, SelectList} = require 'atom'
 
 module.exports =
 class CorrectionsView extends SelectList

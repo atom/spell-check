@@ -1,4 +1,4 @@
-{_, Task, View} = require 'atom-api'
+{_, Task, View} = require 'atom'
 MisspellingView = require './misspelling-view'
 
 module.exports =
