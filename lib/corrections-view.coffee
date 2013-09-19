@@ -1,5 +1,4 @@
-{$$, SelectList} = require 'atom-api'
-{Range} = require 'telepath'
+{$$, Range, SelectList} = require 'atom-api'
 
 module.exports =
 class CorrectionsView extends SelectList
