@@ -1,6 +1,6 @@
 {
   "name": "spell-check",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "main": "./lib/spell-check",
   "description": "Highlight misspelled words in the current text or Markdown editor.\n\nDisplay corrections for the misspelling under the cursor with `meta-0`.",
   "dependencies": {
