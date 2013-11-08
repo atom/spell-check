@@ -56,6 +56,7 @@ class MisspellingView extends View
       left: startPixelPosition.left
       width: endPixelPosition.left - startPixelPosition.left
       height: @editor.lineHeight
+      position: 'absolute'
     @show()
 
   destroy: ->
