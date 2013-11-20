@@ -4,18 +4,18 @@ describe "Spell check", ->
   [editor] = []
 
   beforeEach ->
-    atom.activatePackage('language-text', sync: true)
-    atom.activatePackage('language-javascript', sync: true)
-    window.rootView = new RootView
-    rootView.openSync('sample.js')
-    config.set('spell-check.grammars', [])
-    atom.activatePackage('spell-check', immediate: true)
-    rootView.attachToDom()
-    editor = rootView.getActiveView()
+    atom.packages.activatePackage('language-text', sync: true)
+    atom.packages.activatePackage('language-javascript', sync: true)
+    atom.rootView = new RootView
+    atom.rootView.openSync('sample.js')
+    atom.config.set('spell-check.grammars', [])
+    atom.packages.activatePackage('spell-check', immediate: true)
+    atom.rootView.attachToDom()
+    editor = atom.rootView.getActiveView()
 
   it "decorates all misspelled words", ->
     editor.setText("This middle of thiss sentencts has issues.")
-    config.set('spell-check.grammars', ['source.js'])
+    atom.config.set('spell-check.grammars', ['source.js'])
 
     waitsFor ->
       editor.find('.misspelling').length > 0
@@ -36,7 +36,7 @@ describe "Spell check", ->
   it "hides decorations when a misspelled word is edited", ->
     editor.setText('notaword')
     advanceClock(editor.getBuffer().stoppedChangingDelay)
-    config.set('spell-check.grammars', ['source.js'])
+    atom.config.set('spell-check.grammars', ['source.js'])
 
     waitsFor ->
       editor.find('.misspelling').length > 0
@@ -52,14 +52,14 @@ describe "Spell check", ->
     it "removes all current decorations", ->
       editor.setText('notaword')
       advanceClock(editor.getBuffer().stoppedChangingDelay)
-      config.set('spell-check.grammars', ['source.js'])
+      atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
         editor.find('.misspelling').length > 0
 
       runs ->
         expect(editor.find('.misspelling').length).toBe 1
-        config.set('spell-check.grammars', [])
+        atom.config.set('spell-check.grammars', [])
         expect(editor.find('.misspelling').length).toBe 0
 
   describe "when 'editor:correct-misspelling' is triggered on the editor", ->
@@ -67,7 +67,7 @@ describe "Spell check", ->
       it "displays the corrections for the misspelling and replaces the misspelling when a correction is selected", ->
         editor.setText('tofether')
         advanceClock(editor.getBuffer().stoppedChangingDelay)
-        config.set('spell-check.grammars', ['source.js'])
+        atom.config.set('spell-check.grammars', ['source.js'])
 
         waitsFor ->
           editor.find('.misspelling').length > 0
@@ -88,7 +88,7 @@ describe "Spell check", ->
       it "displays a message saying no corrections found", ->
         editor.setText('zxcasdfysyadfyasdyfasdfyasdfyasdfyasydfasdf')
         advanceClock(editor.getBuffer().stoppedChangingDelay)
-        config.set('spell-check.grammars', ['source.js'])
+        atom.config.set('spell-check.grammars', ['source.js'])
 
         waitsFor ->
           editor.find('.misspelling').length > 0
@@ -102,7 +102,7 @@ describe "Spell check", ->
   describe "when the edit session is destroyed", ->
     it "destroys all misspelling markers", ->
       editor.setText("mispelling")
-      config.set('spell-check.grammars', ['source.js'])
+      atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
         editor.find('.misspelling').length > 0

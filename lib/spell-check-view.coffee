@@ -39,7 +39,7 @@ class SpellCheckView extends View
 
   spellCheckCurrentGrammar: ->
     grammar = @editor.getGrammar().scopeName
-    _.contains config.get('spell-check.grammars'), grammar
+    _.contains atom.config.get('spell-check.grammars'), grammar
 
   destroyViews: ->
     while view = @views.shift()
