@@ -6,14 +6,14 @@ class MisspellingView extends View
   @content: ->
     @div class: 'misspelling'
 
-  initialize: (range, @editor) ->
-    @editSession = @editor.activeEditSession
-    range = @editSession.screenRangeForBufferRange(Range.fromObject(range))
+  initialize: (range, @editorView) ->
+    {@editor} = @editorView
+    range = @editor.screenRangeForBufferRange(Range.fromObject(range))
     @startPosition = range.start
     @endPosition = range.end
     @misspellingValid = true
 
-    @marker = @editSession.markScreenRange(range, invalidation: 'inside', replicate: false)
+    @marker = @editor.markScreenRange(range, invalidation: 'inside', replicate: false)
     @marker.on 'changed', ({newHeadScreenPosition, newTailScreenPosition, isValid}) =>
       @startPosition = newTailScreenPosition
       @endPosition = newHeadScreenPosition
@@ -21,18 +21,18 @@ class MisspellingView extends View
       @misspellingValid = isValid
       @hide() unless isValid
 
-    @subscribe @editor, 'editor:display-updated', =>
+    @subscribe @editorView, 'editorView:display-updated', =>
       @updatePosition() if @updateDisplayPosition
 
-    @editor.command 'editor:correct-misspelling', =>
+    @editorView.command 'editorView:correct-misspelling', =>
       return unless @misspellingValid and @containsCursor()
 
       screenRange = @getScreenRange()
-      misspelling = @editor.getTextInRange(@editor.bufferRangeForScreenRange(screenRange))
+      misspelling = @editorView.getTextInRange(@editorView.bufferRangeForScreenRange(screenRange))
       SpellChecker = require 'spellchecker'
       corrections = SpellChecker.getCorrectionsForMisspelling(misspelling)
       @correctionsView?.remove()
-      @correctionsView = new CorrectionsView(@editor, corrections, screenRange)
+      @correctionsView = new CorrectionsView(@editorView, corrections, screenRange)
 
     @updatePosition()
 
@@ -44,22 +44,22 @@ class MisspellingView extends View
     @marker.destroy()
 
   containsCursor: ->
-    cursor = @editor.getCursorScreenPosition()
+    cursor = @editorView.getCursorScreenPosition()
     @getScreenRange().containsPoint(cursor, exclusive: false)
 
   updatePosition: ->
     @updateDisplayPosition = false
-    startPixelPosition = @editor.pixelPositionForScreenPosition(@startPosition)
-    endPixelPosition = @editor.pixelPositionForScreenPosition(@endPosition)
+    startPixelPosition = @editorView.pixelPositionForScreenPosition(@startPosition)
+    endPixelPosition = @editorView.pixelPositionForScreenPosition(@endPosition)
     @css
       top: startPixelPosition.top
       left: startPixelPosition.left
       width: endPixelPosition.left - startPixelPosition.left
-      height: @editor.lineHeight
+      height: @editorView.lineHeight
     @show()
 
   destroy: ->
     @misspellingValid = false
-    @editSession.destroyMarker(@marker)
+    @editor.destroyMarker(@marker)
     @correctionsView?.remove()
     @remove()

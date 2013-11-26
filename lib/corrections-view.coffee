@@ -4,12 +4,12 @@ module.exports =
 class CorrectionsView extends SelectList
   @viewClass: -> "corrections #{super} popover-list"
 
-  editor: null
+  editorView: null
   corrections: null
   misspellingRange: null
   aboveCursor: false
 
-  initialize: (@editor, @corrections, @misspellingRange) ->
+  initialize: (@editorView, @corrections, @misspellingRange) ->
     super
 
     @attach()
@@ -31,15 +31,15 @@ class CorrectionsView extends SelectList
   confirmed: (correction) ->
     @cancel()
     return unless correction
-    @editor.transact =>
-      @editor.setSelectedBufferRange(@editor.bufferRangeForScreenRange(@misspellingRange))
-      @editor.insertText(correction)
+    @editorView.transact =>
+      @editorView.setSelectedBufferRange(@editorView.bufferRangeForScreenRange(@misspellingRange))
+      @editorView.insertText(correction)
 
   attach: ->
     @aboveCursor = false
     @setArray(@corrections)
 
-    @editor.appendToLinesView(this)
+    @editorView.appendToLinesView(this)
     @setPosition()
     @miniEditor.focus()
 
@@ -52,15 +52,15 @@ class CorrectionsView extends SelectList
   detach: ->
     super
 
-    @editor.focus()
+    @editorView.focus()
 
   setPosition: ->
-    { left, top } = @editor.pixelPositionForScreenPosition(@misspellingRange.start)
+    { left, top } = @editorView.pixelPositionForScreenPosition(@misspellingRange.start)
     height = @outerHeight()
-    potentialTop = top + @editor.lineHeight
-    potentialBottom = potentialTop - @editor.scrollTop() + height
+    potentialTop = top + @editorView.lineHeight
+    potentialBottom = potentialTop - @editorView.scrollTop() + height
 
-    if @aboveCursor or potentialBottom > @editor.outerHeight()
+    if @aboveCursor or potentialBottom > @editorView.outerHeight()
       @aboveCursor = true
       @css(left: left, top: top - height, bottom: 'inherit')
     else
