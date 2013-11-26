@@ -13,6 +13,6 @@ module.exports =
     new SpellCheckView(editor)
 
   activate: ->
-    atom.rootView.eachEditor (editor) =>
+    atom.workspaceView.eachEditor (editor) =>
       if editor.attached and editor.getPane()?
         editor.underlayer.append(@createView(editor))

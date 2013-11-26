@@ -1,4 +1,4 @@
-{RootView} = require 'atom'
+{WorkspaceView} = require 'atom'
 
 describe "Spell check", ->
   [editor] = []
@@ -6,12 +6,12 @@ describe "Spell check", ->
   beforeEach ->
     atom.packages.activatePackage('language-text', sync: true)
     atom.packages.activatePackage('language-javascript', sync: true)
-    atom.rootView = new RootView
-    atom.rootView.openSync('sample.js')
+    atom.workspaceView = new WorkspaceView
+    atom.workspaceView.openSync('sample.js')
     atom.config.set('spell-check.grammars', [])
     atom.packages.activatePackage('spell-check', immediate: true)
-    atom.rootView.attachToDom()
-    editor = atom.rootView.getActiveView()
+    atom.workspaceView.attachToDom()
+    editor = atom.workspaceView.getActiveView()
 
   it "decorates all misspelled words", ->
     editor.setText("This middle of thiss sentencts has issues.")
