@@ -6,17 +6,8 @@
   "dependencies": {
     "spellchecker": "~0.7.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/atom/spell-check.git"
-  },
-  "bugs": {
-    "url": "https://github.com/atom/spell-check/issues"
-  },
+  "repository": "https://github.com/atom/spell-check",
   "engines": {
     "atom": "*"
-  },
-  "publishConfig": {
-    "registry": "https://atom.cloudant.com/registry/_design/app/_rewrite"
   }
 }
