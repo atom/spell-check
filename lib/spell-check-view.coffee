@@ -6,11 +6,15 @@ class SpellCheckView extends View
   @content: ->
     @div class: 'spell-check'
 
-  task: null
+  @task: null
+  @instances: 0
+
   views: []
 
   initialize: (@editor) ->
-    @task = new Task(require.resolve('./spell-check-handler'))
+    @constructor.task ?= new Task(require.resolve('./spell-check-handler'))
+    @constructor.instances++
+
     @subscribe @editor, 'editor:path-changed', @subscribeToBuffer
     @subscribe @editor, 'editor:grammar-changed', @subscribeToBuffer
     @observeConfig 'editor.fontSize', @subscribeToBuffer
@@ -20,7 +24,11 @@ class SpellCheckView extends View
 
   beforeRemove: ->
     @unsubscribeFromBuffer()
-    @task?.terminate()
+
+    @constructor.instances--
+    if @constructor.instances is 0
+      @constructor.task.terminate()
+      @constructor.task = null
 
   unsubscribeFromBuffer: ->
     @destroyViews()
@@ -52,6 +60,6 @@ class SpellCheckView extends View
       @append(view)
 
   updateMisspellings: =>
-    @task.start @buffer.getText(), (misspellings) =>
+    @constructor.task.start @buffer.getText(), (misspellings) =>
       @destroyViews()
       @addViews(misspellings)
