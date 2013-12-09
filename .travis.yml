@@ -3,4 +3,4 @@ script: 'curl -s -H "Authorization: token $ATOM_ACCESS_TOKEN" -H "Accept: applic
   https://api.github.com/repos/atom/apm/contents/script/build-package | sh'
 env:
   global:
-    secure: JRVQXRPtCp4hvyLGhNDnTB2vc5mEme7Y/LeNekuX3tT2IEwz7hd4PdIEjzEgqiW10LewKuvzeXFg2Dvku/dDXcG07eBYrZ+7zMCpA2L5yTerhRbGtzDkfrL5LrL0LHlQX+LWX/AetXAmYlHb2UoTwoSeqvxl1OgVov1/UB1528k=
+    secure: K8BJ6HXSFxHC4AVSGdrdK4RNfHGXWK6N0T8mBAJQ+eyjppyGnZUC+S+1GhLtfnXpmVDcc1v0kJp/tyIARhkOb9fC67FUvvRqytdWOgQKjpxAcImHRYxzeADDbiI35SncNr/cPho5irS/mxx/gAOMRV/uweQmTrqgXaRBCuyhFAA=
