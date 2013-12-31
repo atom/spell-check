@@ -62,7 +62,7 @@ describe "Spell check", ->
         atom.config.set('spell-check.grammars', [])
         expect(editorView.find('.misspelling').length).toBe 0
 
-  describe "when 'editorView:correct-misspelling' is triggered on the editorView", ->
+  describe "when 'editor:correct-misspelling' is triggered on the editor", ->
     describe "when the cursor touches a misspelling that has corrections", ->
       it "displays the corrections for the misspelling and replaces the misspelling when a correction is selected", ->
         editorView.setText('tofether')
@@ -99,7 +99,7 @@ describe "Spell check", ->
           expect(editorView.find('.corrections li').length).toBe 0
           expect(editorView.find('.corrections').view().error.text()).toBe "No corrections"
 
-  describe "when the edit session is destroyed", ->
+  describe "when the editor is destroyed", ->
     it "destroys all misspelling markers", ->
       editorView.setText("mispelling")
       atom.config.set('spell-check.grammars', ['source.js'])
