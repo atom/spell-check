@@ -7,7 +7,7 @@ class MisspellingView extends View
     @div class: 'misspelling'
 
   initialize: (range, @editorView) ->
-    {@editor} = @editorView
+    @editor = @editorView.getEditor()
     range = @editor.screenRangeForBufferRange(Range.fromObject(range))
     @startPosition = range.start
     @endPosition = range.end
@@ -28,7 +28,7 @@ class MisspellingView extends View
       return unless @misspellingValid and @containsCursor()
 
       screenRange = @getScreenRange()
-      misspelling = @editorView.getTextInRange(@editorView.bufferRangeForScreenRange(screenRange))
+      misspelling = @editor.getTextInRange(@editor.bufferRangeForScreenRange(screenRange))
       SpellChecker = require 'spellchecker'
       corrections = SpellChecker.getCorrectionsForMisspelling(misspelling)
       @correctionsView?.remove()
@@ -44,7 +44,7 @@ class MisspellingView extends View
     @marker.destroy()
 
   containsCursor: ->
-    cursor = @editorView.getCursorScreenPosition()
+    cursor = @editor.getCursorScreenPosition()
     @getScreenRange().containsPoint(cursor, exclusive: false)
 
   updatePosition: ->

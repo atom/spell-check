@@ -35,7 +35,7 @@ describe "Spell check", ->
 
   it "hides decorations when a misspelled word is edited", ->
     editorView.setText('notaword')
-    advanceClock(editorView.getBuffer().stoppedChangingDelay)
+    advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
     atom.config.set('spell-check.grammars', ['source.js'])
 
     waitsFor ->
@@ -43,15 +43,15 @@ describe "Spell check", ->
 
     runs ->
       expect(editorView.find('.misspelling').length).toBe 1
-      editorView.moveCursorToEndOfLine()
+      editorView.getEditor().moveCursorToEndOfLine()
       editorView.insertText('a')
-      advanceClock(editorView.getBuffer().stoppedChangingDelay)
+      advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
       expect(editorView.find('.misspelling')).toBeHidden()
 
   describe "when spell checking for a grammar is removed", ->
     it "removes all current decorations", ->
       editorView.setText('notaword')
-      advanceClock(editorView.getBuffer().stoppedChangingDelay)
+      advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
@@ -66,7 +66,7 @@ describe "Spell check", ->
     describe "when the cursor touches a misspelling that has corrections", ->
       it "displays the corrections for the misspelling and replaces the misspelling when a correction is selected", ->
         editorView.setText('tofether')
-        advanceClock(editorView.getBuffer().stoppedChangingDelay)
+        advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
         atom.config.set('spell-check.grammars', ['source.js'])
 
         waitsFor ->
@@ -79,15 +79,15 @@ describe "Spell check", ->
           expect(editorView.find('.corrections li:first').text()).toBe "together"
           editorView.find('.corrections').view().confirmSelection()
           expect(editorView.getText()).toBe 'together'
-          expect(editorView.getCursorBufferPosition()).toEqual [0, 8]
-          advanceClock(editorView.getBuffer().stoppedChangingDelay)
+          expect(editorView.getEditor().getCursorBufferPosition()).toEqual [0, 8]
+          advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
           expect(editorView.find('.misspelling')).toBeHidden()
           expect(editorView.find('.corrections').length).toBe 0
 
     describe "when the cursor touches a misspelling that has no corrections", ->
       it "displays a message saying no corrections found", ->
         editorView.setText('zxcasdfysyadfyasdyfasdfyasdfyasdfyasydfasdf')
-        advanceClock(editorView.getBuffer().stoppedChangingDelay)
+        advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
         atom.config.set('spell-check.grammars', ['source.js'])
 
         waitsFor ->
@@ -110,7 +110,7 @@ describe "Spell check", ->
       runs ->
         expect(editorView.find('.misspelling').length).toBe 1
         view = editorView.find('.misspelling').view()
-        buffer = editorView.getBuffer()
+        buffer = editorView.getEditor().getBuffer()
         expect(view.marker.isDestroyed()).toBeFalsy()
         editorView.remove()
         expect(view.marker.isDestroyed()).toBeTruthy()

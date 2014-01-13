@@ -11,12 +11,12 @@ class SpellCheckView extends View
 
   views: []
 
-  initialize: (@editor) ->
+  initialize: (@editorView) ->
     @constructor.task ?= new Task(require.resolve('./spell-check-handler'))
     @constructor.instances++
 
-    @subscribe @editor, 'editor:path-changed', @subscribeToBuffer
-    @subscribe @editor, 'editor:grammar-changed', @subscribeToBuffer
+    @subscribe editorView, 'editor:path-changed', @subscribeToBuffer
+    @subscribe editorView, 'editor:grammar-changed', @subscribeToBuffer
     @observeConfig 'editor.fontSize', @subscribeToBuffer
     @observeConfig 'spell-check.grammars', @subscribeToBuffer
 
@@ -41,12 +41,12 @@ class SpellCheckView extends View
     @unsubscribeFromBuffer()
 
     if @spellCheckCurrentGrammar()
-      @buffer = @editor.getBuffer()
+      @buffer = @editorView.getEditor().getBuffer()
       @buffer.on 'contents-modified', @updateMisspellings
       @updateMisspellings()
 
   spellCheckCurrentGrammar: ->
-    grammar = @editor.getGrammar().scopeName
+    grammar = @editorView.getEditor().getGrammar().scopeName
     _.contains atom.config.get('spell-check.grammars'), grammar
 
   destroyViews: ->
@@ -55,7 +55,7 @@ class SpellCheckView extends View
 
   addViews: (misspellings) ->
     for misspelling in misspellings
-      view = new MisspellingView(misspelling, @editor)
+      view = new MisspellingView(misspelling, @editorView)
       @views.push(view)
       @append(view)
 

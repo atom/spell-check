@@ -31,9 +31,10 @@ class CorrectionsView extends SelectList
   confirmed: (correction) ->
     @cancel()
     return unless correction
-    @editorView.transact =>
-      @editorView.setSelectedBufferRange(@editorView.bufferRangeForScreenRange(@misspellingRange))
-      @editorView.insertText(correction)
+    editor = @editorView.getEditor()
+    editor.transact =>
+      editor.setSelectedBufferRange(editor.bufferRangeForScreenRange(@misspellingRange))
+      editor.insertText(correction)
 
   attach: ->
     @aboveCursor = false
