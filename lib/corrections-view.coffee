@@ -1,7 +1,7 @@
-{$$, Range, SelectList} = require 'atom'
+{$$, Range, SelectListView} = require 'atom'
 
 module.exports =
-class CorrectionsView extends SelectList
+class CorrectionsView extends SelectListView
   @viewClass: -> "corrections #{super} popover-list"
 
   editorView: null
