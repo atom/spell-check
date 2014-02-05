@@ -1,5 +1,5 @@
 '.platform-darwin .editor':
-  'cmd-:': 'editor:correct-misspelling'
+  'cmd-:': 'spell-check:correct-misspelling'
 
 '.platform-win32 .editor':
-  'ctrl-:': 'editor:correct-misspelling'
+  'ctrl-:': 'spell-check:correct-misspelling'

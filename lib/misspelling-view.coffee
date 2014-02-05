@@ -21,10 +21,10 @@ class MisspellingView extends View
       @misspellingValid = isValid
       @hide() unless isValid
 
-    @subscribe @editorView, 'editorView:display-updated', =>
+    @subscribe @editorView, 'spell-check:display-updated', =>
       @updatePosition() if @updateDisplayPosition
 
-    @editorView.command 'editorView:correct-misspelling', =>
+    @editorView.command 'spell-check:correct-misspelling', =>
       return unless @misspellingValid and @containsCursor()
 
       screenRange = @getScreenRange()
