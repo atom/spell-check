@@ -11,7 +11,6 @@ class CorrectionsView extends SelectListView
 
   initialize: (@editorView, @corrections, @misspellingRange) ->
     super
-
     @attach()
 
   itemForElement: (word) ->
@@ -20,12 +19,10 @@ class CorrectionsView extends SelectListView
 
   selectNextItem: ->
     super
-
     false
 
   selectPreviousItem: ->
     super
-
     false
 
   confirmed: (correction) ->
