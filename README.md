@@ -1,3 +1,3 @@
-# Spell check package
+# Spell Check Package
 
-Highlight misspelling in the editor and show possible corrections with `meta-0`.
+Highlights misspelling in the editor and show possible corrections with `cmd-:`.
