@@ -4,11 +4,6 @@ module.exports =
 class CorrectionsView extends SelectListView
   @viewClass: -> "corrections #{super} popover-list"
 
-  editorView: null
-  corrections: null
-  misspellingRange: null
-  aboveCursor: false
-
   initialize: (@editorView, @corrections, @misspellingRange) ->
     super
     @attach()
