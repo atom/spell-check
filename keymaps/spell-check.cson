@@ -1,5 +1,15 @@
 '.platform-darwin .editor':
   'cmd-:': 'spell-check:correct-misspelling'
 
+'.platform-darwin .corrections .editor':
+  'cmd-:': 'core:cancel'
+
 '.platform-win32 .editor':
   'ctrl-:': 'spell-check:correct-misspelling'
+
+'.platform-win32 .corrections .editor':
+  'ctrl-:': 'core:cancel'
+
+'.corrections .mini.editor input':
+  'enter': 'core:confirm'
+  'tab': 'core:confirm'
