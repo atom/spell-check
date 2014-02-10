@@ -4,14 +4,23 @@ describe "Spell check", ->
   [editorView] = []
 
   beforeEach ->
-    atom.packages.activatePackage('language-text', sync: true)
-    atom.packages.activatePackage('language-javascript', sync: true)
-    atom.workspaceView = new WorkspaceView
-    atom.workspaceView.openSync('sample.js')
-    atom.config.set('spell-check.grammars', [])
-    atom.packages.activatePackage('spell-check', immediate: true)
-    atom.workspaceView.attachToDom()
-    editorView = atom.workspaceView.getActiveView()
+    waitsForPromise ->
+      atom.packages.activatePackage('language-text')
+
+    waitsForPromise ->
+      atom.packages.activatePackage('language-javascript')
+
+    runs ->
+      atom.workspaceView = new WorkspaceView
+      atom.workspaceView.openSync('sample.js')
+      atom.config.set('spell-check.grammars', [])
+
+    waitsForPromise ->
+      atom.packages.activatePackage('spell-check')
+
+    runs ->
+      atom.workspaceView.attachToDom()
+      editorView = atom.workspaceView.getActiveView()
 
   it "decorates all misspelled words", ->
     editorView.setText("This middle of thiss sentencts has issues.")
