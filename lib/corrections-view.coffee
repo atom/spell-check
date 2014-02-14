@@ -1,22 +1,22 @@
-{$$, Range, SelectListView} = require 'atom'
+{Range, SelectListView} = require 'atom'
 
 module.exports =
 class CorrectionsView extends SelectListView
-  @viewClass: -> "corrections #{super} popover-list"
-
   initialize: (@editorView, @corrections, @misspellingRange) ->
     super
+    @addClass('corrections popover-list')
     @attach()
 
-  itemForElement: (word) ->
-    $$ ->
-      @li word
+  viewForItem: (word) ->
+    element = document.createElement('li')
+    element.textContent = word
+    element
 
-  selectNextItem: ->
+  selectNextItemView: ->
     super
     false
 
-  selectPreviousItem: ->
+  selectPreviousItemView: ->
     super
     false
 
@@ -27,25 +27,21 @@ class CorrectionsView extends SelectListView
     editor.transact =>
       editor.setSelectedBufferRange(editor.bufferRangeForScreenRange(@misspellingRange))
       editor.insertText(correction)
+    @editorView.focus()
 
   attach: ->
     @aboveCursor = false
-    @setArray(@corrections)
+    @setItems(@corrections)
 
     @editorView.appendToLinesView(this)
     @setPosition()
-    @miniEditor.focus()
+    @focusFilterEditor()
 
   getEmptyMessage: (itemCount) ->
     if itemCount is 0
       'No corrections'
     else
       super
-
-  detach: ->
-    super
-
-    @editorView.focus()
 
   setPosition: ->
     { left, top } = @editorView.pixelPositionForScreenPosition(@misspellingRange.start)
