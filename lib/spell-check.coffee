@@ -8,11 +8,13 @@ module.exports =
       'text.git-commit'
     ]
 
-  createView: (editorView) ->
-    SpellCheckView ?= require './spell-check-view'
-    new SpellCheckView(editorView)
-
   activate: ->
-    atom.workspaceView.eachEditorView (editorView) =>
-      if editorView.attached and editorView.getPane()?
-        editorView.underlayer.append(@createView(editorView))
+    @editorSubscription = atom.workspaceView.eachEditorView(addViewToEditor)
+
+  deactivate: ->
+    @editorSubscription?.off()
+
+addViewToEditor = (editorView) ->
+  if editorView.attached and editorView.getPane()?
+    SpellCheckView ?= require './spell-check-view'
+    editorView.underlayer.append(new SpellCheckView(editorView))
