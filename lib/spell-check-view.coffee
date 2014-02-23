@@ -20,6 +20,9 @@ class SpellCheckView extends View
       @task?.terminate()
       @task = null
 
+  @startTask: (args...) ->
+    @task.start(args...)
+
   initialize: (@editorView) ->
     @views = []
     @constructor.createTask()
@@ -65,6 +68,6 @@ class SpellCheckView extends View
       @append(view)
 
   updateMisspellings: =>
-    @constructor.task.start @buffer.getText(), (misspellings) =>
+    @constructor.startTask @buffer.getText(), (misspellings) =>
       @destroyViews()
       @addViews(misspellings)
