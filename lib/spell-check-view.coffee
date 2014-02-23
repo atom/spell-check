@@ -32,9 +32,9 @@ class SpellCheckView extends View
     @subscribe @editorView, 'editor:grammar-changed', =>
       @subscribeToBuffer()
 
-    @subscribe atom.config.observe 'editor.fontSize', =>
+    @subscribe atom.config.observe 'editor.fontSize', callNow: false, =>
       @subscribeToBuffer()
-    @subscribe atom.config.observe 'spell-check.grammars', =>
+    @subscribe atom.config.observe 'spell-check.grammars', callNow: false, =>
       @subscribeToBuffer()
 
     @subscribeToBuffer()
