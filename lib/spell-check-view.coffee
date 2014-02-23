@@ -1,31 +1,16 @@
 _ = require 'underscore-plus'
-{Task, View} = require 'atom'
+{View} = require 'atom'
 MisspellingView = require './misspelling-view'
+SpellCheckTask = require './spell-check-task'
 
 module.exports =
 class SpellCheckView extends View
   @content: ->
     @div class: 'spell-check'
 
-  @createTask: ->
-    @task ?= new Task(require.resolve('./spell-check-handler'))
-    if @activeViews?
-      @activeViews++
-    else
-      @activeViews = 1
-
-  @terminateTask: ->
-    @activeViews--
-    if @activeViews is 0
-      @task?.terminate()
-      @task = null
-
-  @startTask: (args...) ->
-    @task.start(args...)
-
   initialize: (@editorView) ->
     @views = []
-    @constructor.createTask()
+    @task = new SpellCheckTask()
 
     @subscribe @editorView, 'editor:path-changed', =>
       @subscribeToBuffer()
@@ -41,7 +26,7 @@ class SpellCheckView extends View
 
   beforeRemove: ->
     @unsubscribeFromBuffer()
-    @constructor.terminateTask()
+    @task.terminate()
 
   unsubscribeFromBuffer: ->
     @destroyViews()
@@ -74,6 +59,6 @@ class SpellCheckView extends View
       @append(view)
 
   updateMisspellings: ->
-    @constructor.startTask @buffer.getText(), (misspellings) =>
+    @task.start @buffer.getText(), (misspellings) =>
       @destroyViews()
       @addViews(misspellings)
