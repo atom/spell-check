@@ -1,4 +1,5 @@
-{_, Task, View} = require 'atom'
+_ = require 'underscore-plus'
+{Task, View} = require 'atom'
 MisspellingView = require './misspelling-view'
 
 module.exports =
