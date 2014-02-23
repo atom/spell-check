@@ -1,7 +1,7 @@
 {
   "name": "spell-check",
   "version": "0.25.0",
-  "main": "./lib/spell-check",
+  "main": "./lib/main",
   "description": "Highlights misspelled words and shows possible corrections.",
   "dependencies": {
     "spellchecker": "~0.8.0",
