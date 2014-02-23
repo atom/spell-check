@@ -39,7 +39,7 @@ class SpellCheckView extends View
     @destroyViews()
 
     if @buffer?
-      @buffer.off 'contents-modified', @updateMisspellings
+      @unsubscribe(@buffer)
       @buffer = null
 
   subscribeToBuffer: =>
@@ -47,7 +47,7 @@ class SpellCheckView extends View
 
     if @spellCheckCurrentGrammar()
       @buffer = @editorView.getEditor().getBuffer()
-      @buffer.on 'contents-modified', @updateMisspellings
+      @subscribe @buffer, 'contents-modified', @updateMisspellings
       @updateMisspellings()
 
   spellCheckCurrentGrammar: ->
