@@ -14,7 +14,7 @@ class SpellCheckView extends View
     else
       @activeViews = 1
 
-  @destroyTask: ->
+  @terminateTask: ->
     @activeViews--
     if @activeViews is 0
       @task?.terminate()
@@ -36,7 +36,7 @@ class SpellCheckView extends View
 
   beforeRemove: ->
     @unsubscribeFromBuffer()
-    @constructor.destroyTask()
+    @constructor.terminateTask()
 
   unsubscribeFromBuffer: ->
     @destroyViews()
