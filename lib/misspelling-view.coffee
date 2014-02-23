@@ -25,19 +25,20 @@ class MisspellingView extends View
       @updatePosition() if @updateDisplayPosition
 
     @editorView.command 'spell-check:correct-misspelling', =>
-      return unless @misspellingValid and @containsCursor()
-
-      screenRange = @getScreenRange()
-      misspelling = @editor.getTextInRange(@editor.bufferRangeForScreenRange(screenRange))
-      SpellChecker = require 'spellchecker'
-      corrections = SpellChecker.getCorrectionsForMisspelling(misspelling)
-      @correctionsView?.remove()
-      @correctionsView = new CorrectionsView(@editorView, corrections, screenRange)
+      if @misspellingValid and @containsCursor()
+        @correctionsView?.remove()
+        @correctionsView = new CorrectionsView(@editorView, @getCorrections(), @getScreenRange())
 
     @updatePosition()
 
   getScreenRange: ->
     new Range(@startPosition, @endPosition)
+
+  getCorrections: ->
+    screenRange = @getScreenRange()
+    misspelling = @editor.getTextInRange(@editor.bufferRangeForScreenRange(screenRange))
+    {SpellChecker} = require 'spellchecker'
+    corrections = SpellChecker.getCorrectionsForMisspelling(misspelling)
 
   unsubscribe: ->
     super
