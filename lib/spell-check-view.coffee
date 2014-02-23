@@ -7,14 +7,22 @@ class SpellCheckView extends View
   @content: ->
     @div class: 'spell-check'
 
-  @task: null
-  @instances: 0
+  @createTask: ->
+    @task ?= new Task(require.resolve('./spell-check-handler'))
+    if @activeViews?
+      @activeViews++
+    else
+      @activeViews = 1
 
-  views: []
+  @destroyTask: ->
+    @activeViews--
+    if @activeViews is 0
+      @task?.terminate()
+      @task = null
 
   initialize: (@editorView) ->
-    @constructor.task ?= new Task(require.resolve('./spell-check-handler'))
-    @constructor.instances++
+    @views = []
+    @constructor.createTask()
 
     @subscribe editorView, 'editor:path-changed', @subscribeToBuffer
     @subscribe editorView, 'editor:grammar-changed', @subscribeToBuffer
@@ -25,11 +33,7 @@ class SpellCheckView extends View
 
   beforeRemove: ->
     @unsubscribeFromBuffer()
-
-    @constructor.instances--
-    if @constructor.instances is 0
-      @constructor.task.terminate()
-      @constructor.task = null
+    @constructor.destroyTask()
 
   unsubscribeFromBuffer: ->
     @destroyViews()
@@ -48,7 +52,7 @@ class SpellCheckView extends View
 
   spellCheckCurrentGrammar: ->
     grammar = @editorView.getEditor().getGrammar().scopeName
-    _.contains atom.config.get('spell-check.grammars'), grammar
+    _.contains(atom.config.get('spell-check.grammars'), grammar)
 
   destroyViews: ->
     while view = @views.shift()
