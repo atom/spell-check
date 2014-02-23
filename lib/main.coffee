@@ -3,9 +3,9 @@ SpellCheckView = null
 module.exports =
   configDefaults:
     grammars: [
-      'text.plain'
       'source.gfm'
       'text.git-commit'
+      'text.plain'
     ]
 
   activate: ->
