@@ -27,10 +27,15 @@ class SpellCheckView extends View
     @views = []
     @constructor.createTask()
 
-    @subscribe @editorView, 'editor:path-changed', @subscribeToBuffer
-    @subscribe @editorView, 'editor:grammar-changed', @subscribeToBuffer
-    @subscribe atom.config.observe 'editor.fontSize', @subscribeToBuffer
-    @subscribe atom.config.observe 'spell-check.grammars', @subscribeToBuffer
+    @subscribe @editorView, 'editor:path-changed', =>
+      @subscribeToBuffer()
+    @subscribe @editorView, 'editor:grammar-changed', =>
+      @subscribeToBuffer()
+
+    @subscribe atom.config.observe 'editor.fontSize', =>
+      @subscribeToBuffer()
+    @subscribe atom.config.observe 'spell-check.grammars', =>
+      @subscribeToBuffer()
 
     @subscribeToBuffer()
 
@@ -45,7 +50,7 @@ class SpellCheckView extends View
       @unsubscribe(@buffer)
       @buffer = null
 
-  subscribeToBuffer: =>
+  subscribeToBuffer: ->
     @unsubscribeFromBuffer()
 
     if @spellCheckCurrentGrammar()
