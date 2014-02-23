@@ -55,7 +55,8 @@ class SpellCheckView extends View
 
     if @spellCheckCurrentGrammar()
       @buffer = @editorView.getEditor().getBuffer()
-      @subscribe @buffer, 'contents-modified', @updateMisspellings
+      @subscribe @buffer, 'contents-modified', =>
+        @updateMisspellings()
       @updateMisspellings()
 
   spellCheckCurrentGrammar: ->
@@ -72,7 +73,7 @@ class SpellCheckView extends View
       @views.push(view)
       @append(view)
 
-  updateMisspellings: =>
+  updateMisspellings: ->
     @constructor.startTask @buffer.getText(), (misspellings) =>
       @destroyViews()
       @addViews(misspellings)
