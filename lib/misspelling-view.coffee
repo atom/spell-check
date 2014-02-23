@@ -40,8 +40,7 @@ class MisspellingView extends View
     {SpellChecker} = require 'spellchecker'
     corrections = SpellChecker.getCorrectionsForMisspelling(misspelling)
 
-  unsubscribe: ->
-    super
+  beforeRemove: ->
     @marker.destroy()
 
   containsCursor: ->
