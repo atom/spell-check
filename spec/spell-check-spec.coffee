@@ -71,7 +71,7 @@ describe "Spell check", ->
         atom.config.set('spell-check.grammars', [])
         expect(editorView.find('.misspelling').length).toBe 0
 
-  describe "when the editor's grammar changes to one that is does now have spell check eanbled", ->
+  describe "when the editor's grammar changes to one that does not have spell check enabled", ->
     it "removes all the misspellings", ->
       editorView.setText('notaword')
       advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
