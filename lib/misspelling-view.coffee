@@ -8,18 +8,13 @@ class MisspellingView extends View
 
   initialize: (range, @editorView) ->
     @editor = @editorView.getEditor()
+    @misspellingValid = true
+
     range = @editor.screenRangeForBufferRange(Range.fromObject(range))
     @startPosition = range.start
     @endPosition = range.end
-    @misspellingValid = true
 
-    @marker = @editor.markScreenRange(range, invalidation: 'inside', replicate: false)
-    @marker.on 'changed', ({newHeadScreenPosition, newTailScreenPosition, isValid}) =>
-      @startPosition = newTailScreenPosition
-      @endPosition = newHeadScreenPosition
-      @updateDisplayPosition = isValid
-      @misspellingValid = isValid
-      @hide() unless isValid
+    @createMarker()
 
     @subscribe @editorView, 'spell-check:display-updated', =>
       @updatePosition() if @updateDisplayPosition
@@ -31,13 +26,22 @@ class MisspellingView extends View
 
     @updatePosition()
 
+  createMarker: ->
+    @marker = @editor.markScreenRange(@getScreenRange(), invalidation: 'inside', replicate: false)
+    @marker.on 'changed', ({newHeadScreenPosition, newTailScreenPosition, isValid}) =>
+      @startPosition = newTailScreenPosition
+      @endPosition = newHeadScreenPosition
+      @updateDisplayPosition = isValid
+      @misspellingValid = isValid
+      @hide() unless isValid
+
   getScreenRange: ->
     new Range(@startPosition, @endPosition)
 
   getCorrections: ->
     screenRange = @getScreenRange()
     misspelling = @editor.getTextInRange(@editor.bufferRangeForScreenRange(screenRange))
-    {SpellChecker} = require 'spellchecker'
+    SpellChecker = require 'spellchecker'
     corrections = SpellChecker.getCorrectionsForMisspelling(misspelling)
 
   beforeRemove: ->
@@ -60,6 +64,5 @@ class MisspellingView extends View
 
   destroy: ->
     @misspellingValid = false
-    @editor.destroyMarker(@marker)
     @correctionsView?.remove()
     @remove()
