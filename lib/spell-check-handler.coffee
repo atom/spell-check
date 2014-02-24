@@ -1,4 +1,4 @@
-{isMisspelled} = require 'spellchecker'
+SpellChecker = require 'spellchecker'
 
 wordRegex = /(?:^|[\s\[\]])([a-zA-Z']+)(?=[\s\.\[\]:,]|$)/g
 
@@ -8,7 +8,7 @@ module.exports = (text) ->
   for line in text.split('\n')
     while matches = wordRegex.exec(line)
       word = matches[1]
-      continue unless isMisspelled(word)
+      continue unless SpellChecker.isMisspelled(word)
 
       startColumn = matches.index + matches[0].length - word.length
       endColumn = startColumn + word.length

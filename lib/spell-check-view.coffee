@@ -1,53 +1,52 @@
-{_, Task, View} = require 'atom'
+_ = require 'underscore-plus'
+{View} = require 'atom'
 MisspellingView = require './misspelling-view'
+SpellCheckTask = require './spell-check-task'
 
 module.exports =
 class SpellCheckView extends View
   @content: ->
     @div class: 'spell-check'
 
-  @task: null
-  @instances: 0
-
-  views: []
-
   initialize: (@editorView) ->
-    @constructor.task ?= new Task(require.resolve('./spell-check-handler'))
-    @constructor.instances++
+    @views = []
+    @task = new SpellCheckTask()
 
-    @subscribe editorView, 'editor:path-changed', @subscribeToBuffer
-    @subscribe editorView, 'editor:grammar-changed', @subscribeToBuffer
-    @subscribe atom.config.observe 'editor.fontSize', @subscribeToBuffer
-    @subscribe atom.config.observe 'spell-check.grammars', @subscribeToBuffer
+    @subscribe @editorView, 'editor:path-changed', =>
+      @subscribeToBuffer()
+    @subscribe @editorView, 'editor:grammar-changed', =>
+      @subscribeToBuffer()
+
+    @subscribe atom.config.observe 'editor.fontSize', callNow: false, =>
+      @subscribeToBuffer()
+    @subscribe atom.config.observe 'spell-check.grammars', callNow: false, =>
+      @subscribeToBuffer()
 
     @subscribeToBuffer()
 
   beforeRemove: ->
     @unsubscribeFromBuffer()
-
-    @constructor.instances--
-    if @constructor.instances is 0
-      @constructor.task.terminate()
-      @constructor.task = null
+    @task.terminate()
 
   unsubscribeFromBuffer: ->
     @destroyViews()
 
     if @buffer?
-      @buffer.off 'contents-modified', @updateMisspellings
+      @unsubscribe(@buffer)
       @buffer = null
 
-  subscribeToBuffer: =>
+  subscribeToBuffer: ->
     @unsubscribeFromBuffer()
 
     if @spellCheckCurrentGrammar()
       @buffer = @editorView.getEditor().getBuffer()
-      @buffer.on 'contents-modified', @updateMisspellings
+      @subscribe @buffer, 'contents-modified', =>
+        @updateMisspellings()
       @updateMisspellings()
 
   spellCheckCurrentGrammar: ->
     grammar = @editorView.getEditor().getGrammar().scopeName
-    _.contains atom.config.get('spell-check.grammars'), grammar
+    _.contains(atom.config.get('spell-check.grammars'), grammar)
 
   destroyViews: ->
     while view = @views.shift()
@@ -59,7 +58,7 @@ class SpellCheckView extends View
       @views.push(view)
       @append(view)
 
-  updateMisspellings: =>
-    @constructor.task.start @buffer.getText(), (misspellings) =>
+  updateMisspellings: ->
+    @task.start @buffer.getText(), (misspellings) =>
       @destroyViews()
       @addViews(misspellings)

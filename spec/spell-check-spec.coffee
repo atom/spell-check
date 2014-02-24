@@ -58,7 +58,7 @@ describe "Spell check", ->
       expect(editorView.find('.misspelling')).toBeHidden()
 
   describe "when spell checking for a grammar is removed", ->
-    it "removes all current decorations", ->
+    it "removes all the misspellings", ->
       editorView.setText('notaword')
       advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
       atom.config.set('spell-check.grammars', ['source.js'])
@@ -69,6 +69,21 @@ describe "Spell check", ->
       runs ->
         expect(editorView.find('.misspelling').length).toBe 1
         atom.config.set('spell-check.grammars', [])
+        expect(editorView.find('.misspelling').length).toBe 0
+
+  describe "when the editor's grammar changes to one that does not have spell check enabled", ->
+    it "removes all the misspellings", ->
+      editorView.setText('notaword')
+      advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
+      atom.config.set('spell-check.grammars', ['source.js'])
+
+      waitsFor ->
+        editorView.find('.misspelling').length > 0
+
+      runs ->
+        expect(editorView.find('.misspelling').length).toBe 1
+        atom.syntax.setGrammarOverrideForPath(editorView.getEditor().getPath(), 'text.plain')
+        editorView.getEditor().reloadGrammar()
         expect(editorView.find('.misspelling').length).toBe 0
 
   describe "when 'spell-check:correct-misspelling' is triggered on the editor", ->

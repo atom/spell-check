@@ -44,7 +44,7 @@ class CorrectionsView extends SelectListView
       super
 
   setPosition: ->
-    { left, top } = @editorView.pixelPositionForScreenPosition(@misspellingRange.start)
+    {left, top} = @editorView.pixelPositionForScreenPosition(@misspellingRange.start)
     height = @outerHeight()
     potentialTop = top + @editorView.lineHeight
     potentialBottom = potentialTop - @editorView.scrollTop() + height
