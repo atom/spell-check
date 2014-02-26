@@ -2,7 +2,7 @@
 
 Highlights misspelling in Atom and shows possible corrections.
 
-Use `cmd:` to bring up the list of corrections when your cursor in on a
+Use `cmd:` to bring up the list of corrections when your cursor is on a
 misspelled word.
 
 By default spell check is enabled for the following files:
