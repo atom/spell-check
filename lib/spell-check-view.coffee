@@ -61,4 +61,4 @@ class SpellCheckView extends View
   updateMisspellings: ->
     @task.start @buffer.getText(), (misspellings) =>
       @destroyViews()
-      @addViews(misspellings)
+      @addViews(misspellings) if @buffer?
