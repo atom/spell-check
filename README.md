@@ -23,4 +23,4 @@ This package will use the dictionary set by the system.
 The system dictionary can be changed in
 **System Preferences > Keyboard > Text** under the "Spelling" section.
 
-![](img/dictionary.select.maverick.png)
+![](https://f.cloud.github.com/assets/671378/2450179/1d2b8eae-aeb9-11e3-8bce-9b1b9be2d776.png)
