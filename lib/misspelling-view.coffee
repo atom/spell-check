@@ -16,7 +16,7 @@ class MisspellingView extends View
 
     @createMarker()
 
-    @subscribe @editorView, 'spell-check:display-updated', =>
+    @subscribe @editorView, 'editor:display-updated', =>
       @updatePosition() if @updateDisplayPosition
 
     @editorView.command 'spell-check:correct-misspelling', =>
