@@ -9,22 +9,24 @@ class MisspellingView extends View
   initialize: (range, @editorView) ->
     @editor = @editorView.getEditor()
     @misspellingValid = true
+    @updateDisplayPosition = true
 
     range = @editor.screenRangeForBufferRange(Range.fromObject(range))
     @startPosition = range.start
     @endPosition = range.end
+    @oldScreenRange = @getScreenRange()
 
     @createMarker()
 
     @subscribe @editorView, 'editor:display-updated', =>
-      @updatePosition() if @updateDisplayPosition
+      @updatePosition() if @isUpdateNeeded()
 
     @subscribeToCommand @editorView, 'spell-check:correct-misspelling', =>
       if @misspellingValid and @containsCursor()
         @correctionsView?.remove()
         @correctionsView = new CorrectionsView(@editorView, @getCorrections(), @getScreenRange())
 
-    @updatePosition()
+    @updatePosition() if @isUpdateNeeded()
 
   createMarker: ->
     @marker = @editor.markScreenRange(@getScreenRange(), invalidation: 'inside', replicate: false, persistent: false)
@@ -34,6 +36,17 @@ class MisspellingView extends View
       @updateDisplayPosition = isValid
       @misspellingValid = isValid
       @hide() unless isValid
+
+  isUpdateNeeded: ->
+    return false unless @updateDisplayPosition
+
+    oldScreenRange = @oldScreenRange
+    newScreenRange = @getScreenRange()
+    @oldScreenRange = newScreenRange
+    @intersectsRenderedScreenRows(oldScreenRange) or @intersectsRenderedScreenRows(newScreenRange)
+
+  intersectsRenderedScreenRows: (range) ->
+    range.intersectsRowRange(@editorView.firstRenderedScreenRow, @editorView.lastRenderedScreenRow)
 
   getScreenRange: ->
     new Range(@startPosition, @endPosition)
