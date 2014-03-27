@@ -19,7 +19,7 @@ class MisspellingView extends View
     @subscribe @editorView, 'editor:display-updated', =>
       @updatePosition() if @updateDisplayPosition
 
-    @editorView.command 'spell-check:correct-misspelling', =>
+    @subscribeToCommand @editorView, 'spell-check:correct-misspelling', =>
       if @misspellingValid and @containsCursor()
         @correctionsView?.remove()
         @correctionsView = new CorrectionsView(@editorView, @getCorrections(), @getScreenRange())
@@ -28,7 +28,7 @@ class MisspellingView extends View
 
   createMarker: ->
     @marker = @editor.markScreenRange(@getScreenRange(), invalidation: 'inside', replicate: false)
-    @marker.on 'changed', ({newHeadScreenPosition, newTailScreenPosition, isValid}) =>
+    @subscribe @marker, 'changed', ({newHeadScreenPosition, newTailScreenPosition, isValid}) =>
       @startPosition = newTailScreenPosition
       @endPosition = newHeadScreenPosition
       @updateDisplayPosition = isValid
