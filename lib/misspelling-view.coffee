@@ -29,7 +29,7 @@ class MisspellingView extends View
     @updatePosition() if @isUpdateNeeded()
 
   createMarker: ->
-    @marker = @editor.markScreenRange(@getScreenRange(), invalidation: 'inside', replicate: false, persistent: false)
+    @marker = @editor.markScreenRange(@getScreenRange(), invalidation: 'touch', replicate: false, persistent: false)
     @subscribe @marker, 'changed', ({newHeadScreenPosition, newTailScreenPosition, isValid}) =>
       @startPosition = newTailScreenPosition
       @endPosition = newHeadScreenPosition
