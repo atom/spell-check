@@ -1,4 +1,4 @@
-# Spell Check Package
+# Spell Check Package [![Build Status](https://travis-ci.org/atom/spell-check.svg?branch=master)](https://travis-ci.org/atom/spell-check)
 
 Highlights misspelling in Atom and shows possible corrections.
 
