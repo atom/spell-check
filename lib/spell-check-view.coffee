@@ -12,9 +12,7 @@ class SpellCheckView extends View
     @views = []
     @task = new SpellCheckTask()
 
-    @subscribe @editorView.getEditor(), 'path-changed', =>
-      @subscribeToBuffer()
-    @subscribe @editorView.getEditor(), 'grammar-changed', =>
+    @subscribe @editorView.getEditor(), 'path-changed grammar-changed', =>
       @subscribeToBuffer()
 
     @subscribe atom.config.observe 'editor.fontSize', callNow: false, =>
