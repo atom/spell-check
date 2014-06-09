@@ -53,7 +53,7 @@ describe "Spell check", ->
     runs ->
       expect(editorView.find('.misspelling').length).toBe 1
       editorView.getEditor().moveCursorToEndOfLine()
-      editorView.insertText('a')
+      editorView.getEditor().insertText('a')
       advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
       expect(editorView.find('.misspelling')).toBeHidden()
 
