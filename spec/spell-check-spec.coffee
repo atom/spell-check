@@ -12,8 +12,10 @@ describe "Spell check", ->
 
     runs ->
       atom.workspaceView = new WorkspaceView
-      atom.workspaceView.openSync('sample.js')
       atom.config.set('spell-check.grammars', [])
+
+    waitsForPromise ->
+      atom.workspace.open('sample.js')
 
     waitsForPromise ->
       atom.packages.activatePackage('spell-check')

@@ -62,7 +62,7 @@ class MisspellingView extends View
 
   containsCursor: ->
     cursor = @editor.getCursorScreenPosition()
-    @getScreenRange().containsPoint(cursor, exclusive: false)
+    @getScreenRange().containsPoint(cursor, false)
 
   updatePosition: ->
     @updateDisplayPosition = false
