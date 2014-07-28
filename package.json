@@ -4,7 +4,7 @@
   "main": "./lib/main",
   "description": "Highlights misspelled words and shows possible corrections.",
   "dependencies": {
-    "spellchecker": "~1.0.0",
+    "spellchecker": "1.x",
     "underscore-plus": "1.x"
   },
   "repository": "https://github.com/atom/spell-check",
