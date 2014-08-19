@@ -57,6 +57,10 @@ class SpellCheckView extends View
       @append(view)
 
   updateMisspellings: ->
-    @task.start @buffer.getText(), (misspellings) =>
-      @destroyViews()
-      @addViews(misspellings) if @buffer?
+    # Task::start can throw errors atom/atom#3326
+    try
+      @task.start @buffer.getText(), (misspellings) =>
+        @destroyViews()
+        @addViews(misspellings) if @buffer?
+    catch error
+      console.warn('Error starting spell check task', error.stack ? error)
