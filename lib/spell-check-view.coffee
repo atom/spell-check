@@ -56,6 +56,9 @@ class SpellCheckView extends View
       @views.push(view)
       @append(view)
 
+  destroy: ->
+    @unsubscribeFromBuffer()
+
   updateMisspellings: ->
     # Task::start can throw errors atom/atom#3326
     try
