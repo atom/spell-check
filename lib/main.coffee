@@ -1,5 +1,5 @@
 SpellCheckView = null
-spellCheckViews = []
+spellCheckViews = {}
 
 module.exports =
   configDefaults:
@@ -10,33 +10,35 @@ module.exports =
       'text.plain.null-grammar'
     ]
 
-  # Internal: The activation state of the spell-check package.
-  active: true
-
   activate: ->
     atom.workspaceView.command 'spell-check:toggle', => @toggle()
-    @createViews()
+    @editorSubscription = atom.workspaceView.eachEditorView(addViewToEditor)
 
   deactivate: ->
     @editorSubscription?.off()
-    while view = spellCheckViews.shift()
-      view.destroy()
-
-  createViews: ->
-      @editorSubscription = atom.workspaceView.eachEditorView(addViewToEditor)
 
   # Internal: Toggles the spell-check activation state.
   toggle: () ->
-    if @active
-      @active = false
-      @deactivate()
+    editorId = atom.workspace.getActiveEditor().id
+
+    if spellCheckViews[editorId]['active']
+      # deactivate spell check for this {editor}
+      spellCheckViews[editorId]['active'] = false
+      spellCheckViews[editorId]['view'].unsubscribeFromBuffer()
     else
-      @createViews()
-      @active = true
+      # activate spell check for this {editor}
+      spellCheckViews[editorId]['active'] = true
+      spellCheckViews[editorId]['view'].subscribeToBuffer()
 
 addViewToEditor = (editorView) ->
   if editorView.attached and editorView.getPane()?
     SpellCheckView ?= require './spell-check-view'
     spellCheckView = new SpellCheckView(editorView)
-    spellCheckViews.push(spellCheckView)
+
+    # safe the {editorView} into a map
+    editorId = editorView.getEditor().id
+    spellCheckViews[editorId] = {}
+    spellCheckViews[editorId]['view'] = spellCheckView
+    spellCheckViews[editorId]['active'] = true
+
     editorView.underlayer.append(spellCheckView)
