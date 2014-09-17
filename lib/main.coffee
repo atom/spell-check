@@ -35,7 +35,7 @@ addViewToEditor = (editorView) ->
     SpellCheckView ?= require './spell-check-view'
     spellCheckView = new SpellCheckView(editorView)
 
-    # safe the {editorView} into a map
+    # save the {editorView} into a map
     editorId = editorView.getEditor().id
     spellCheckViews[editorId] = {}
     spellCheckViews[editorId]['view'] = spellCheckView
