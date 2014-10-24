@@ -9,6 +9,12 @@
 
 '.platform-win32 .corrections .editor':
   'ctrl-:': 'core:cancel'
+  
+'.platform-linux .editor':
+  'ctrl-:': 'spell-check:correct-misspelling'
+
+'.platform-linux .corrections .editor':
+  'ctrl-:': 'core:cancel'
 
 '.corrections .mini.editor input':
   'enter': 'core:confirm'
