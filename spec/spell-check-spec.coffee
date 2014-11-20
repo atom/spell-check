@@ -57,7 +57,7 @@ describe "Spell check", ->
       editorView.getEditor().moveCursorToEndOfLine()
       editorView.getEditor().insertText('a')
       advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
-      expect(editorView.find('.misspelling')).toBeHidden()
+      expect(editorView.find('.misspelling').length).toBe 0
 
   describe "when spell checking for a grammar is removed", ->
     it "removes all the misspellings", ->
@@ -107,7 +107,7 @@ describe "Spell check", ->
           expect(editorView.getText()).toBe 'together'
           expect(editorView.getEditor().getCursorBufferPosition()).toEqual [0, 8]
           advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
-          expect(editorView.find('.misspelling')).toBeHidden()
+          expect(editorView.find('.misspelling').length).toBe 0
           expect(editorView.find('.corrections').length).toBe 0
 
     describe "when the cursor touches a misspelling that has no corrections", ->
@@ -127,16 +127,12 @@ describe "Spell check", ->
 
   describe "when the editor is destroyed", ->
     it "destroys all misspelling markers", ->
-      editorView.setText("mispelling")
+      editorView.setText('mispelling')
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
         editorView.find('.misspelling').length > 0
 
       runs ->
-        expect(editorView.find('.misspelling').length).toBe 1
-        view = editorView.find('.misspelling').view()
-        buffer = editorView.getEditor().getBuffer()
-        expect(view.marker.isDestroyed()).toBeFalsy()
         editorView.remove()
-        expect(view.marker.isDestroyed()).toBeTruthy()
+        expect(editorView.getModel().getMarkers().length).toBe 0

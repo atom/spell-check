@@ -54,7 +54,6 @@ class SpellCheckView extends View
     for misspelling in misspellings
       view = new MisspellingView(misspelling, @editorView)
       @views.push(view)
-      @append(view)
 
   updateMisspellings: ->
     # Task::start can throw errors atom/atom#3326
