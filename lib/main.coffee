@@ -1,13 +1,15 @@
 SpellCheckView = null
 
 module.exports =
-  configDefaults:
-    grammars: [
-      'source.gfm'
-      'text.git-commit'
-      'text.plain'
-      'text.plain.null-grammar'
-    ]
+  config:
+    grammars:
+      type: 'array'
+      default: [
+        'source.gfm'
+        'text.git-commit'
+        'text.plain'
+        'text.plain.null-grammar'
+      ]
 
   activate: ->
     @editorSubscription = atom.workspaceView.eachEditorView(addViewToEditor)
