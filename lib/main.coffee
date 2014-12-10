@@ -20,4 +20,4 @@ module.exports =
 addViewToEditor = (editorView) ->
   if editorView.attached and editorView.getPane()?
     SpellCheckView ?= require './spell-check-view'
-    editorView.underlayer.append(new SpellCheckView(editorView))
+    editorView.underlayer.append(new SpellCheckView(editorView.getModel()))

@@ -8,12 +8,11 @@ class SpellCheckView extends View
   @content: ->
     @div class: 'spell-check'
 
-  initialize: (@editorView) ->
-    @editor = @editorView.getModel()
+  initialize: (@editor) ->
     @views = []
     @task = new SpellCheckTask()
 
-    @subscribe @editorView.getEditor(), 'path-changed grammar-changed', =>
+    @subscribe @editor, 'path-changed grammar-changed', =>
       @subscribeToBuffer()
 
     @subscribe atom.config.observe 'editor.fontSize', callNow: false, =>
@@ -38,13 +37,13 @@ class SpellCheckView extends View
     @unsubscribeFromBuffer()
 
     if @spellCheckCurrentGrammar()
-      @buffer = @editorView.getEditor().getBuffer()
+      @buffer = @editor.getBuffer()
       @subscribe @buffer, 'contents-modified', =>
         @updateMisspellings()
       @updateMisspellings()
 
   spellCheckCurrentGrammar: ->
-    grammar = @editorView.getEditor().getGrammar().scopeName
+    grammar = @editor.getGrammar().scopeName
     _.contains(atom.config.get('spell-check.grammars'), grammar)
 
   destroyViews: ->
