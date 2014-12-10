@@ -3,9 +3,8 @@
 
 module.exports =
 class CorrectionsView extends SelectListView
-  initialize: (@editorView, @corrections, @marker) ->
+  initialize: (@editor, @corrections, @marker) ->
     super
-    @editor = @editorView.getModel()
     @addClass('corrections popover-list')
     @attach()
 
@@ -14,19 +13,19 @@ class CorrectionsView extends SelectListView
     @overlayDecoration = @editor.decorateMarker(@marker, type: 'overlay', item: this)
 
   attached: ->
+    @storeFocusedElement()
     @focusFilterEditor()
 
   confirmed: (correction) ->
     @cancel()
     return unless correction
-    editor = @editorView.getEditor()
-    editor.transact =>
-      editor.selectMarker(@marker)
-      editor.insertText(correction)
-    @editorView.focus()
+    @editor.transact =>
+      @editor.selectMarker(@marker)
+      @editor.insertText(correction)
 
   cancelled: ->
     @overlayDecoration.destroy()
+    @restoreFocus()
 
   viewForItem: (word) ->
     element = document.createElement('li')
