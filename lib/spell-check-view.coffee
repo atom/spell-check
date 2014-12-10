@@ -22,7 +22,9 @@ class SpellCheckView extends View
 
     @subscribeToBuffer()
 
-  beforeRemove: ->
+    @subscribe @editor.onDidDestroy(@destroy.bind(this))
+
+  destroy: ->
     @unsubscribeFromBuffer()
     @task.terminate()
 

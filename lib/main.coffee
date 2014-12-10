@@ -12,12 +12,11 @@ module.exports =
       ]
 
   activate: ->
-    @editorSubscription = atom.workspaceView.eachEditorView(addViewToEditor)
+    @editorSubscription = atom.workspace.observeTextEditors(addViewToEditor)
 
   deactivate: ->
     @editorSubscription?.off()
 
-addViewToEditor = (editorView) ->
-  if editorView.attached and editorView.getPane()?
-    SpellCheckView ?= require './spell-check-view'
-    editorView.underlayer.append(new SpellCheckView(editorView.getModel()))
+addViewToEditor = (editor) ->
+  SpellCheckView ?= require './spell-check-view'
+  new SpellCheckView(editor)
