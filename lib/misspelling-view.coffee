@@ -9,7 +9,7 @@ class MisspellingView
     @correctMispellingCommand = atom.commands.add editorView.element, 'spell-check:correct-misspelling', =>
       if @containsCursor()
         @correctionsView?.remove()
-        @correctionsView = new CorrectionsView(editorView, @getCorrections(), @marker.getScreenRange())
+        @correctionsView = new CorrectionsView(editorView, @getCorrections(), @marker)
 
   createMarker: (bufferRange) ->
     @marker = @editor.markBufferRange(bufferRange, invalidate: 'touch', replicate: false, persistent: false)
