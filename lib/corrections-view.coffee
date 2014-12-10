@@ -16,6 +16,10 @@ class CorrectionsView extends SelectListView
     @storeFocusedElement()
     @focusFilterEditor()
 
+  destroy: ->
+    @cancel()
+    @remove()
+
   confirmed: (correction) ->
     @cancel()
     return unless correction
