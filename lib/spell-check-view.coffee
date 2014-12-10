@@ -9,6 +9,7 @@ class SpellCheckView extends View
     @div class: 'spell-check'
 
   initialize: (@editorView) ->
+    @editor = @editorView.getModel()
     @views = []
     @task = new SpellCheckTask()
 
@@ -52,7 +53,7 @@ class SpellCheckView extends View
 
   addViews: (misspellings) ->
     for misspelling in misspellings
-      view = new MisspellingView(misspelling, @editorView)
+      view = new MisspellingView(misspelling, @editor)
       @views.push(view)
 
   updateMisspellings: ->

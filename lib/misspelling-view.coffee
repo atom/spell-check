@@ -2,11 +2,9 @@ CorrectionsView = require './corrections-view'
 
 module.exports =
 class MisspellingView
-  constructor: (bufferRange, editorView) ->
-    @editor = editorView.getEditor()
+  constructor: (bufferRange, @editor) ->
     @createMarker(bufferRange)
-
-    @correctMispellingCommand = atom.commands.add editorView.element, 'spell-check:correct-misspelling', =>
+    @correctMispellingCommand = atom.commands.add atom.views.getView(@editor), 'spell-check:correct-misspelling', =>
       if @containsCursor()
         @correctionsView?.destroy()
         @correctionsView = new CorrectionsView(@editor, @getCorrections(), @marker)
