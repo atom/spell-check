@@ -1,4 +1,4 @@
 'context-menu':
-  '.overlayer': [
+  'atom-text-editor': [
     {label: 'Correct Spelling', command: 'spell-check:correct-misspelling'}
   ]
