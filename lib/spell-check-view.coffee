@@ -9,34 +9,36 @@ class SpellCheckView extends View
     @div class: 'spell-check'
 
   initialize: (@editor) ->
+    @disposables = new CompositeDisposable
     @views = []
     @task = new SpellCheckTask()
 
-    @subscribe @editor.onDidChangePath =>
+    @disposables.add @editor.onDidChangePath =>
       @subscribeToBuffer()
 
-    @subscribe @editor.onDidChangeGrammar =>
+    @disposables.add @editor.onDidChangeGrammar =>
       @subscribeToBuffer()
 
-    @subscribe atom.config.onDidChange 'editor.fontSize', =>
+    @disposables.add atom.config.onDidChange 'editor.fontSize', =>
       @subscribeToBuffer()
 
-    @subscribe atom.config.onDidChange 'spell-check.grammars', =>
+    @disposables.add atom.config.onDidChange 'spell-check.grammars', =>
       @subscribeToBuffer()
 
     @subscribeToBuffer()
 
-    @subscribe @editor.onDidDestroy(@destroy.bind(this))
+    @disposables.add @editor.onDidDestroy(@destroy.bind(this))
 
   destroy: ->
     @unsubscribeFromBuffer()
+    @disposables.dispose()
     @task.terminate()
 
   unsubscribeFromBuffer: ->
     @destroyViews()
 
     if @buffer?
-      @unsubscribe(@buffer)
+      @bufferDisposable.dispose()
       @buffer = null
 
   subscribeToBuffer: ->
@@ -44,7 +46,7 @@ class SpellCheckView extends View
 
     if @spellCheckCurrentGrammar()
       @buffer = @editor.getBuffer()
-      @subscribe @buffer.onDidStopChanging => @updateMisspellings()
+      @bufferDisposable = @buffer.onDidStopChanging => @updateMisspellings()
       @updateMisspellings()
 
   spellCheckCurrentGrammar: ->
