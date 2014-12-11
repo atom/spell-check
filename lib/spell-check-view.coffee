@@ -1,14 +1,14 @@
 _ = require 'underscore-plus'
-{View, CompositeDisposable} = require 'atom'
+{CompositeDisposable} = require 'atom'
 MisspellingView = require './misspelling-view'
 SpellCheckTask = require './spell-check-task'
 
 module.exports =
-class SpellCheckView extends View
+class SpellCheckView
   @content: ->
     @div class: 'spell-check'
 
-  initialize: (@editor) ->
+  constructor: (@editor) ->
     @disposables = new CompositeDisposable
     @views = []
     @task = new SpellCheckTask()
