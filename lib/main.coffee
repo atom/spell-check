@@ -12,10 +12,10 @@ module.exports =
       ]
 
   activate: ->
-    @editorSubscription = atom.workspace.observeTextEditors(addViewToEditor)
+    @disposable = atom.workspace.observeTextEditors(addViewToEditor)
 
   deactivate: ->
-    @editorSubscription?.off()
+    @disposable.dispose()
 
 addViewToEditor = (editor) ->
   SpellCheckView ?= require './spell-check-view'
