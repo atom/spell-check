@@ -1,3 +1,4 @@
 'context-menu':
-  '.overlayer':
-    'Correct Spelling': 'spell-check:correct-misspelling'
+  '.overlayer': [
+    {label: 'Correct Spelling', command: 'spell-check:correct-misspelling'}
+  ]
