@@ -1,5 +1,5 @@
 _ = require 'underscore-plus'
-{View} = require 'atom'
+{View, CompositeDisposable} = require 'atom'
 MisspellingView = require './misspelling-view'
 SpellCheckTask = require './spell-check-task'
 
@@ -12,12 +12,16 @@ class SpellCheckView extends View
     @views = []
     @task = new SpellCheckTask()
 
-    @subscribe @editor, 'path-changed grammar-changed', =>
+    @subscribe @editor.onDidChangePath =>
       @subscribeToBuffer()
 
-    @subscribe atom.config.observe 'editor.fontSize', callNow: false, =>
+    @subscribe @editor.onDidChangeGrammar =>
       @subscribeToBuffer()
-    @subscribe atom.config.observe 'spell-check.grammars', callNow: false, =>
+
+    @subscribe atom.config.onDidChange 'editor.fontSize', =>
+      @subscribeToBuffer()
+
+    @subscribe atom.config.onDidChange 'spell-check.grammars', =>
       @subscribeToBuffer()
 
     @subscribeToBuffer()
@@ -40,8 +44,7 @@ class SpellCheckView extends View
 
     if @spellCheckCurrentGrammar()
       @buffer = @editor.getBuffer()
-      @subscribe @buffer, 'contents-modified', =>
-        @updateMisspellings()
+      @subscribe @buffer.onDidStopChanging => @updateMisspellings()
       @updateMisspellings()
 
   spellCheckCurrentGrammar: ->
