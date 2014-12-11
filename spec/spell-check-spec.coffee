@@ -51,7 +51,7 @@ describe "Spell check", ->
 
     runs ->
       expect(decorations.length).toBe 1
-      editor.moveCursorToEndOfLine()
+      editor.moveToEndOfLine()
       editor.insertText('a')
       advanceClock(editor.getBuffer().getStoppedChangingDelay())
       decorations = editor.getHighlightDecorations(class: 'spell-check-misspelling')
