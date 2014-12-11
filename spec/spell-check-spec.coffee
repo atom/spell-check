@@ -84,8 +84,7 @@ describe "Spell check", ->
 
       runs ->
         expect(editor.getHighlightDecorations(class: 'spell-check-misspelling').length).toBe 1
-        atom.syntax.setGrammarOverrideForPath(editor.getPath(), 'text.plain')
-        editor.reloadGrammar()
+        editor.setGrammar(atom.grammars.selectGrammar('.txt'))
         expect(editor.getHighlightDecorations(class: 'spell-check-misspelling').length).toBe 0
 
   describe "when 'spell-check:correct-misspelling' is triggered on the editor", ->
