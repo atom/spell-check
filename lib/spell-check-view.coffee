@@ -1,49 +1,56 @@
 _ = require 'underscore-plus'
-{View} = require 'atom'
+{CompositeDisposable} = require 'atom'
 MisspellingView = require './misspelling-view'
 SpellCheckTask = require './spell-check-task'
 
 module.exports =
-class SpellCheckView extends View
+class SpellCheckView
   @content: ->
     @div class: 'spell-check'
 
-  initialize: (@editorView) ->
+  constructor: (@editor) ->
+    @disposables = new CompositeDisposable
     @views = []
     @task = new SpellCheckTask()
 
-    @subscribe @editorView.getEditor(), 'path-changed grammar-changed', =>
+    @disposables.add @editor.onDidChangePath =>
       @subscribeToBuffer()
 
-    @subscribe atom.config.observe 'editor.fontSize', callNow: false, =>
+    @disposables.add @editor.onDidChangeGrammar =>
       @subscribeToBuffer()
-    @subscribe atom.config.observe 'spell-check.grammars', callNow: false, =>
+
+    @disposables.add atom.config.onDidChange 'editor.fontSize', =>
+      @subscribeToBuffer()
+
+    @disposables.add atom.config.onDidChange 'spell-check.grammars', =>
       @subscribeToBuffer()
 
     @subscribeToBuffer()
 
-  beforeRemove: ->
+    @disposables.add @editor.onDidDestroy(@destroy.bind(this))
+
+  destroy: ->
     @unsubscribeFromBuffer()
+    @disposables.dispose()
     @task.terminate()
 
   unsubscribeFromBuffer: ->
     @destroyViews()
 
     if @buffer?
-      @unsubscribe(@buffer)
+      @bufferDisposable.dispose()
       @buffer = null
 
   subscribeToBuffer: ->
     @unsubscribeFromBuffer()
 
     if @spellCheckCurrentGrammar()
-      @buffer = @editorView.getEditor().getBuffer()
-      @subscribe @buffer, 'contents-modified', =>
-        @updateMisspellings()
+      @buffer = @editor.getBuffer()
+      @bufferDisposable = @buffer.onDidStopChanging => @updateMisspellings()
       @updateMisspellings()
 
   spellCheckCurrentGrammar: ->
-    grammar = @editorView.getEditor().getGrammar().scopeName
+    grammar = @editor.getGrammar().scopeName
     _.contains(atom.config.get('spell-check.grammars'), grammar)
 
   destroyViews: ->
@@ -52,7 +59,7 @@ class SpellCheckView extends View
 
   addViews: (misspellings) ->
     for misspelling in misspellings
-      view = new MisspellingView(misspelling, @editorView)
+      view = new MisspellingView(misspelling, @editor)
       @views.push(view)
 
   updateMisspellings: ->

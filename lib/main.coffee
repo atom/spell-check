@@ -1,21 +1,22 @@
 SpellCheckView = null
 
 module.exports =
-  configDefaults:
-    grammars: [
-      'source.gfm'
-      'text.git-commit'
-      'text.plain'
-      'text.plain.null-grammar'
-    ]
+  config:
+    grammars:
+      type: 'array'
+      default: [
+        'source.gfm'
+        'text.git-commit'
+        'text.plain'
+        'text.plain.null-grammar'
+      ]
 
   activate: ->
-    @editorSubscription = atom.workspaceView.eachEditorView(addViewToEditor)
+    @disposable = atom.workspace.observeTextEditors(addViewToEditor)
 
   deactivate: ->
-    @editorSubscription?.off()
+    @disposable.dispose()
 
-addViewToEditor = (editorView) ->
-  if editorView.attached and editorView.getPane()?
-    SpellCheckView ?= require './spell-check-view'
-    editorView.underlayer.append(new SpellCheckView(editorView))
+addViewToEditor = (editor) ->
+  SpellCheckView ?= require './spell-check-view'
+  new SpellCheckView(editor)
