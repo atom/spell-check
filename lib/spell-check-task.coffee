@@ -16,4 +16,4 @@ class SpellCheckTask
       @constructor.task = null
 
   start: (args...) ->
-    @constructor.task.start(args...)
+    @constructor.task?.start(args...)
