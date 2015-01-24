@@ -5,6 +5,7 @@ module.exports =
     grammars:
       type: 'array'
       default: [
+        'source.asciidoc'
         'source.gfm'
         'text.git-commit'
         'text.plain'
