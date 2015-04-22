@@ -1,4 +1,4 @@
 'context-menu':
-  'atom-text-editor': [
+  'atom-text-editor:not([mini])': [
     {label: 'Correct Spelling', command: 'spell-check:correct-misspelling'}
   ]
