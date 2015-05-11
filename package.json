@@ -9,6 +9,7 @@
     "underscore-plus": "^1"
   },
   "repository": "https://github.com/atom/spell-check",
+  "license": "MIT",
   "engines": {
     "atom": "*"
   }
