@@ -10,8 +10,17 @@ class MisspellingView
         @correctionsView = new CorrectionsView(@editor, @getCorrections(), @marker)
 
   createMarker: (bufferRange) ->
-    @marker = @editor.markBufferRange(bufferRange, invalidate: 'touch', replicate: false, persistent: false)
-    @editor.decorateMarker(@marker, type: 'highlight', class: 'spell-check-misspelling', deprecatedRegionClass: 'misspelling')
+    @marker = @editor.markBufferRange(bufferRange,
+      invalidate: 'touch',
+      replicate: false,
+      persistent: false,
+      maintainHistory: false
+    )
+    @editor.decorateMarker(@marker,
+      type: 'highlight',
+      class: 'spell-check-misspelling',
+      deprecatedRegionClass: 'misspelling'
+    )
 
   getCorrections: ->
     screenRange = @marker.getScreenRange()
