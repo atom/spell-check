@@ -16,11 +16,4 @@ You can override this from the _Spell Check_ settings in the Settings view
 
 ## Changing the dictionary
 
-This package will use the dictionary set by the system.
-
-### Mac OS X Mavericks (10.9)
-
-The system dictionary can be changed in
-**System Preferences > Keyboard > Text** under the "Spelling" section.
-
-![](https://f.cloud.github.com/assets/671378/2450179/1d2b8eae-aeb9-11e3-8bce-9b1b9be2d776.png)
+Currently, only the English (US) dictionary is supported. Follow [this issue](https://github.com/atom/spell-check/issues/11) for updates.
