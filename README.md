@@ -18,7 +18,7 @@ You can override this from the _Spell Check_ settings in the Settings view
 
 This package will use the dictionary set by the system.
 
-### Mac OS X Maverick (10.9)
+### Mac OS X Mavericks (10.9)
 
 The system dictionary can be changed in
 **System Preferences > Keyboard > Text** under the "Spelling" section.
