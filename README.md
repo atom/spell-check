@@ -14,6 +14,8 @@ By default spell check is enabled for the following files:
 You can override this from the _Spell Check_ settings in the Settings view
 (`cmd-,`).
 
+To find the correct file type for your current file in where you want to enable `spell-check`: put your cursor in the file, open the *Command Palette* (Cmd+Shift+P) and open **Editor: Log Cursor Scope**.
+
 ## Changing the dictionary
 
 Currently, only the English (US) dictionary is supported. Follow [this issue](https://github.com/atom/spell-check/issues/11) for updates.
