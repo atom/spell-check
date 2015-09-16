@@ -5,7 +5,6 @@ idCounter = 0
 # terminated once all views are removed.
 module.exports =
 class SpellCheckTask
-  @activeViews: 0
   @callbacksById: {}
 
   constructor: ->
