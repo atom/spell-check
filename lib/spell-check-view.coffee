@@ -13,6 +13,10 @@ class SpellCheckView
     @views = []
     @task = new SpellCheckTask()
 
+    @task.onDidSpellCheck (misspellings) =>
+      @destroyViews()
+      @addViews(misspellings) if @buffer?
+
     @disposables.add @editor.onDidChangePath =>
       @subscribeToBuffer()
 
@@ -65,8 +69,6 @@ class SpellCheckView
   updateMisspellings: ->
     # Task::start can throw errors atom/atom#3326
     try
-      @task.start @buffer.getText(), (misspellings) =>
-        @destroyViews()
-        @addViews(misspellings) if @buffer?
+      @task.start(@buffer.getText())
     catch error
       console.warn('Error starting spell check task', error.stack ? error)

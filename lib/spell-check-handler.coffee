@@ -2,7 +2,7 @@ SpellChecker = require 'spellchecker'
 
 wordRegex = /(?:^|[\s\[\]"'])([a-zA-Z]+([a-zA-Z']+[a-zA-Z])?)(?=[\s\.\[\]:,"']|$)/g
 
-module.exports = (text) ->
+module.exports = ({id, text}) ->
   row = 0
   misspellings = []
   for line in text.split('\n')
@@ -15,4 +15,4 @@ module.exports = (text) ->
       endColumn = startColumn + word.length
       misspellings.push([[row, startColumn], [row, endColumn]])
     row++
-  misspellings
+  {id, misspellings}
