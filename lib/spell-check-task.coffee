@@ -12,8 +12,10 @@ class SpellCheckTask
 
   terminate: ->
     delete @constructor.callbacksById[@id]
-    @constructor.task?.terminate()
-    @constructor.task = null
+
+    if Object.keys(@constructor.callbacksById).length is 0
+      @constructor.task?.terminate()
+      @constructor.task = null
 
   start: (text) ->
     @constructor.task ?= new Task(require.resolve('./spell-check-handler'))
