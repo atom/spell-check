@@ -11,6 +11,7 @@ module.exports =
         'text.plain'
         'text.plain.null-grammar'
       ]
+      description: 'List of scopes for languages which will be checked for misspellings. See [the README](https://github.com/atom/spell-check#spell-check-package-) for more information on finding the correct scope for a specific language.'
 
   activate: ->
     @disposable = atom.workspace.observeTextEditors(addViewToEditor)
