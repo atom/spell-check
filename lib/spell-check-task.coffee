@@ -17,12 +17,12 @@ class SpellCheckTask
       @constructor.task?.terminate()
       @constructor.task = null
 
-  start: (text) ->
+  start: (range, text) ->
     @constructor.task ?= new Task(require.resolve('./spell-check-handler'))
-    @constructor.task?.start {@id, text}, @constructor.dispatchMisspellings
+    @constructor.task?.start {@id, range, text}, @constructor.dispatchMisspellings
 
   onDidSpellCheck: (callback) ->
     @constructor.callbacksById[@id] = callback
 
-  @dispatchMisspellings: ({id, misspellings}) =>
-    @callbacksById[id]?(misspellings)
+  @dispatchMisspellings: ({id, range, misspellings}) =>
+    @callbacksById[id]?(range, misspellings)
