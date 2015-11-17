@@ -25,7 +25,7 @@ module.exports =
     @disposable.dispose()
 
   # Internal: Toggles the spell-check activation state.
-  toggle: () ->
+  toggle: ->
     editorId = atom.workspace.getActiveTextEditor().id
 
     if spellCheckViews[editorId]['active']
