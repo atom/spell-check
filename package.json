@@ -1,14 +1,19 @@
 {
   "name": "spell-check",
-  "version": "0.42.0",
+  "version": "0.63.0",
   "main": "./lib/main",
   "description": "Highlights misspelled words and shows possible corrections.",
   "dependencies": {
-    "spellchecker": "^1.0.1",
+    "atom-space-pen-views": "^2.0.0",
+    "spellchecker": "^3.1.2",
     "underscore-plus": "^1"
   },
   "repository": "https://github.com/atom/spell-check",
+  "license": "MIT",
   "engines": {
     "atom": "*"
+  },
+  "devDependencies": {
+    "coffeelint": "^1.9.7"
   }
 }

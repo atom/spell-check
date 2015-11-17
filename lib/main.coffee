@@ -2,24 +2,31 @@ SpellCheckView = null
 spellCheckViews = {}
 
 module.exports =
-  configDefaults:
-    grammars: [
-      'source.gfm'
-      'text.git-commit'
-      'text.plain'
-      'text.plain.null-grammar'
-    ]
+  config:
+    grammars:
+      type: 'array'
+      default: [
+        'source.asciidoc'
+        'source.gfm'
+        'text.git-commit'
+        'text.plain'
+        'text.plain.null-grammar'
+      ]
+      description: 'List of scopes for languages which will be checked for misspellings. See [the README](https://github.com/atom/spell-check#spell-check-package-) for more information on finding the correct scope for a specific language.'
 
   activate: ->
-    atom.workspaceView.command 'spell-check:toggle', => @toggle()
-    @editorSubscription = atom.workspaceView.eachEditorView(addViewToEditor)
+    @subscriptionsOfCommands = atom.commands.add 'atom-workspace',
+        'spell-check:toggle': => @toggle()
+    @disposable = atom.workspace.observeTextEditors(addViewToEditor)
 
   deactivate: ->
-    @editorSubscription?.off()
+    @subscriptionsOfCommands.dispose()
+    @subscriptionsOfCommands = null
+    @disposable.dispose()
 
   # Internal: Toggles the spell-check activation state.
   toggle: () ->
-    editorId = atom.workspace.getActiveEditor().id
+    editorId = atom.workspace.getActiveTextEditor().id
 
     if spellCheckViews[editorId]['active']
       # deactivate spell check for this {editor}
@@ -30,15 +37,13 @@ module.exports =
       spellCheckViews[editorId]['active'] = true
       spellCheckViews[editorId]['view'].subscribeToBuffer()
 
-addViewToEditor = (editorView) ->
-  if editorView.attached and editorView.getPane()?
-    SpellCheckView ?= require './spell-check-view'
-    spellCheckView = new SpellCheckView(editorView)
 
-    # save the {editorView} into a map
-    editorId = editorView.getEditor().id
-    spellCheckViews[editorId] = {}
-    spellCheckViews[editorId]['view'] = spellCheckView
-    spellCheckViews[editorId]['active'] = true
+addViewToEditor = (editor) ->
+  SpellCheckView ?= require './spell-check-view'
+  spellCheckView = new SpellCheckView(editor)
 
-    editorView.underlayer.append(spellCheckView)
+  # save the {editor} into a map
+  editorId = editor.id
+  spellCheckViews[editorId] = {}
+  spellCheckViews[editorId]['view'] = spellCheckView
+  spellCheckViews[editorId]['active'] = true

@@ -15,5 +15,6 @@
   }
 ],
 'context-menu':
-  '.overlayer':
-    'Correct Spelling': 'spell-check:correct-misspelling'
+  'atom-text-editor:not([mini])': [
+    {label: 'Correct Spelling', command: 'spell-check:correct-misspelling'}
+  ]

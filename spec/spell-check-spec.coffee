@@ -1,9 +1,9 @@
-{WorkspaceView} = require 'atom'
-
 describe "Spell check", ->
-  [editorView] = []
+  [workspaceElement, editor, editorElement] = []
 
   beforeEach ->
+    workspaceElement = atom.views.getView(atom.workspace)
+
     waitsForPromise ->
       atom.packages.activatePackage('language-text')
 
@@ -11,7 +11,6 @@ describe "Spell check", ->
       atom.packages.activatePackage('language-javascript')
 
     runs ->
-      atom.workspaceView = new WorkspaceView
       atom.config.set('spell-check.grammars', [])
 
     waitsForPromise ->
@@ -21,122 +20,124 @@ describe "Spell check", ->
       atom.packages.activatePackage('spell-check')
 
     runs ->
-      atom.workspaceView.attachToDom()
-      editorView = atom.workspaceView.getActiveView()
+      jasmine.attachToDOM(workspaceElement)
+      editor = atom.workspace.getActiveTextEditor()
+      editorElement = atom.views.getView(editor)
 
   it "decorates all misspelled words", ->
-    editorView.setText("This middle of thiss sentencts has issues.")
+    editor.setText("This middle of thiss sentencts has issues and the \"edn\" 'dsoe' too")
     atom.config.set('spell-check.grammars', ['source.js'])
 
+    decorations = null
+
     waitsFor ->
-      editorView.find('.misspelling').length > 0
+      decorations = editor.getHighlightDecorations(class: 'spell-check-misspelling')
+      decorations.length > 0
 
     runs ->
-      expect(editorView.find('.misspelling').length).toBe 2
-
-      typo1StartPosition = editorView.pixelPositionForBufferPosition([0, 15])
-      typo1EndPosition = editorView.pixelPositionForBufferPosition([0, 20])
-      expect(editorView.find('.misspelling:eq(0)').position()).toEqual typo1StartPosition
-      expect(editorView.find('.misspelling:eq(0)').width()).toBe typo1EndPosition.left - typo1StartPosition.left
-
-      typo2StartPosition = editorView.pixelPositionForBufferPosition([0, 21])
-      typo2EndPosition = editorView.pixelPositionForBufferPosition([0, 30])
-      expect(editorView.find('.misspelling:eq(1)').position()).toEqual typo2StartPosition
-      expect(editorView.find('.misspelling:eq(1)').width()).toBe typo2EndPosition.left - typo2StartPosition.left
+      expect(decorations.length).toBe 4
+      expect(decorations[0].marker.getBufferRange()).toEqual [[0, 15], [0, 20]]
+      expect(decorations[1].marker.getBufferRange()).toEqual [[0, 21], [0, 30]]
+      expect(decorations[2].marker.getBufferRange()).toEqual [[0, 51], [0, 54]]
+      expect(decorations[3].marker.getBufferRange()).toEqual [[0, 57], [0, 61]]
 
   it "hides decorations when a misspelled word is edited", ->
-    editorView.setText('notaword')
-    advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
+    editor.setText('notaword')
+    advanceClock(editor.getBuffer().getStoppedChangingDelay())
     atom.config.set('spell-check.grammars', ['source.js'])
 
+    decorations = null
     waitsFor ->
-      editorView.find('.misspelling').length > 0
+      decorations = editor.getHighlightDecorations(class: 'spell-check-misspelling')
+      decorations.length > 0
 
     runs ->
-      expect(editorView.find('.misspelling').length).toBe 1
-      editorView.getEditor().moveCursorToEndOfLine()
-      editorView.getEditor().insertText('a')
-      advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
-      expect(editorView.find('.misspelling')).toBeHidden()
+      expect(decorations.length).toBe 1
+      editor.moveToEndOfLine()
+      editor.insertText('a')
+      advanceClock(editor.getBuffer().getStoppedChangingDelay())
+      decorations = editor.getHighlightDecorations(class: 'spell-check-misspelling')
+      expect(decorations.length).toBe 1
+      expect(decorations[0].marker.isValid()).toBe false
 
   describe "when spell checking for a grammar is removed", ->
     it "removes all the misspellings", ->
-      editorView.setText('notaword')
-      advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
+      editor.setText('notaword')
+      advanceClock(editor.getBuffer().getStoppedChangingDelay())
       atom.config.set('spell-check.grammars', ['source.js'])
 
+      decorations = null
       waitsFor ->
-        editorView.find('.misspelling').length > 0
+        editor.getHighlightDecorations(class: 'spell-check-misspelling').length > 0
 
       runs ->
-        expect(editorView.find('.misspelling').length).toBe 1
+        expect(editor.getHighlightDecorations(class: 'spell-check-misspelling').length).toBe 1
         atom.config.set('spell-check.grammars', [])
-        expect(editorView.find('.misspelling').length).toBe 0
+        expect(editor.getHighlightDecorations(class: 'spell-check-misspelling').length).toBe 0
 
   describe "when the editor's grammar changes to one that does not have spell check enabled", ->
     it "removes all the misspellings", ->
-      editorView.setText('notaword')
-      advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
+      editor.setText('notaword')
+      advanceClock(editor.getBuffer().getStoppedChangingDelay())
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        editorView.find('.misspelling').length > 0
+        editor.getHighlightDecorations(class: 'spell-check-misspelling').length > 0
 
       runs ->
-        expect(editorView.find('.misspelling').length).toBe 1
-        atom.syntax.setGrammarOverrideForPath(editorView.getEditor().getPath(), 'text.plain')
-        editorView.getEditor().reloadGrammar()
-        expect(editorView.find('.misspelling').length).toBe 0
+        expect(editor.getHighlightDecorations(class: 'spell-check-misspelling').length).toBe 1
+        editor.setGrammar(atom.grammars.selectGrammar('.txt'))
+        expect(editor.getHighlightDecorations(class: 'spell-check-misspelling').length).toBe 0
 
   describe "when 'spell-check:correct-misspelling' is triggered on the editor", ->
     describe "when the cursor touches a misspelling that has corrections", ->
       it "displays the corrections for the misspelling and replaces the misspelling when a correction is selected", ->
-        editorView.setText('tofether')
-        advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
+        editor.setText('tofether')
+        advanceClock(editor.getBuffer().getStoppedChangingDelay())
         atom.config.set('spell-check.grammars', ['source.js'])
 
         waitsFor ->
-          editorView.find('.misspelling').length > 0
+          editor.getHighlightDecorations(class: 'spell-check-misspelling').length > 0
 
         runs ->
-          editorView.trigger 'spell-check:correct-misspelling'
-          expect(editorView.find('.corrections').length).toBe 1
-          expect(editorView.find('.corrections li').length).toBeGreaterThan 0
-          expect(editorView.find('.corrections li:first').text()).toBe "together"
-          editorView.find('.corrections').view().confirmSelection()
-          expect(editorView.getText()).toBe 'together'
-          expect(editorView.getEditor().getCursorBufferPosition()).toEqual [0, 8]
-          advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
-          expect(editorView.find('.misspelling')).toBeHidden()
-          expect(editorView.find('.corrections').length).toBe 0
+          atom.commands.dispatch editorElement, 'spell-check:correct-misspelling'
+
+          correctionsElement = editorElement.querySelector('.corrections')
+          expect(correctionsElement).toBeDefined()
+          expect(correctionsElement.querySelectorAll('li').length).toBeGreaterThan 0
+          expect(correctionsElement.querySelectorAll('li')[0].textContent).toBe "together"
+
+          atom.commands.dispatch correctionsElement, 'core:confirm'
+
+          expect(editor.getText()).toBe 'together'
+          expect(editor.getCursorBufferPosition()).toEqual [0, 8]
+          advanceClock(editor.getBuffer().getStoppedChangingDelay())
+          expect(editorElement.querySelectorAll('.spell-check-misspelling').length).toBe 0
+          expect(editorElement.querySelector('.corrections')).toBeNull()
 
     describe "when the cursor touches a misspelling that has no corrections", ->
       it "displays a message saying no corrections found", ->
-        editorView.setText('zxcasdfysyadfyasdyfasdfyasdfyasdfyasydfasdf')
-        advanceClock(editorView.getEditor().getBuffer().stoppedChangingDelay)
+        editor.setText('zxcasdfysyadfyasdyfasdfyasdfyasdfyasydfasdf')
+        advanceClock(editor.getBuffer().getStoppedChangingDelay())
         atom.config.set('spell-check.grammars', ['source.js'])
 
         waitsFor ->
-          editorView.find('.misspelling').length > 0
+          editor.getHighlightDecorations(class: 'spell-check-misspelling').length > 0
 
         runs ->
-          editorView.trigger 'spell-check:correct-misspelling'
-          expect(editorView.find('.corrections').length).toBe 1
-          expect(editorView.find('.corrections li').length).toBe 0
-          expect(editorView.find('.corrections').view().error.text()).toBe "No corrections"
+          atom.commands.dispatch editorElement, 'spell-check:correct-misspelling'
+          expect(editorElement.querySelectorAll('.corrections').length).toBe 1
+          expect(editorElement.querySelectorAll('.corrections li').length).toBe 0
+          expect(editorElement.querySelector('.corrections').textContent).toBe "No corrections"
 
   describe "when the editor is destroyed", ->
     it "destroys all misspelling markers", ->
-      editorView.setText("mispelling")
+      editor.setText('mispelling')
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        editorView.find('.misspelling').length > 0
+        editor.getHighlightDecorations(class: 'spell-check-misspelling').length > 0
 
       runs ->
-        expect(editorView.find('.misspelling').length).toBe 1
-        view = editorView.find('.misspelling').view()
-        buffer = editorView.getEditor().getBuffer()
-        expect(view.marker.isDestroyed()).toBeFalsy()
-        editorView.remove()
-        expect(view.marker.isDestroyed()).toBeTruthy()
+        editor.destroy()
+        expect(editor.getMarkers().length).toBe 0

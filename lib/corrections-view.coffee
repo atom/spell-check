@@ -1,11 +1,35 @@
-{Range, SelectListView} = require 'atom'
+{Range} = require 'atom'
+{SelectListView} = require 'atom-space-pen-views'
 
 module.exports =
 class CorrectionsView extends SelectListView
-  initialize: (@editorView, @corrections, @misspellingRange) ->
+  initialize: (@editor, @corrections, @marker) ->
     super
     @addClass('corrections popover-list')
     @attach()
+
+  attach: ->
+    @setItems(@corrections)
+    @overlayDecoration = @editor.decorateMarker(@marker, type: 'overlay', item: this)
+
+  attached: ->
+    @storeFocusedElement()
+    @focusFilterEditor()
+
+  destroy: ->
+    @cancel()
+    @remove()
+
+  confirmed: (correction) ->
+    @cancel()
+    return unless correction
+    @editor.transact =>
+      @editor.selectMarker(@marker)
+      @editor.insertText(correction)
+
+  cancelled: ->
+    @overlayDecoration.destroy()
+    @restoreFocus()
 
   viewForItem: (word) ->
     element = document.createElement('li')
@@ -20,42 +44,8 @@ class CorrectionsView extends SelectListView
     super
     false
 
-  confirmed: (correction) ->
-    @cancel()
-    return unless correction
-    editor = @editorView.getEditor()
-    editor.transact =>
-      editor.setSelectedBufferRange(editor.bufferRangeForScreenRange(@misspellingRange))
-      editor.insertText(correction)
-    @editorView.focus()
-
-  attach: ->
-    @aboveCursor = false
-    @setItems(@corrections)
-
-    @editorView.appendToLinesView(this)
-    @setPosition()
-    @focusFilterEditor()
-
   getEmptyMessage: (itemCount) ->
     if itemCount is 0
       'No corrections'
     else
       super
-
-  setPosition: ->
-    {left, top} = @editorView.pixelPositionForScreenPosition(@misspellingRange.start)
-    height = @outerHeight()
-    potentialTop = top + @editorView.lineHeight
-    potentialBottom = potentialTop - @editorView.scrollTop() + height
-
-    if @aboveCursor or potentialBottom > @editorView.outerHeight()
-      @aboveCursor = true
-      @css(left: left, top: top - height, bottom: 'inherit')
-    else
-      @css(left: left, top: potentialTop, bottom: 'inherit')
-
-  populateList: ->
-    super
-
-    @setPosition()
