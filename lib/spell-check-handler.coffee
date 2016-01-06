@@ -1,6 +1,6 @@
 SpellChecker = require 'spellchecker'
 
-wordRegex = /([A-Z][a-z]+|[a-z]+|[A-Z]+)/g
+wordRegex = /([A-Z][a-z\']+|[a-z\']+|[A-Z]+)/g
 
 module.exports = (text) ->
   row = 0
