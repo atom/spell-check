@@ -1,6 +1,9 @@
 SpellChecker = require 'spellchecker'
 
 module.exports = ({id, text}) ->
+  SpellChecker.add("GitHub")
+  SpellChecker.add("github")
+
   misspelledCharacterRanges = SpellChecker.checkSpelling(text)
 
   row = 0

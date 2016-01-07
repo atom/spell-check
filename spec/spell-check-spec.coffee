@@ -1,6 +1,9 @@
 describe "Spell check", ->
   [workspaceElement, editor, editorElement] = []
 
+  textForDecoration = ({marker}) ->
+    editor.getTextInBufferRange(marker.getBufferRange())
+
   beforeEach ->
     workspaceElement = atom.views.getView(atom.workspace)
 
@@ -34,8 +37,6 @@ describe "Spell check", ->
       decorations = editor.getHighlightDecorations(class: 'spell-check-misspelling')
       decorations.length > 0
 
-    textForDecoration = ({marker}) ->
-      editor.getTextInBufferRange(marker.getBufferRange())
 
     runs ->
       expect(decorations.length).toBe 4
@@ -43,6 +44,20 @@ describe "Spell check", ->
       expect(textForDecoration(decorations[1])).toEqual "sentencts"
       expect(textForDecoration(decorations[2])).toEqual "edn"
       expect(textForDecoration(decorations[3])).toEqual "dsoe"
+
+  it "doesn't consider our company's name to be a spelling error", ->
+    editor.setText("GitHub (aka github): Where codez are built.")
+    atom.config.set('spell-check.grammars', ['source.js'])
+
+    decorations = null
+
+    waitsFor ->
+      decorations = editor.getHighlightDecorations(class: 'spell-check-misspelling')
+      decorations.length > 0
+
+    runs ->
+      expect(decorations.length).toBe 1
+      expect(textForDecoration(decorations[0])).toBe "codez"
 
   it "hides decorations when a misspelled word is edited", ->
     editor.setText('notaword')
