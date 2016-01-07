@@ -25,7 +25,7 @@ describe "Spell check", ->
       editorElement = atom.views.getView(editor)
 
   it "decorates all misspelled words", ->
-    editor.setText("This middle of thiss sentencts has issues and the \"edn\" 'dsoe' too")
+    editor.setText("This middle of thiss\nsentencts\n\nhas issues and the \"edn\" 'dsoe' too")
     atom.config.set('spell-check.grammars', ['source.js'])
 
     decorations = null
@@ -34,12 +34,15 @@ describe "Spell check", ->
       decorations = editor.getHighlightDecorations(class: 'spell-check-misspelling')
       decorations.length > 0
 
+    textForDecoration = ({marker}) ->
+      editor.getTextInBufferRange(marker.getBufferRange())
+
     runs ->
       expect(decorations.length).toBe 4
-      expect(decorations[0].marker.getBufferRange()).toEqual [[0, 15], [0, 20]]
-      expect(decorations[1].marker.getBufferRange()).toEqual [[0, 21], [0, 30]]
-      expect(decorations[2].marker.getBufferRange()).toEqual [[0, 51], [0, 54]]
-      expect(decorations[3].marker.getBufferRange()).toEqual [[0, 57], [0, 61]]
+      expect(textForDecoration(decorations[0])).toEqual "thiss"
+      expect(textForDecoration(decorations[1])).toEqual "sentencts"
+      expect(textForDecoration(decorations[2])).toEqual "edn"
+      expect(textForDecoration(decorations[3])).toEqual "dsoe"
 
   it "hides decorations when a misspelled word is edited", ->
     editor.setText('notaword')
