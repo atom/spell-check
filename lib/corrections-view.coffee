@@ -24,7 +24,7 @@ class CorrectionsView extends SelectListView
     @cancel()
     return unless correction
     @editor.transact =>
-      @editor.selectMarker(@marker)
+      @editor.setSelectedBufferRange(@marker.getRange())
       @editor.insertText(correction)
 
   cancelled: ->

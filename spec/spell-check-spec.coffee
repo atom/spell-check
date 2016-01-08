@@ -1,8 +1,11 @@
 describe "Spell check", ->
-  [workspaceElement, editor, editorElement] = []
+  [workspaceElement, editor, editorElement, spellCheckModule] = []
 
-  textForDecoration = ({marker}) ->
-    editor.getTextInBufferRange(marker.getBufferRange())
+  textForMarker = (marker) ->
+    editor.getTextInBufferRange(marker.getRange())
+
+  getMisspellingMarkers = ->
+    spellCheckModule.misspellingMarkersForEditor(editor)
 
   beforeEach ->
     workspaceElement = atom.views.getView(atom.workspace)
@@ -20,7 +23,8 @@ describe "Spell check", ->
       atom.workspace.open('sample.js')
 
     waitsForPromise ->
-      atom.packages.activatePackage('spell-check')
+      atom.packages.activatePackage('spell-check').then ({mainModule}) ->
+        spellCheckModule = mainModule
 
     runs ->
       jasmine.attachToDOM(workspaceElement)
@@ -31,52 +35,51 @@ describe "Spell check", ->
     editor.setText("This middle of thiss\nsentencts\n\nhas issues and the \"edn\" 'dsoe' too")
     atom.config.set('spell-check.grammars', ['source.js'])
 
-    decorations = null
-
+    misspellingMarkers = null
     waitsFor ->
-      decorations = editor.getHighlightDecorations(class: 'spell-check-misspelling')
-      decorations.length > 0
-
+      misspellingMarkers = getMisspellingMarkers()
+      misspellingMarkers.length > 0
 
     runs ->
-      expect(decorations.length).toBe 4
-      expect(textForDecoration(decorations[0])).toEqual "thiss"
-      expect(textForDecoration(decorations[1])).toEqual "sentencts"
-      expect(textForDecoration(decorations[2])).toEqual "edn"
-      expect(textForDecoration(decorations[3])).toEqual "dsoe"
+      expect(misspellingMarkers.length).toBe 4
+      expect(textForMarker(misspellingMarkers[0])).toEqual "thiss"
+      expect(textForMarker(misspellingMarkers[1])).toEqual "sentencts"
+      expect(textForMarker(misspellingMarkers[2])).toEqual "edn"
+      expect(textForMarker(misspellingMarkers[3])).toEqual "dsoe"
 
   it "doesn't consider our company's name to be a spelling error", ->
     editor.setText("GitHub (aka github): Where codez are built.")
     atom.config.set('spell-check.grammars', ['source.js'])
 
-    decorations = null
-
+    misspellingMarkers = null
     waitsFor ->
-      decorations = editor.getHighlightDecorations(class: 'spell-check-misspelling')
-      decorations.length > 0
+      misspellingMarkers = getMisspellingMarkers()
+      misspellingMarkers.length > 0
 
     runs ->
-      expect(decorations.length).toBe 1
-      expect(textForDecoration(decorations[0])).toBe "codez"
+      expect(misspellingMarkers.length).toBe 1
+      expect(textForMarker(misspellingMarkers[0])).toBe "codez"
 
   it "hides decorations when a misspelled word is edited", ->
     editor.setText('notaword')
     advanceClock(editor.getBuffer().getStoppedChangingDelay())
     atom.config.set('spell-check.grammars', ['source.js'])
 
-    decorations = null
+    misspellingMarkers = null
     waitsFor ->
-      decorations = editor.getHighlightDecorations(class: 'spell-check-misspelling')
-      decorations.length > 0
+      misspellingMarkers = getMisspellingMarkers()
+      misspellingMarkers.length > 0
 
     runs ->
-      expect(decorations.length).toBe 1
+      expect(misspellingMarkers.length).toBe 1
       editor.moveToEndOfLine()
       editor.insertText('a')
       advanceClock(editor.getBuffer().getStoppedChangingDelay())
-      decorations = editor.getHighlightDecorations(class: 'spell-check-misspelling')
-      expect(decorations.length).toBe 1
-      expect(decorations[0].marker.isValid()).toBe false
+
+      misspellingMarkers = getMisspellingMarkers()
+
+      expect(misspellingMarkers.length).toBe 1
+      expect(misspellingMarkers[0].isValid()).toBe false
 
   describe "when spell checking for a grammar is removed", ->
     it "removes all the misspellings", ->
@@ -84,14 +87,15 @@ describe "Spell check", ->
       advanceClock(editor.getBuffer().getStoppedChangingDelay())
       atom.config.set('spell-check.grammars', ['source.js'])
 
-      decorations = null
+      misspellingMarkers = null
       waitsFor ->
-        editor.getHighlightDecorations(class: 'spell-check-misspelling').length > 0
+        misspellingMarkers = getMisspellingMarkers()
+        misspellingMarkers.length > 0
 
       runs ->
-        expect(editor.getHighlightDecorations(class: 'spell-check-misspelling').length).toBe 1
+        expect(getMisspellingMarkers().length).toBe 1
         atom.config.set('spell-check.grammars', [])
-        expect(editor.getHighlightDecorations(class: 'spell-check-misspelling').length).toBe 0
+        expect(getMisspellingMarkers().length).toBe 0
 
   describe "when the editor's grammar changes to one that does not have spell check enabled", ->
     it "removes all the misspellings", ->
@@ -100,12 +104,12 @@ describe "Spell check", ->
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        editor.getHighlightDecorations(class: 'spell-check-misspelling').length > 0
+        getMisspellingMarkers().length > 0
 
       runs ->
-        expect(editor.getHighlightDecorations(class: 'spell-check-misspelling').length).toBe 1
+        expect(getMisspellingMarkers().length).toBe 1
         editor.setGrammar(atom.grammars.selectGrammar('.txt'))
-        expect(editor.getHighlightDecorations(class: 'spell-check-misspelling').length).toBe 0
+        expect(getMisspellingMarkers().length).toBe 0
 
   describe "when 'spell-check:correct-misspelling' is triggered on the editor", ->
     describe "when the cursor touches a misspelling that has corrections", ->
@@ -115,9 +119,11 @@ describe "Spell check", ->
         atom.config.set('spell-check.grammars', ['source.js'])
 
         waitsFor ->
-          editor.getHighlightDecorations(class: 'spell-check-misspelling').length > 0
+          getMisspellingMarkers().length is 1
 
         runs ->
+          expect(getMisspellingMarkers()[0].isValid()).toBe true
+
           atom.commands.dispatch editorElement, 'spell-check:correct-misspelling'
 
           correctionsElement = editorElement.querySelector('.corrections')
@@ -129,8 +135,8 @@ describe "Spell check", ->
 
           expect(editor.getText()).toBe 'together'
           expect(editor.getCursorBufferPosition()).toEqual [0, 8]
-          advanceClock(editor.getBuffer().getStoppedChangingDelay())
-          expect(editorElement.querySelectorAll('.spell-check-misspelling').length).toBe 0
+
+          expect(getMisspellingMarkers()[0].isValid()).toBe false
           expect(editorElement.querySelector('.corrections')).toBeNull()
 
     describe "when the cursor touches a misspelling that has no corrections", ->
@@ -140,7 +146,7 @@ describe "Spell check", ->
         atom.config.set('spell-check.grammars', ['source.js'])
 
         waitsFor ->
-          editor.getHighlightDecorations(class: 'spell-check-misspelling').length > 0
+          getMisspellingMarkers().length > 0
 
         runs ->
           atom.commands.dispatch editorElement, 'spell-check:correct-misspelling'
@@ -154,8 +160,8 @@ describe "Spell check", ->
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        editor.getHighlightDecorations(class: 'spell-check-misspelling').length > 0
+        getMisspellingMarkers().length > 0
 
       runs ->
         editor.destroy()
-        expect(editor.getMarkers().length).toBe 0
+        expect(getMisspellingMarkers().length).toBe 0
