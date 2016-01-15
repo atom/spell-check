@@ -13,7 +13,7 @@ By default spell check is enabled for the following files:
 * AsciiDoc
 
 You can override this from the _Spell Check_ settings in the Settings view
-(<kbd>cmd-,</kbd>). The Grammars config option is a list of scopes for which the package
+(<kbd>cmd+,</kbd>). The Grammars config option is a list of scopes for which the package
 will check for spelling errors.
 
 To enable _Spell Check_ for your current file type: put your cursor in the file,
