@@ -1,7 +1,9 @@
 _ = require 'underscore-plus'
 {CompositeDisposable} = require 'atom'
-MisspellingView = require './misspelling-view'
 SpellCheckTask = require './spell-check-task'
+
+CorrectionsView = null
+SpellChecker = null
 
 module.exports =
 class SpellCheckView
@@ -10,12 +12,18 @@ class SpellCheckView
 
   constructor: (@editor) ->
     @disposables = new CompositeDisposable
-    @views = []
     @task = new SpellCheckTask()
+    @initializeMarkerLayer()
+
+    @correctMisspellingCommand = atom.commands.add atom.views.getView(@editor), 'spell-check:correct-misspelling', =>
+      if marker = @markerLayer.findMarkers({containsPoint: @editor.getCursorBufferPosition()})[0]
+        CorrectionsView ?= require './corrections-view'
+        @correctionsView?.destroy()
+        @correctionsView = new CorrectionsView(@editor, @getCorrections(marker), marker)
 
     @task.onDidSpellCheck (misspellings) =>
-      @destroyViews()
-      @addViews(misspellings) if @buffer?
+      @detroyMarkers()
+      @addMarkers(misspellings) if @buffer?
 
     @disposables.add @editor.onDidChangePath =>
       @subscribeToBuffer()
@@ -33,13 +41,25 @@ class SpellCheckView
 
     @disposables.add @editor.onDidDestroy(@destroy.bind(this))
 
+  initializeMarkerLayer: ->
+    @markerLayer = @editor.getBuffer().addMarkerLayer()
+    @markerLayerDecoration = @editor.decorateMarkerLayer(@markerLayer, {
+      type: 'highlight',
+      class: 'spell-check-misspelling',
+      deprecatedRegionClass: 'misspelling'
+    })
+
   destroy: ->
     @unsubscribeFromBuffer()
     @disposables.dispose()
     @task.terminate()
+    @markerLayer.destroy()
+    @markerLayerDecoration.destroy()
+    @correctMisspellingCommand.dispose()
+    @correctionsView?.remove()
 
   unsubscribeFromBuffer: ->
-    @destroyViews()
+    @detroyMarkers()
 
     if @buffer?
       @bufferDisposable.dispose()
@@ -57,14 +77,19 @@ class SpellCheckView
     grammar = @editor.getGrammar().scopeName
     _.contains(atom.config.get('spell-check.grammars'), grammar)
 
-  destroyViews: ->
-    while view = @views.shift()
-      view.destroy()
+  detroyMarkers: ->
+    @markerLayer.destroy()
+    @markerLayerDecoration.destroy()
+    @initializeMarkerLayer()
 
-  addViews: (misspellings) ->
+  addMarkers: (misspellings) ->
     for misspelling in misspellings
-      view = new MisspellingView(misspelling, @editor)
-      @views.push(view)
+      @markerLayer.markRange(misspelling,
+        invalidate: 'touch',
+        replicate: 'false',
+        persistent: false,
+        maintainHistory: false,
+      )
 
   updateMisspellings: ->
     # Task::start can throw errors atom/atom#3326
@@ -72,3 +97,8 @@ class SpellCheckView
       @task.start(@buffer.getText())
     catch error
       console.warn('Error starting spell check task', error.stack ? error)
+
+  getCorrections: (marker) ->
+    SpellChecker ?= require 'spellchecker'
+    misspelling = @editor.getTextInBufferRange(marker.getRange())
+    corrections = SpellChecker.getCorrectionsForMisspelling(misspelling)

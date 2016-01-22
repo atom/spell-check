@@ -17,7 +17,20 @@ module.exports =
   activate: ->
     @subscriptionsOfCommands = atom.commands.add 'atom-workspace',
         'spell-check:toggle': => @toggle()
-    @disposable = atom.workspace.observeTextEditors(addViewToEditor)
+    @viewsByEditor = new WeakMap
+    @disposable = atom.workspace.observeTextEditors (editor) =>
+      SpellCheckView ?= require './spell-check-view'
+      spellCheckView = new SpellCheckView(editor)
+
+      # save the {editor} into a map
+      editorId = editor.id
+      spellCheckViews[editorId] = {}
+      spellCheckViews[editorId]['view'] = spellCheckView
+      spellCheckViews[editorId]['active'] = true
+      @viewsByEditor.set(editor, spellCheckView)
+
+  misspellingMarkersForEditor: (editor) ->
+    @viewsByEditor.get(editor).markerLayer.getMarkers()
 
   deactivate: ->
     @subscriptionsOfCommands.dispose()
@@ -36,14 +49,3 @@ module.exports =
       # activate spell check for this {editor}
       spellCheckViews[editorId]['active'] = true
       spellCheckViews[editorId]['view'].subscribeToBuffer()
-
-
-addViewToEditor = (editor) ->
-  SpellCheckView ?= require './spell-check-view'
-  spellCheckView = new SpellCheckView(editor)
-
-  # save the {editor} into a map
-  editorId = editor.id
-  spellCheckViews[editorId] = {}
-  spellCheckViews[editorId]['view'] = spellCheckView
-  spellCheckViews[editorId]['active'] = true
