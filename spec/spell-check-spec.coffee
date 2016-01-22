@@ -102,14 +102,16 @@ describe "Spell check", ->
       editor.setText('notaword')
       advanceClock(editor.getBuffer().getStoppedChangingDelay())
       atom.config.set('spell-check.grammars', ['source.js'])
-
+      
+      misspellingMarkers = null
       waitsFor ->
-        editor.getHighlightDecorations(class: 'spell-check-misspelling').length > 0
+        misspellingMarkers = getMisspellingMarkers()
+        misspellingMarkers.length > 0
 
       runs ->
-        expect(editor.getHighlightDecorations(class: 'spell-check-misspelling').length).toBe 1
+        expect(getMisspellingMarkers().length).toBe 1
         atom.commands.dispatch(workspaceElement, 'spell-check:toggle')
-        expect(editor.getHighlightDecorations(class: 'spell-check-misspelling').length).toBe 0
+        expect(getMisspellingMarkers().length).toBe 0
 
   describe "when the editor's grammar changes to one that does not have spell check enabled", ->
     it "removes all the misspellings", ->
