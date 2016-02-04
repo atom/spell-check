@@ -22,7 +22,7 @@ class SpellCheckView
         @correctionsView = new CorrectionsView(@editor, @getCorrections(marker), marker)
 
     @task.onDidSpellCheck (misspellings) =>
-      @detroyMarkers()
+      @destroyMarkers()
       @addMarkers(misspellings) if @buffer?
 
     @disposables.add @editor.onDidChangePath =>
@@ -59,7 +59,7 @@ class SpellCheckView
     @correctionsView?.remove()
 
   unsubscribeFromBuffer: ->
-    @detroyMarkers()
+    @destroyMarkers()
 
     if @buffer?
       @bufferDisposable.dispose()
@@ -77,7 +77,7 @@ class SpellCheckView
     grammar = @editor.getGrammar().scopeName
     _.contains(atom.config.get('spell-check.grammars'), grammar)
 
-  detroyMarkers: ->
+  destroyMarkers: ->
     @markerLayer.destroy()
     @markerLayerDecoration.destroy()
     @initializeMarkerLayer()
