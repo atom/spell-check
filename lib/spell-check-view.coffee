@@ -21,10 +21,6 @@ class SpellCheckView
         @correctionsView?.destroy()
         @correctionsView = new CorrectionsView(@editor, @getCorrections(marker), marker)
 
-    @task.onDidSpellCheck (misspellings) =>
-      @destroyMarkers()
-      @addMarkers(misspellings) if @buffer?
-
     @disposables.add @editor.onDidChangePath =>
       @subscribeToBuffer()
 
@@ -91,10 +87,14 @@ class SpellCheckView
         maintainHistory: false,
       )
 
+  showMarkers: (misspellings) =>
+    @destroyMarkers()
+    @addMarkers(misspellings) if @buffer?
+
   updateMisspellings: ->
     # Task::start can throw errors atom/atom#3326
     try
-      @task.start(@buffer.getText())
+      @task.start @buffer.getText(), @showMarkers
     catch error
       console.warn('Error starting spell check task', error.stack ? error)
 
