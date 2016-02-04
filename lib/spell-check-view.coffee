@@ -33,6 +33,12 @@ class SpellCheckView
     @disposables.add atom.config.onDidChange 'spell-check.grammars', =>
       @subscribeToBuffer()
 
+    @disposables.add atom.config.onDidChange 'spell-check.dictionaryDir', =>
+      @subscribeToBuffer()
+
+    @disposables.add atom.config.onDidChange 'spell-check.language', =>
+      @subscribeToBuffer()
+
     @subscribeToBuffer()
 
     @disposables.add @editor.onDidDestroy(@destroy.bind(this))
@@ -92,9 +98,11 @@ class SpellCheckView
     @addMarkers(misspellings) if @buffer?
 
   updateMisspellings: ->
+    language = atom.config.get('spell-check.language')
+    dictionaryDir = atom.config.get('spell-check.dictionaryDir')
     # Task::start can throw errors atom/atom#3326
     try
-      @task.start(@buffer.getText(), @showMarkers)
+      @task.start(@buffer.getText(), @showMarkers, language, dictionaryDir)
     catch error
       console.warn('Error starting spell check task', error.stack ? error)
 

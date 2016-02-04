@@ -12,6 +12,14 @@ module.exports =
         'text.plain.null-grammar'
       ]
       description: 'List of scopes for languages which will be checked for misspellings. See [the README](https://github.com/atom/spell-check#spell-check-package-) for more information on finding the correct scope for a specific language.'
+    dictionaryDir:
+      type: 'string'
+      default: '/usr/share/hunspell'
+      description: 'Directory containing dictionaries.'
+    language:
+      type: 'string'
+      default: 'en_US'
+      description: 'Language used for spellchecking.'
 
   activate: ->
     @viewsByEditor = new WeakMap
