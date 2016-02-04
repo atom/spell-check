@@ -11,11 +11,10 @@ class SpellCheckTask
 
   terminate: ->
     @constructor.numEditors--;
-
     if @constructor.numEditors is 0
       @constructor.task?.terminate()
       @constructor.task = null
 
-  start: (text, callback) ->
+  start: (text, callback, language, dictionaryDir) ->
     @constructor.task ?= new Task(require.resolve('./spell-check-handler'))
-    @constructor.task?.start text, callback
+    @constructor.task?.start {text, language, dictionaryDir}, callback
