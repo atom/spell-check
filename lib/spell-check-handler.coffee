@@ -1,12 +1,12 @@
 SpellChecker = require 'spellchecker'
 
 module.exports = ({text, language, dictionaryDir}) ->
-  SpellChecker.add("GitHub")
-  SpellChecker.add("github")
-
   if language? and dictionaryDir?
     SpellChecker.setDictionary(language, dictionaryDir)
 
+  SpellChecker.add("GitHub")
+  SpellChecker.add("github")
+  
   misspelledCharacterRanges = SpellChecker.checkSpelling(text)
 
   row = 0

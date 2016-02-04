@@ -10,7 +10,7 @@ class SpellCheckTask
     @constructor.numEditors++
 
   terminate: ->
-    @constructor.numEditors--;
+    @constructor.numEditors--
     if @constructor.numEditors is 0
       @constructor.task?.terminate()
       @constructor.task = null
