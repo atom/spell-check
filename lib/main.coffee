@@ -15,7 +15,7 @@ module.exports =
       description: 'List of scopes for languages which will be checked for misspellings. See [the README](https://github.com/atom/spell-check#spell-check-package-) for more information on finding the correct scope for a specific language.'
 
   activate: ->
-    @subscriptionsOfCommands = atom.commands.add 'atom-workspace',
+    @commandSubscription = atom.commands.add 'atom-workspace',
         'spell-check:toggle': => @toggle()
     @viewsByEditor = new WeakMap
     @disposable = atom.workspace.observeTextEditors (editor) =>
@@ -33,8 +33,8 @@ module.exports =
     @viewsByEditor.get(editor).markerLayer.getMarkers()
 
   deactivate: ->
-    @subscriptionsOfCommands.dispose()
-    @subscriptionsOfCommands = null
+    @commandSubscription.dispose()
+    @commandSubscription = null
     @disposable.dispose()
 
   # Internal: Toggles the spell-check activation state.
