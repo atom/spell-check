@@ -6,7 +6,7 @@ module.exports = ({text, language, dictionaryDir}) ->
 
   SpellChecker.add("GitHub")
   SpellChecker.add("github")
-  
+
   misspelledCharacterRanges = SpellChecker.checkSpelling(text)
 
   row = 0

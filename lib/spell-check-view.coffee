@@ -107,6 +107,11 @@ class SpellCheckView
       console.warn('Error starting spell check task', error.stack ? error)
 
   getCorrections: (marker) ->
+    language = atom.config.get('spell-check.language')
+    dictionaryDir = atom.config.get('spell-check.dictionaryDir')
+
     SpellChecker ?= require 'spellchecker'
+    SpellChecker.setDictionary(language, dictionaryDir)
+
     misspelling = @editor.getTextInBufferRange(marker.getRange())
     corrections = SpellChecker.getCorrectionsForMisspelling(misspelling)
