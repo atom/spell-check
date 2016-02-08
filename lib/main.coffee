@@ -15,11 +15,11 @@ module.exports =
     dictionaryDir:
       type: 'string'
       default: '/usr/share/hunspell'
-      description: 'Directory containing dictionaries.'
+      description: 'Directory containing dictionaries. Has effect only when hunspell is used.'
     language:
       type: 'string'
       default: 'en_US'
-      description: 'Language used for spellchecking.'
+      description: 'Language used for spellchecking. Has effect only when hunspell is used.'
 
   activate: ->
     @viewsByEditor = new WeakMap
