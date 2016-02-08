@@ -166,7 +166,9 @@ describe "Spell check", ->
         editor.destroy()
         expect(getMisspellingMarkers().length).toBe 0
 
-  describe "when language or dictionary directory are changed in settings", ->
+  describe "when hunspell language or dictionary directory are changed in settings", ->
+    return if process.platform isnt 'linux'
+
     it "it checks spelling using correct dictionary", ->
       editor.setText('loudly better trzcina')
       atom.config.set('spell-check.grammars', ['source.js'])
