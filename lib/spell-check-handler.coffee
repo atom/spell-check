@@ -1,6 +1,9 @@
 SpellChecker = require 'spellchecker'
 
-module.exports = ({id, text}) ->
+module.exports = ({text, language, dictionaryDir}) ->
+  if language? and dictionaryDir?
+    SpellChecker.setDictionary(language, dictionaryDir)
+
   SpellChecker.add("GitHub")
   SpellChecker.add("github")
 
@@ -29,4 +32,4 @@ module.exports = ({id, text}) ->
     characterIndex = lineBreakIndex + 1
     row++
 
-  {id, misspellings}
+  misspellings

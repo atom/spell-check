@@ -21,10 +21,6 @@ class SpellCheckView
         @correctionsView?.destroy()
         @correctionsView = new CorrectionsView(@editor, @getCorrections(marker), marker)
 
-    @task.onDidSpellCheck (misspellings) =>
-      @detroyMarkers()
-      @addMarkers(misspellings) if @buffer?
-
     @disposables.add @editor.onDidChangePath =>
       @subscribeToBuffer()
 
@@ -35,6 +31,12 @@ class SpellCheckView
       @subscribeToBuffer()
 
     @disposables.add atom.config.onDidChange 'spell-check.grammars', =>
+      @subscribeToBuffer()
+
+    @disposables.add atom.config.onDidChange 'spell-check.dictionaryDir', =>
+      @subscribeToBuffer()
+
+    @disposables.add atom.config.onDidChange 'spell-check.language', =>
       @subscribeToBuffer()
 
     @subscribeToBuffer()
@@ -59,7 +61,7 @@ class SpellCheckView
     @correctionsView?.remove()
 
   unsubscribeFromBuffer: ->
-    @detroyMarkers()
+    @destroyMarkers()
 
     if @buffer?
       @bufferDisposable.dispose()
@@ -77,7 +79,7 @@ class SpellCheckView
     grammar = @editor.getGrammar().scopeName
     _.contains(atom.config.get('spell-check.grammars'), grammar)
 
-  detroyMarkers: ->
+  destroyMarkers: ->
     @markerLayer.destroy()
     @markerLayerDecoration.destroy()
     @initializeMarkerLayer()
@@ -91,14 +93,25 @@ class SpellCheckView
         maintainHistory: false,
       )
 
+  showMarkers: (misspellings) =>
+    @destroyMarkers()
+    @addMarkers(misspellings) if @buffer?
+
   updateMisspellings: ->
+    language = atom.config.get('spell-check.language')
+    dictionaryDir = atom.config.get('spell-check.dictionaryDir')
     # Task::start can throw errors atom/atom#3326
     try
-      @task.start(@buffer.getText())
+      @task.start(@buffer.getText(), @showMarkers, language, dictionaryDir)
     catch error
       console.warn('Error starting spell check task', error.stack ? error)
 
   getCorrections: (marker) ->
+    language = atom.config.get('spell-check.language')
+    dictionaryDir = atom.config.get('spell-check.dictionaryDir')
+
     SpellChecker ?= require 'spellchecker'
+    SpellChecker.setDictionary(language, dictionaryDir)
+
     misspelling = @editor.getTextInBufferRange(marker.getRange())
     corrections = SpellChecker.getCorrectionsForMisspelling(misspelling)
