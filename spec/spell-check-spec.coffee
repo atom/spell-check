@@ -165,3 +165,20 @@ describe "Spell check", ->
       runs ->
         editor.destroy()
         expect(getMisspellingMarkers().length).toBe 0
+
+  describe "when language or dictionary directory are changed in settings", ->
+    it "it checks spelling using correct dictionary", ->
+      editor.setText('loudly better trzcina')
+      atom.config.set('spell-check.grammars', ['source.js'])
+      atom.config.set('spell-check.language', 'pl_PL')
+      atom.config.set('spell-check.dictionaryDir', 'spec/dictionaries')
+
+      misspellingMarkers = null
+      waitsFor =>
+        misspellingMarkers = getMisspellingMarkers()
+        misspellingMarkers.length > 1
+
+      runs =>
+        expect(misspellingMarkers.length).toBe 2
+        expect(textForMarker(misspellingMarkers[0])).toEqual "loudly"
+        expect(textForMarker(misspellingMarkers[1])).toEqual "better"
