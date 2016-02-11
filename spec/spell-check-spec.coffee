@@ -16,15 +16,15 @@ describe "Spell check", ->
     waitsForPromise ->
       atom.packages.activatePackage('language-javascript')
 
-    runs ->
-      atom.config.set('spell-check.grammars', [])
-
     waitsForPromise ->
       atom.workspace.open('sample.js')
 
     waitsForPromise ->
       atom.packages.activatePackage('spell-check').then ({mainModule}) ->
         spellCheckModule = mainModule
+
+    runs ->
+      atom.config.set('spell-check.grammars', [])
 
     runs ->
       jasmine.attachToDOM(workspaceElement)
@@ -102,7 +102,7 @@ describe "Spell check", ->
       editor.setText('notaword')
       advanceClock(editor.getBuffer().getStoppedChangingDelay())
       atom.config.set('spell-check.grammars', ['source.js'])
-      
+
       misspellingMarkers = null
       waitsFor ->
         misspellingMarkers = getMisspellingMarkers()
