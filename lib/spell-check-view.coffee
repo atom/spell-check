@@ -83,13 +83,20 @@ class SpellCheckView
     @initializeMarkerLayer()
 
   addMarkers: (misspellings) ->
+    scope_whitelist = atom.config.get('spell-check.scopes')
     for misspelling in misspellings
-      @markerLayer.markRange(misspelling,
-        invalidate: 'touch',
-        replicate: 'false',
-        persistent: false,
-        maintainHistory: false,
-      )
+      # Find scopes for the text given at the starting position of the misspelling
+      scopes_for_misspelling = @editor.scopeDescriptorForBufferPosition(misspelling[0]).getScopesArray()
+      # Mark the misspelling if there is no whitelist or there are whole-word matches between
+      # the scopes and the whitelist
+      if scope_whitelist.length is 0 or _.intersection(scopes_for_misspelling, scope_whitelist).length > 0
+        @markerLayer.markRange(misspelling,
+          invalidate: 'touch',
+          replicate: 'false',
+          persistent: false,
+          maintainHistory: false,
+        )
+    return
 
   updateMisspellings: ->
     # Task::start can throw errors atom/atom#3326
