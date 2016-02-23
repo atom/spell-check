@@ -19,6 +19,7 @@
       "default": [
         "source.asciidoc",
         "source.gfm",
+        "text.tex.latex",
         "text.git-commit",
         "text.plain",
         "text.plain.null-grammar"
