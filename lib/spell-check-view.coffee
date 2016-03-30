@@ -83,7 +83,11 @@ class SpellCheckView
     @initializeMarkerLayer()
 
   addMarkers: (misspellings) ->
+    scope_blacklist = atom.config.get('spell-check.scopeBlacklist')
     for misspelling in misspellings
+      scopes_for_misspelling = @editor.scopeDescriptorForBufferPosition(misspelling[0]).getScopesArray()
+      if _.intersection(scopes_for_misspelling, scope_blacklist).length > 0
+        return
       @markerLayer.markRange(misspelling,
         invalidate: 'touch',
         replicate: 'false',
