@@ -2,7 +2,7 @@ describe "Spell check", ->
   [workspaceElement, editor, editorElement, spellCheckModule] = []
 
   textForMarker = (marker) ->
-    editor.getTextInBufferRange(marker.getRange())
+    editor.getTextInBufferRange(marker.getBufferRange())
 
   getMisspellingMarkers = ->
     spellCheckModule.misspellingMarkersForEditor(editor)
