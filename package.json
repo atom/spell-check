@@ -5,7 +5,7 @@
   "description": "Highlights misspelled words and shows possible corrections.",
   "dependencies": {
     "atom-space-pen-views": "^2.0.0",
-    "multi-integer-range": "^1.4.0",
+    "natural": "^0.4.0",
     "spellchecker": "3.2.3",
     "spelling-manager": "0.3.0",
     "underscore-plus": "^1"

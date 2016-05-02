@@ -26,46 +26,10 @@ for the _Spell Check_ package. Here are some examples: `source.coffee`,
 
 ## Changing the dictionary
 
-Currently, only the English (US) dictionary is supported. Follow [this issue](https://github.com/atom/spell-check/issues/11) for updates.
+To change the language of the dictionary, set the "Locales" configuration option to the IEFT tag (en-US, fr-FR, etc). More than one language can be used, simply separate them by commas.
 
-## Writing Providers
+For Windows 8 and 10, you must install the language using the regional settings before the language can be chosen inside Atom.
 
-The `spell-check` allows for additional dictionaries to be used at the same time using Atom's `providedServices` element in the `package.json` file.
+## Plugins
 
-    "providedServices": {
-      "spell-check": {
-        "versions": {
-          "1.0.0": "nameOfFunctionToProvideSpellCheck"
-        }
-      }
-    }
-
-The `nameOfFunctionToProvideSpellCheck` function may return either a single object describing the spell-check plugin or an array of them. Each spell-check plugin must implement the following:
-
-* getId(): string
-    * This returns the canonical identifier for this plugin. Typically, this will be the package name with an optional suffix for options, such as `spell-check-project` or `spell-check:en-US`. This identifier will be used for some control plugins (such as `spell-check-project`) to enable or disable the plugin.
-* getName(): string
-    * Returns the human-readable name for the plugin. This is used on the status screen and in various dialogs/popups.
-* getPriority(): number
-    * Determines how significant the plugin is for information with lower numbers being more important. Typically, user-entered data (such as the config `knownWords` configuration or a project's dictionary) will be lower than system data (priority 100).
-* isEnabled(): boolean
-    * If this returns true, then the plugin will considered for processing.
-* getStatus(): string
-    * Returns a string that describes the current status or state of the plugin. This is to allow a plugin to identify why it is disabled or to indicate version numbers. This can be formatted for Markdown, including links, and will be displayed on a status screen (eventually).
-* providesSpelling(buffer): boolean
-    * If this returns true, then the plugin will be included when looking for incorrect and correct words via the `check` function.
-* check(buffer, text: string): { correct: [range], incorrect: [range] }
-    * `correct` and `incorrect` are both optional. If they are skipped, then it means the plugin does not contribute to the correctness or incorrectness of any word. If they are present but empty, it means there are no correct or incorrect words respectively.
-    * The `range` objects have a signature of `{ start: X, end: Y }`.
-* providesSuggestions(buffer): boolean
-    * If this returns true, then the plugin will be included when querying for suggested words via the `suggest` function.
-* suggest(buffer, word: string): [suggestion: string]
-    * Returns a list of suggestions for a given word ordered so the most important is at the beginning of the list.
-* providesAdding(buffer): boolean
-    * If this returns true, then the dictionary allows a word to be added to the dictionary.
-* getAddingTargets(buffer): [target]
-    * Gets a list of targets to show to the user.
-    * The `target` object has a minimum signature of `{ label: stringToShowTheUser }`. For example, `{ label: "Ignore word (case-sensitive)" }`.
-    * This is a list to allow plugins to have multiple options, such as adding it as a case-sensitive or insensitive, temporary verses configuration, etc.
-* add(buffer, target, word)
-    * Adds a word to the dictionary, using the target for identifying which one is used.
+_Spell Check_ allows for plugins to provide additional spell checking functionality. See the `PLUGINS.md` file in the repository on how to write a plugin.

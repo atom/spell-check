@@ -13,7 +13,8 @@ class KnownWordsChecker
     @setKnownWords knownWords
 
   deactivate: ->
-    console.log(@getid() + "deactivating")
+    #console.log(@getid() + "deactivating")
+    return
 
   getId: -> "spell-check:known-words"
   getName: -> "Known Words"
@@ -31,6 +32,16 @@ class KnownWordsChecker
       if token.status is 1
         ranges.push {start: token.start, end: token.end}
     {correct: ranges}
+
+  checkArray: (args, words) ->
+    results = []
+    for word, index in words
+      result = @check args, word
+      if result.correct.length is 0
+        results.push null
+      else
+        results.push true
+    results
 
   suggest: (args, word) ->
     @spelling.suggest word

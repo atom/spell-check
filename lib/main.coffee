@@ -1,45 +1,49 @@
+{Task} = require 'atom'
+
 SpellCheckView = null
 spellCheckViews = {}
 
 module.exports =
-  instance: null
-
   activate: ->
-    # Create the unified handler for all spellchecking.
-    SpellCheckerManager = require './spell-check-manager.coffee'
-    @instance = SpellCheckerManager
-    that = this
+    # Set up the task for handling spell-checking in the background. This is
+    # what is actually in the background.
+    handlerFilename = require.resolve './spell-check-handler'
+    @task ?= new Task handlerFilename
 
-    # Initialize the spelling manager so it can perform deferred loading.
-    @instance.locales = atom.config.get('spell-check.locales')
-    @instance.localePaths = atom.config.get('spell-check.localePaths')
-    @instance.useLocales = atom.config.get('spell-check.useLocales')
+    # Set up our callback to track when settings changed.
+    that = this
+    @task.on "spell-check:settings-changed", (ignore) ->
+      console.log("updating views because of change", that)
+      that.updateViews()
+
+    # Since the spell-checking is done on another process, we gather up all the
+    # arguments and pass them into the task. Whenever these change, we'll update
+    # the object with the parameters and resend it to the task.
+    @globalArgs = {
+      locales: atom.config.get('spell-check.locales'),
+      localePaths: atom.config.get('spell-check.localePaths'),
+      useLocales: atom.config.get('spell-check.useLocales'),
+      knownWords: atom.config.get('spell-check.knownWords'),
+      addKnownWords: atom.config.get('spell-check.addKnownWords'),
+      checkerPaths: []
+    }
+    @sendGlobalArgs()
 
     atom.config.onDidChange 'spell-check.locales', ({newValue, oldValue}) ->
-      that.instance.locales = atom.config.get('spell-check.locales')
-      that.instance.reloadLocales()
-      that.updateViews()
+      that.globalArgs.locales = atom.config.get('spell-check.locales')
+      that.sendGlobalArgs()
     atom.config.onDidChange 'spell-check.localePaths', ({newValue, oldValue}) ->
-      that.instance.localePaths = atom.config.get('spell-check.localePaths')
-      that.instance.reloadLocales()
-      that.updateViews()
+      that.globalArgs.localePaths = atom.config.get('spell-check.localePaths')
+      that.sendGlobalArgs()
     atom.config.onDidChange 'spell-check.useLocales', ({newValue, oldValue}) ->
-      that.instance.useLocales = atom.config.get('spell-check.useLocales')
-      that.instance.reloadLocales()
-      that.updateViews()
-
-    # Add in the settings for known words checker.
-    @instance.knownWords = atom.config.get('spell-check.knownWords')
-    @instance.addKnownWords = atom.config.get('spell-check.addKnownWords')
-
+      that.globalArgs.useLocales = atom.config.get('spell-check.useLocales')
+      that.sendGlobalArgs()
     atom.config.onDidChange 'spell-check.knownWords', ({newValue, oldValue}) ->
-      that.instance.knownWords = atom.config.get('spell-check.knownWords')
-      that.instance.reloadKnownWords()
-      that.updateViews()
+      that.globalArgs.knownWords = atom.config.get('spell-check.knownWords')
+      that.sendGlobalArgs()
     atom.config.onDidChange 'spell-check.addKnownWords', ({newValue, oldValue}) ->
-      that.instance.addKnownWords = atom.config.get('spell-check.addKnownWords')
-      that.instance.reloadKnownWords()
-      that.updateViews()
+      that.globalArgs.addKnownWords = atom.config.get('spell-check.addKnownWords')
+      that.sendGlobalArgs()
 
     # Hook up the UI and processing.
     @commandSubscription = atom.commands.add 'atom-workspace',
@@ -47,28 +51,54 @@ module.exports =
     @viewsByEditor = new WeakMap
     @disposable = atom.workspace.observeTextEditors (editor) =>
       SpellCheckView ?= require './spell-check-view'
-      spellCheckView = new SpellCheckView(editor, @instance)
+
+      # The SpellCheckView needs both a handle for the task to handle the
+      # background checking and a cached view of the in-process manager for
+      # getting corrections. We used a function to a function because scope
+      # wasn't working properly.
+      spellCheckView = new SpellCheckView(editor, @task, (ignore) => @getInstance @globalArgs)
 
       # save the {editor} into a map
       editorId = editor.id
       spellCheckViews[editorId] = {}
       spellCheckViews[editorId]['view'] = spellCheckView
       spellCheckViews[editorId]['active'] = true
-      @viewsByEditor.set(editor, spellCheckView)
+      @viewsByEditor.set editor, spellCheckView
 
   deactivate: ->
-    @instance.deactivate()
+    console.log "spell-check: deactiving"
+    @instance?.deactivate()
     @instance = null
+    @task?.terminate()
+    @task = null
     @commandSubscription.dispose()
     @commandSubscription = null
+
+    # While we have WeakMap.clear, it isn't a function available in ES6. So, we
+    # just replace the WeakMap entirely and let the system release the objects.
+    @viewsByEditor = new WeakMap
+
+    # Finish up by disposing everything else associated with the plugin.
     @disposable.dispose()
 
-  consumeSpellCheckers: (plugins) ->
-    unless plugins instanceof Array
-      plugins = [ plugins ]
+  # Registers any Atom packages that provide our service. Because we use a Task,
+  # we have to load the plugin's checker in both that service and in the Atom
+  # process (for coming up with corrections). Since everything passed to the
+  # task must be JSON serialized, we pass the full path to the task and let it
+  # require it on that end.
+  consumeSpellCheckers: (checkerPaths) ->
+    # Normalize it so we always have an array.
+    unless checkerPaths instanceof Array
+      checkerPaths = [ checkerPaths ]
 
-    for plugin in plugins
-      @instance.addPluginChecker plugin
+    # Go through and add any new plugins to the list.
+    changed = false
+    for checkerPath in checkerPaths
+      if checkerPath not in @globalArgs.checkerPaths
+        @task?.send {type: "checker", checkerPath: checkerPath}
+        @instance?.addCheckerPath checkerPath
+        @globalArgs.checkerPaths.push checkerPath
+        changed = true
 
   misspellingMarkersForEditor: (editor) ->
     @viewsByEditor.get(editor).markerLayer.getMarkers()
@@ -78,6 +108,22 @@ module.exports =
       view = spellCheckViews[editorId]
       if view['active']
         view['view'].updateMisspellings()
+
+  sendGlobalArgs: ->
+    @task.send {type: "global", global: @globalArgs}
+
+  # Retrieves, creating if required, a spelling manager for use with synchronous
+  # operations such as retrieving corrections.
+  getInstance: (globalArgs) ->
+    if not @instance
+      SpellCheckerManager = require './spell-check-manager.coffee'
+      @instance = SpellCheckerManager
+      @instance.setGlobalArgs globalArgs
+
+      for checkerPath in globalArgs.checkerPaths
+        @instance.addCheckerPath checkerPath
+
+    return @instance
 
   # Internal: Toggles the spell-check activation state.
   toggle: ->

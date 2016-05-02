@@ -12,7 +12,8 @@ class SystemChecker
     @paths = paths
 
   deactivate: ->
-    console.log @getId(), "deactivating"
+    #console.log @getId(), "deactivating"
+    return
 
   getId: -> "spell-check:" + @locale.toLowerCase().replace("_", "-")
   getName: -> "System Dictionary (" + @locale + ")"
@@ -32,6 +33,17 @@ class SystemChecker
     @deferredInit()
     {incorrect: @spellchecker.checkSpelling(text)}
 
+  checkArray: (args, words) ->
+    @deferredInit()
+    results = []
+    for word, index in words
+      result = @check args, word
+      if result.incorrect.length is 0
+        results.push null
+      else
+        results.push false
+    results
+
   suggest: (args, word) ->
     @deferredInit()
     @spellchecker.getCorrectionsForMisspelling(word)
@@ -48,31 +60,31 @@ class SystemChecker
     # to load it works.
     if /win32/.test process.platform
       if @spellchecker.setDictionary @locale, "C:\\"
-        console.log @getId(), "Windows API"
+        #console.log @getId(), "Windows API"
         return
 
     # Check the paths supplied by the user.
     for path in @paths
       if @spellchecker.setDictionary @locale, path
-        console.log @getId(), path
+        #console.log @getId(), path
         return
 
     # For Linux, we have to search the directory paths to find the dictionary.
     if /linux/.test process.platform
       if @spellchecker.setDictionary @locale, "/usr/share/hunspell"
-        console.log @getId(), "/usr/share/hunspell"
+        #console.log @getId(), "/usr/share/hunspell"
         return
       if @spellchecker.setDictionary @locale, "/usr/share/myspell/dicts"
-        console.log @getId(), "/usr/share/myspell/dicts"
+        #console.log @getId(), "/usr/share/myspell/dicts"
         return
 
     # OS X uses the following paths.
     if /darwin/.test process.platform
       if @spellchecker.setDictionary @locale, "/"
-        console.log @getId(), "OS X API"
+        #console.log @getId(), "OS X API"
         return
       if @spellchecker.setDictionary @locale, "/System/Library/Spelling"
-        console.log @getId(), "/System/Library/Spelling"
+        #console.log @getId(), "/System/Library/Spelling"
         return
 
     # Try the packaged library inside the node_modules. `getDictionaryPath` is
@@ -80,7 +92,7 @@ class SystemChecker
     path = require 'path'
     vendor = path.join __dirname, "..", "node_modules", "spellchecker", "vendor", "hunspell_dictionaries"
     if @spellchecker.setDictionary @locale, vendor
-      console.log @getId(), vendor
+      #console.log @getId(), vendor
       return
 
     # If we fell through all the if blocks, then we couldn't load the dictionary.

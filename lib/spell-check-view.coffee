@@ -10,10 +10,10 @@ class SpellCheckView
   @content: ->
     @div class: 'spell-check'
 
-  constructor: (@editor, @handler) ->
+  constructor: (@editor, @task, @getInstance) ->
     @disposables = new CompositeDisposable
-    @task = new SpellCheckTask(@handler)
     @initializeMarkerLayer()
+    @taskWrapper = new SpellCheckTask @task
 
     @correctMisspellingCommand = atom.commands.add atom.views.getView(@editor), 'spell-check:correct-misspelling', =>
       if marker = @markerLayer.findMarkers({containsBufferPosition: @editor.getCursorBufferPosition()})[0]
@@ -21,7 +21,7 @@ class SpellCheckView
         @correctionsView?.destroy()
         @correctionsView = new CorrectionsView(@editor, @getCorrections(marker), marker, this, @updateMisspellings)
 
-    @task.onDidSpellCheck (misspellings) =>
+    @taskWrapper.onDidSpellCheck (misspellings) =>
       @destroyMarkers()
       @addMarkers(misspellings) if @buffer?
 
@@ -52,7 +52,7 @@ class SpellCheckView
   destroy: ->
     @unsubscribeFromBuffer()
     @disposables.dispose()
-    @task.terminate()
+    @taskWrapper.terminate()
     @markerLayer.destroy()
     @markerLayerDecoration.destroy()
     @correctMisspellingCommand.dispose()
@@ -89,7 +89,7 @@ class SpellCheckView
   updateMisspellings: ->
     # Task::start can throw errors atom/atom#3326
     try
-      @task.start @editor.buffer
+      @taskWrapper.start @editor.buffer
     catch error
       console.warn('Error starting spell check task', error.stack ? error)
 
@@ -105,5 +105,6 @@ class SpellCheckView
     }
 
     # Get the misspelled word and then request corrections.
-    misspelling = @editor.getTextInBufferRange marker.getRange()
-    corrections = @handler.suggest args, misspelling
+    instance = @getInstance()
+    misspelling = @editor.getTextInBufferRange marker.getBufferRange()
+    corrections = instance.suggest args, misspelling

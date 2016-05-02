@@ -26,7 +26,7 @@ class CorrectionsView extends SelectListView
     @editor.transact =>
       if item.isSuggestion
         # Update the buffer with the correction.
-        @editor.setSelectedBufferRange(@marker.getRange())
+        @editor.setSelectedBufferRange(@marker.getBufferRange())
         @editor.insertText(item.suggestion)
       else
         # Build up the arguments object for this buffer and text.
