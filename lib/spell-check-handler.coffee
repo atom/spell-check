@@ -1,32 +1,17 @@
-SpellChecker = require 'spellchecker'
+# Background task for checking the text of a buffer and returning the
+# spelling. Since this can be an expensive operation, it is intended to be run
+# in the background with the results returned asynchronously.
+backgroundCheck = (data) ->
+  # Load a manager in memory and let it initialize.
+  SpellCheckerManager = require './spell-check-manager.coffee'
+  instance = SpellCheckerManager
+  instance.locales = data.args.locales
+  instance.localePaths = data.args.localePaths
+  instance.useLocales = data.args.useLocales
+  instance.knownWords = data.args.knownWords
+  instance.addKnownWords = data.args.addKnownWords
 
-module.exports = ({id, text}) ->
-  SpellChecker.add("GitHub")
-  SpellChecker.add("github")
+  misspellings = instance.check data.args, data.text
+  {id: data.args.id, misspellings}
 
-  misspelledCharacterRanges = SpellChecker.checkSpelling(text)
-
-  row = 0
-  rangeIndex = 0
-  characterIndex = 0
-  misspellings = []
-  while characterIndex < text.length and rangeIndex < misspelledCharacterRanges.length
-    lineBreakIndex = text.indexOf('\n', characterIndex)
-    if lineBreakIndex is -1
-      lineBreakIndex = Infinity
-
-    loop
-      range = misspelledCharacterRanges[rangeIndex]
-      if range and range.start < lineBreakIndex
-        misspellings.push([
-          [row, range.start - characterIndex],
-          [row, range.end - characterIndex]
-        ])
-        rangeIndex++
-      else
-        break
-
-    characterIndex = lineBreakIndex + 1
-    row++
-
-  {id, misspellings}
+module.exports = backgroundCheck
