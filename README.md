@@ -8,7 +8,7 @@ Use <kbd>cmd-shift-:</kbd> to bring up the list of corrections when your cursor 
 By default spell check is enabled for the following files:
 
 * Plain Text
-* GitHub Markdown
+* Markdown
 * Git Commit Message
 * AsciiDoc
 
