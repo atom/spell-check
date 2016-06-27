@@ -1,8 +1,17 @@
 SpellChecker = require 'spellchecker'
 
-module.exports = ({id, text}) ->
+module.exports = ({id, text, dict}) ->
   SpellChecker.add("GitHub")
   SpellChecker.add("github")
+
+  dict.filter((word) ->
+    word
+  ).forEach (word) ->
+    word = word.trim()
+    capitalized = word.charAt(0).toUpperCase() + word.slice(1)
+    SpellChecker.add(word)
+    if word isnt capitalized
+      SpellChecker.add(capitalized)
 
   misspelledCharacterRanges = SpellChecker.checkSpelling(text)
 
