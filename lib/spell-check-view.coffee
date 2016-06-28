@@ -37,6 +37,9 @@ class SpellCheckView
     @disposables.add atom.config.onDidChange 'spell-check.grammars', =>
       @subscribeToBuffer()
 
+    @disposables.add atom.config.onDidChange 'spell-check.dictionary', =>
+      @subscribeToBuffer()
+
     @subscribeToBuffer()
 
     @disposables.add @editor.onDidDestroy(@destroy.bind(this))
