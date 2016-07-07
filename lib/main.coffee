@@ -12,8 +12,7 @@ module.exports =
 
     # Set up our callback to track when settings changed.
     that = this
-    @task.on "spell-check:settings-changed", (ignore) ->
-      console.log("updating views because of change", that)
+    @task.on "spell-check:settings-changed", () ->
       that.updateViews()
 
     # Since the spell-checking is done on another process, we gather up all the
@@ -30,19 +29,19 @@ module.exports =
     @sendGlobalArgs()
 
     atom.config.onDidChange 'spell-check.locales', ({newValue, oldValue}) ->
-      that.globalArgs.locales = atom.config.get('spell-check.locales')
+      that.globalArgs.locales = newValue
       that.sendGlobalArgs()
     atom.config.onDidChange 'spell-check.localePaths', ({newValue, oldValue}) ->
-      that.globalArgs.localePaths = atom.config.get('spell-check.localePaths')
+      that.globalArgs.localePaths = newValue
       that.sendGlobalArgs()
     atom.config.onDidChange 'spell-check.useLocales', ({newValue, oldValue}) ->
-      that.globalArgs.useLocales = atom.config.get('spell-check.useLocales')
+      that.globalArgs.useLocales = newValue
       that.sendGlobalArgs()
     atom.config.onDidChange 'spell-check.knownWords', ({newValue, oldValue}) ->
-      that.globalArgs.knownWords = atom.config.get('spell-check.knownWords')
+      that.globalArgs.knownWords = newValue
       that.sendGlobalArgs()
     atom.config.onDidChange 'spell-check.addKnownWords', ({newValue, oldValue}) ->
-      that.globalArgs.addKnownWords = atom.config.get('spell-check.addKnownWords')
+      that.globalArgs.addKnownWords = newValue
       that.sendGlobalArgs()
 
     # Hook up the UI and processing.
@@ -56,13 +55,14 @@ module.exports =
       # background checking and a cached view of the in-process manager for
       # getting corrections. We used a function to a function because scope
       # wasn't working properly.
-      spellCheckView = new SpellCheckView(editor, @task, (ignore) => @getInstance @globalArgs)
+      spellCheckView = new SpellCheckView(editor, @task, () => @getInstance @globalArgs)
 
       # save the {editor} into a map
       editorId = editor.id
       spellCheckViews[editorId] = {}
       spellCheckViews[editorId]['view'] = spellCheckView
       spellCheckViews[editorId]['active'] = true
+      spellCheckViews[editorId]['editor'] = editor
       @viewsByEditor.set editor, spellCheckView
 
   deactivate: ->
@@ -73,6 +73,12 @@ module.exports =
     @task = null
     @commandSubscription.dispose()
     @commandSubscription = null
+
+    # Clear out the known views.
+    for editorId of spellCheckViews
+      view = spellCheckViews[editorId]
+      view['editor'].destroy()
+    spellCheckViews = {}
 
     # While we have WeakMap.clear, it isn't a function available in ES6. So, we
     # just replace the WeakMap entirely and let the system release the objects.

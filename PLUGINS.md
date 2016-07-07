@@ -30,7 +30,7 @@ A common parameter type is `checkArgs`, this is a hash with the following signat
 
     args = {
       projectPath: "/absolute/path/to/project/root,
-      relativePath: "relative/path/from/projet/root"
+      relativePath: "relative/path/from/project/root"
     }
 
 Below the required methods for the checker instance.
@@ -44,13 +44,13 @@ Below the required methods for the checker instance.
     * If this returns true, then the plugin will considered for processing.
 * providesSpelling(checkArgs): boolean
     * If this returns true, then the plugin will be included when looking for incorrect and correct words via the `check` function.
-* checkArray(checkArgs, words: string[]): boolean?[]
-    * This takes an array of words in a given line. This will be called once for every line inside the buffer. It also also not include words already requested earlier in the buffer.
-    * The output is an array of the same length as words which has three values, one for each word given:
-        * `null`: The checker provides no opinion on correctness.
-        * `false`: The word is specifically false.
-        * `true`: The word is correctly spelled.
-    * True always takes precedence, then false. If every checker provides `null`, then the word is considered spelled correctly.
+* check(checkArgs, text: string): [results]
+    * This takes the entire text buffer and will be called once per buffer.
+    * The output is an array with three parameters, all optional: `{ invertIncorrectAsCorrect: true, incorrect: [ranges], correct: [ranges] }`
+        * The ranges are a zero-based index of a start and stop character (`[1, 23]`).
+        * `invertIncorrectAsCorrect` means take the incorrect range and assume everything not in this list is correct.
+    * Correct words always take precedence, even if another checker indicates a word is incorrect.
+    * If a word or character is neither correct or incorrect, it is considered correct.
 * providesSuggestions(checkArgs): boolean
     * If this returns true, then the plugin will be included when querying for suggested words via the `suggest` function.
 * suggest(checkArgs, word: string): [suggestion: string]

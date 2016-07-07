@@ -78,28 +78,26 @@ describe "Spell check", ->
       expect(misspellingMarkers.length).toBe 1
       expect(textForMarker(misspellingMarkers[0])).toBe "builz"
 
-  # This test was commented out because we moved away from the Task handling.
-  # Once that is enabled, this test should be valid again.
-  #it "hides decorations when a misspelled word is edited", ->
-  #  editor.setText('notaword')
-  #  advanceClock(editor.getBuffer().getStoppedChangingDelay())
-  #  atom.config.set('spell-check.grammars', ['source.js'])
+  it "hides decorations when a misspelled word is edited", ->
+    editor.setText('notaword')
+    advanceClock(editor.getBuffer().getStoppedChangingDelay())
+    atom.config.set('spell-check.grammars', ['source.js'])
 
-  #  misspellingMarkers = null
-  #  waitsFor ->
-  #    misspellingMarkers = getMisspellingMarkers()
-  #    misspellingMarkers.length > 0
+    misspellingMarkers = null
+    waitsFor ->
+      misspellingMarkers = getMisspellingMarkers()
+      misspellingMarkers.length > 0
 
-  #  runs ->
-  #    expect(misspellingMarkers.length).toBe 1
-  #    editor.moveToEndOfLine()
-  #    editor.insertText('a')
-  #    advanceClock(editor.getBuffer().getStoppedChangingDelay())
+    runs ->
+      expect(misspellingMarkers.length).toBe 1
+      editor.moveToEndOfLine()
+      editor.insertText('a')
+      advanceClock(editor.getBuffer().getStoppedChangingDelay())
 
-  #    misspellingMarkers = getMisspellingMarkers()
+      misspellingMarkers = getMisspellingMarkers()
 
-  #    expect(misspellingMarkers.length).toBe 1
-  #    expect(misspellingMarkers[0].isValid()).toBe false
+      expect(misspellingMarkers.length).toBe 1
+      expect(misspellingMarkers[0].isValid()).toBe false
 
   describe "when spell checking for a grammar is removed", ->
     it "removes all the misspellings", ->
@@ -201,5 +199,139 @@ describe "Spell check", ->
         getMisspellingMarkers().length > 0
 
       runs ->
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe 0
+
+  describe "when using checker plugins", ->
+    it "no opinion on input means correctly spells", ->
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-1-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-2-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-3-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-4-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./eot-spec-checker.coffee')
+      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', false)
+      editor.setText('eot')
+      atom.config.set('spell-check.grammars', ['source.js'])
+
+      waitsFor ->
+        getMisspellingMarkers().length > 0
+
+      runs ->
+        expect(getMisspellingMarkers().length).toBe 1
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe 0
+
+    it "correctly spelling k1a", ->
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-1-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-2-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-3-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-4-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./eot-spec-checker.coffee')
+      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', false)
+      editor.setText('k1a eot')
+      atom.config.set('spell-check.grammars', ['source.js'])
+
+      waitsFor ->
+        getMisspellingMarkers().length > 0
+
+      runs ->
+        expect(getMisspellingMarkers().length).toBe 1
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe 0
+
+    it "correctly mispelling k2a", ->
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-1-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-2-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-3-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-4-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./eot-spec-checker.coffee')
+      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', false)
+      editor.setText('k2a eot')
+      atom.config.set('spell-check.grammars', ['source.js'])
+
+      waitsFor ->
+        getMisspellingMarkers().length > 0
+
+      runs ->
+        expect(getMisspellingMarkers().length).toBe 2
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe 0
+
+    it "correctly mispelling k2a with text in middle", ->
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-1-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-2-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-3-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-4-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./eot-spec-checker.coffee')
+      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', false)
+      editor.setText('k2a good eot')
+      atom.config.set('spell-check.grammars', ['source.js'])
+
+      waitsFor ->
+        getMisspellingMarkers().length > 0
+
+      runs ->
+        expect(getMisspellingMarkers().length).toBe 2
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe 0
+
+    it "word is both correct and incorrect is correct", ->
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-1-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-2-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-3-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-4-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./eot-spec-checker.coffee')
+      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', false)
+      editor.setText('k0a eot')
+      atom.config.set('spell-check.grammars', ['source.js'])
+
+      waitsFor ->
+        getMisspellingMarkers().length > 0
+
+      runs ->
+        expect(getMisspellingMarkers().length).toBe 1
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe 0
+
+    it "word is correct twice is correct", ->
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-1-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-2-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-3-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-4-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./eot-spec-checker.coffee')
+      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', false)
+      editor.setText('k0b eot')
+      atom.config.set('spell-check.grammars', ['source.js'])
+
+      waitsFor ->
+        getMisspellingMarkers().length > 0
+
+      runs ->
+        expect(getMisspellingMarkers().length).toBe 1
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe 0
+
+    it "word is incorrect twice is incorrect", ->
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-1-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-2-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-3-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-4-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./eot-spec-checker.coffee')
+      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', false)
+      editor.setText('k0c eot')
+      atom.config.set('spell-check.grammars', ['source.js'])
+
+      waitsFor ->
+        getMisspellingMarkers().length > 0
+
+      runs ->
+        expect(getMisspellingMarkers().length).toBe 2
         editor.destroy()
         expect(getMisspellingMarkers().length).toBe 0

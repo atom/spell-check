@@ -31,18 +31,7 @@ class SystemChecker
 
   check: (args, text) ->
     @deferredInit()
-    {incorrect: @spellchecker.checkSpelling(text)}
-
-  checkArray: (args, words) ->
-    @deferredInit()
-    results = []
-    for word, index in words
-      result = @check args, word
-      if result.incorrect.length is 0
-        results.push null
-      else
-        results.push false
-    results
+    {invertIncorrectAsCorrect: true, incorrect: @spellchecker.checkSpelling(text)}
 
   suggest: (args, word) ->
     @deferredInit()
