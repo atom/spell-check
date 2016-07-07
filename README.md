@@ -1,8 +1,6 @@
 # Spell Check package
 [![OS X Build Status](https://travis-ci.org/atom/spell-check.svg?branch=master)](https://travis-ci.org/atom/spell-check) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/1620a5reqw6kdolv/branch/master?svg=true)](https://ci.appveyor.com/project/Atom/spell-check/branch/master) [![Dependency Status](https://david-dm.org/atom/spell-check.svg)](https://david-dm.org/atom/spell-check)
 
-**This is a test package. Disable the built-in `spell-check` module before using it.**
-
 Highlights misspelling in Atom and shows possible corrections.
 
 Use <kbd>cmd-shift-:</kbd> to bring up the list of corrections when your cursor is on a misspelled word.
