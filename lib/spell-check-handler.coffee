@@ -13,7 +13,7 @@ instance.isTask = true
 #
 # Below the dispatcher for all messages from the server. The type argument is
 # require, how it is handled is based on the type.
-process.on "message", (message) =>
+process.on "message", (message) ->
   switch
     when message.type is "global" then loadGlobalSettings message.global
     when message.type is "checker" then instance.addCheckerPath message.checkerPath

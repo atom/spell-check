@@ -12,7 +12,7 @@ module.exports =
 
     # Set up our callback to track when settings changed.
     that = this
-    @task.on "spell-check:settings-changed", () ->
+    @task.on "spell-check:settings-changed", (ignore) ->
       that.updateViews()
 
     # Since the spell-checking is done on another process, we gather up all the
@@ -55,7 +55,7 @@ module.exports =
       # background checking and a cached view of the in-process manager for
       # getting corrections. We used a function to a function because scope
       # wasn't working properly.
-      spellCheckView = new SpellCheckView(editor, @task, () => @getInstance @globalArgs)
+      spellCheckView = new SpellCheckView(editor, @task, => @getInstance @globalArgs)
 
       # save the {editor} into a map
       editorId = editor.id
