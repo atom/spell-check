@@ -118,11 +118,11 @@ module.exports =
   sendGlobalArgs: ->
     @task.send {type: "global", global: @globalArgs}
 
-  # Retrieves, creating if required, a spelling manager for use with synchronous
-  # operations such as retrieving corrections.
+  # Retrieves, creating if required, a spelling manager for use with
+  # synchronous operations such as retrieving corrections.
   getInstance: (globalArgs) ->
     if not @instance
-      SpellCheckerManager = require './spell-check-manager.coffee'
+      SpellCheckerManager = require './spell-check-manager'
       @instance = SpellCheckerManager
       @instance.setGlobalArgs globalArgs
 

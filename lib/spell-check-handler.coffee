@@ -1,6 +1,6 @@
 # This is the task local handler for the manager so we can reuse the manager
 # throughout the life of the task.
-SpellCheckerManager = require './spell-check-manager.coffee'
+SpellCheckerManager = require './spell-check-manager'
 instance = SpellCheckerManager
 instance.isTask = true
 

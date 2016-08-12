@@ -133,10 +133,8 @@ class SpellCheckerManager
 
     # If we don't have any incorrect spellings, then there is nothing to worry
     # about, so just return and stop processing.
-    misspellings = []
-
     if incorrects.length is 0
-      return {id: args.id, misspellings}
+      return {id: args.id, misspellings: []}
 
     # Build up an intersection of all the incorrect ranges. We only treat a word
     # as being incorrect if *every* checker that provides negative values treats
@@ -156,7 +154,7 @@ class SpellCheckerManager
 
     # If we have no intersection, then nothing to report as a problem.
     if intersection.length is 0
-      return {id: args.id, misspellings}
+      return {id: args.id, misspellings: []}
 
     # Remove all of the confirmed correct words from the resulting incorrect
     # list. This allows us to have correct-only providers as opposed to only
@@ -169,6 +167,7 @@ class SpellCheckerManager
     row = 0
     rangeIndex = 0
     lineBeginIndex = 0
+    misspellings = []
     while lineBeginIndex < text.length and rangeIndex < intersection.ranges.length
       # Figure out where the next line break is. If we hit -1, then we make sure
       # it is a higher number so our < comparisons work properly.
@@ -348,7 +347,7 @@ class SpellCheckerManager
     # See if we need to reload the known words.
     if @knownWordsChecker is null
       console.log "spell-check: loading known words", @knownWords
-      KnownWordsChecker = require './known-words-checker.coffee'
+      KnownWordsChecker = require './known-words-checker'
       @knownWordsChecker = new KnownWordsChecker @knownWords
       @knownWordsChecker.enableAdd = @addKnownWords
       @addSpellChecker @knownWordsChecker
@@ -378,7 +377,3 @@ class SpellCheckerManager
 
 manager = new SpellCheckerManager
 module.exports = manager
-
-#    KnownWordsChecker = require './known-words-checker.coffee'
-#    knownWords = atom.config.get('spell-check.knownWords')
-#    addKnownWords = atom.config.get('spell-check.addKnownWords')
