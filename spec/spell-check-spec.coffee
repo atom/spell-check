@@ -39,10 +39,9 @@ describe "Spell check", ->
     misspellingMarkers = null
     waitsFor ->
       misspellingMarkers = getMisspellingMarkers()
-      misspellingMarkers.length > 0
+      misspellingMarkers.length is 4
 
     runs ->
-      expect(misspellingMarkers.length).toBe 4
       expect(textForMarker(misspellingMarkers[0])).toEqual "thiss"
       expect(textForMarker(misspellingMarkers[1])).toEqual "sentencts"
       expect(textForMarker(misspellingMarkers[2])).toEqual "edn"
@@ -56,10 +55,9 @@ describe "Spell check", ->
     misspellingMarkers = null
     waitsFor ->
       misspellingMarkers = getMisspellingMarkers()
-      misspellingMarkers.length > 0
+      misspellingMarkers.length is 2
 
     runs ->
-      expect(misspellingMarkers.length).toBe 2
       expect(textForMarker(misspellingMarkers[0])).toEqual "chok"
       expect(textForMarker(misspellingMarkers[1])).toEqual "bok"
 
@@ -72,7 +70,7 @@ describe "Spell check", ->
     misspellingMarkers = null
     waitsFor ->
       misspellingMarkers = getMisspellingMarkers()
-      misspellingMarkers.length > 0
+      misspellingMarkers.length is 1
 
     runs ->
       expect(misspellingMarkers.length).toBe 1
@@ -83,13 +81,10 @@ describe "Spell check", ->
     advanceClock(editor.getBuffer().getStoppedChangingDelay())
     atom.config.set('spell-check.grammars', ['source.js'])
 
-    misspellingMarkers = null
     waitsFor ->
-      misspellingMarkers = getMisspellingMarkers()
-      misspellingMarkers.length > 0
+      getMisspellingMarkers().length is 1
 
     runs ->
-      expect(misspellingMarkers.length).toBe 1
       editor.moveToEndOfLine()
       editor.insertText('a')
       advanceClock(editor.getBuffer().getStoppedChangingDelay())
@@ -107,10 +102,9 @@ describe "Spell check", ->
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        getMisspellingMarkers().length > 0
+        getMisspellingMarkers().length is 1
 
       runs ->
-        expect(getMisspellingMarkers().length).toBe 1
         atom.config.set('spell-check.grammars', [])
         expect(getMisspellingMarkers().length).toBe 0
 
@@ -122,10 +116,9 @@ describe "Spell check", ->
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        getMisspellingMarkers().length > 0
+        getMisspellingMarkers().length is 1
 
       runs ->
-        expect(getMisspellingMarkers().length).toBe 1
         atom.commands.dispatch(workspaceElement, 'spell-check:toggle')
         expect(getMisspellingMarkers().length).toBe 0
 
@@ -136,11 +129,12 @@ describe "Spell check", ->
       advanceClock(editor.getBuffer().getStoppedChangingDelay())
       atom.config.set('spell-check.grammars', ['source.js'])
 
+      misspellingMarkers = null
       waitsFor ->
-        getMisspellingMarkers().length > 0
+        misspellingMarkers = getMisspellingMarkers()
+        misspellingMarkers.length is 1
 
       runs ->
-        expect(getMisspellingMarkers().length).toBe 1
         editor.setGrammar(atom.grammars.selectGrammar('.txt'))
         expect(getMisspellingMarkers().length).toBe 0
 
@@ -215,10 +209,9 @@ describe "Spell check", ->
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        getMisspellingMarkers().length > 0
+        getMisspellingMarkers().length is 1
 
       runs ->
-        expect(getMisspellingMarkers().length).toBe 1
         editor.destroy()
         expect(getMisspellingMarkers().length).toBe 0
 
@@ -234,10 +227,9 @@ describe "Spell check", ->
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        getMisspellingMarkers().length > 0
+        getMisspellingMarkers().length is 1
 
       runs ->
-        expect(getMisspellingMarkers().length).toBe 1
         editor.destroy()
         expect(getMisspellingMarkers().length).toBe 0
 
@@ -253,10 +245,9 @@ describe "Spell check", ->
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        getMisspellingMarkers().length > 0
+        getMisspellingMarkers().length is 2
 
       runs ->
-        expect(getMisspellingMarkers().length).toBe 2
         editor.destroy()
         expect(getMisspellingMarkers().length).toBe 0
 
@@ -272,10 +263,9 @@ describe "Spell check", ->
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        getMisspellingMarkers().length > 0
+        getMisspellingMarkers().length is 2
 
       runs ->
-        expect(getMisspellingMarkers().length).toBe 2
         editor.destroy()
         expect(getMisspellingMarkers().length).toBe 0
 
@@ -291,10 +281,9 @@ describe "Spell check", ->
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        getMisspellingMarkers().length > 0
+        getMisspellingMarkers().length is 1
 
       runs ->
-        expect(getMisspellingMarkers().length).toBe 1
         editor.destroy()
         expect(getMisspellingMarkers().length).toBe 0
 
@@ -310,10 +299,9 @@ describe "Spell check", ->
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        getMisspellingMarkers().length > 0
+        getMisspellingMarkers().length is 1
 
       runs ->
-        expect(getMisspellingMarkers().length).toBe 1
         editor.destroy()
         expect(getMisspellingMarkers().length).toBe 0
 
@@ -329,9 +317,8 @@ describe "Spell check", ->
       atom.config.set('spell-check.grammars', ['source.js'])
 
       waitsFor ->
-        getMisspellingMarkers().length > 0
+        getMisspellingMarkers().length is 2
 
       runs ->
-        expect(getMisspellingMarkers().length).toBe 2
         editor.destroy()
         expect(getMisspellingMarkers().length).toBe 0
