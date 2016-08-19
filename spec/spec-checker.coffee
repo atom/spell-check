@@ -11,8 +11,6 @@ class SpecChecker
     # Set our known words.
     @setKnownWords knownWords
 
-    console.log "constructor", @getId()
-
   deactivate: ->
     return
 

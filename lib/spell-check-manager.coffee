@@ -308,7 +308,6 @@ class SpellCheckerManager
     # See if we need to initialize the system checkers.
     if @localeCheckers is null
       # Initialize the collection. If we aren't using any, then stop doing anything.
-      console.log "spell-check: loading locales", @useLocales, @locales
       @localeCheckers = []
 
       if @useLocales
@@ -346,7 +345,6 @@ class SpellCheckerManager
 
     # See if we need to reload the known words.
     if @knownWordsChecker is null
-      console.log "spell-check: loading known words", @knownWords
       KnownWordsChecker = require './known-words-checker'
       @knownWordsChecker = new KnownWordsChecker @knownWords
       @knownWordsChecker.enableAdd = @addKnownWords
@@ -364,14 +362,12 @@ class SpellCheckerManager
 
   reloadLocales: ->
     if @localeCheckers
-      console.log "spell-check: unloading locales"
       for localeChecker in @localeCheckers
         @removeSpellChecker localeChecker
       @localeCheckers = null
 
   reloadKnownWords: ->
     if @knownWordsChecker
-      console.log "spell-check: unloading known words"
       @removeSpellChecker @knownWordsChecker
       @knownWordsChecker = null
 

@@ -13,7 +13,6 @@ class KnownWordsChecker
     @setKnownWords knownWords
 
   deactivate: ->
-    #console.log(@getid() + "deactivating")
     return
 
   getId: -> "spell-check:known-words"

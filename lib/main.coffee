@@ -66,7 +66,6 @@ module.exports =
       @viewsByEditor.set editor, spellCheckView
 
   deactivate: ->
-    console.log "spell-check: deactiving"
     @instance?.deactivate()
     @instance = null
     @task?.terminate()
