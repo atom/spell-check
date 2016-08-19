@@ -5,10 +5,13 @@
   "description": "Highlights misspelled words and shows possible corrections.",
   "dependencies": {
     "atom-space-pen-views": "^2.0.0",
+    "multi-integer-range": "^2.0.0",
+    "natural": "^0.4.0",
     "spellchecker": "3.2.3",
+    "spelling-manager": "0.3.0",
     "underscore-plus": "^1"
   },
-  "repository": "https://github.com/atom/spell-check",
+  "repository": "https://github.com/dmoonfire/spell-check",
   "license": "MIT",
   "engines": {
     "atom": "*"
@@ -23,10 +26,54 @@
         "text.plain",
         "text.plain.null-grammar"
       ],
-      "description": "List of scopes for languages which will be checked for misspellings. See [the README](https://github.com/atom/spell-check#spell-check-package-) for more information on finding the correct scope for a specific language."
+      "description": "List of scopes for languages which will be checked for misspellings. See [the README](https://github.com/atom/spell-check#spell-check-package-) for more information on finding the correct scope for a specific language.",
+      "order": "1"
+    },
+    "useLocales": {
+      "type": "boolean",
+      "default": "true",
+      "description": "If unchecked, then the locales below will not be used for spell-checking and no spell-checking using system dictionaries will be provided.",
+      "order": "2"
+    },
+    "locales": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "description": "List of locales to use for the system spell-checking. Examples would be `en-US` or `de-DE`. For Windows, the appropriate language must be installed using *Region and language settings*. If this is blank, then the default language for the user will be used.",
+      "order": 3
+    },
+    "localePaths": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "description": "List of additional paths to search for dictionary files. If a locale cannot be found in these, the internal code will attempt to find it using common search paths. This is used for Linux and OS X.",
+      "order": 4
+    },
+    "knownWords": {
+      "type": "array",
+      "default": [],
+      "description": "List words that are considered correct even if they do not appear in any other dictionary. Words with capitals or ones that start with `!` are case-sensitive.",
+      "order": 5
+    },
+    "addKnownWords": {
+      "type": "boolean",
+      "default": false,
+      "description": "If checked, then the suggestions will include options to add to the known words list above.",
+      "order": 6
     }
   },
   "devDependencies": {
     "coffeelint": "^1.9.7"
+  },
+  "consumedServices": {
+    "spell-check": {
+      "versions": {
+        "^1.0.0": "consumeSpellCheckers"
+      }
+    }
   }
 }

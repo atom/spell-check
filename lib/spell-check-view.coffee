@@ -10,19 +10,19 @@ class SpellCheckView
   @content: ->
     @div class: 'spell-check'
 
-  constructor: (@editor) ->
+  constructor: (@editor, @task, @getInstance) ->
     @disposables = new CompositeDisposable
-    @task = new SpellCheckTask()
     @initializeMarkerLayer()
+    @taskWrapper = new SpellCheckTask @task
 
     @correctMisspellingCommand = atom.commands.add atom.views.getView(@editor), 'spell-check:correct-misspelling', =>
       if marker = @markerLayer.findMarkers({containsBufferPosition: @editor.getCursorBufferPosition()})[0]
         CorrectionsView ?= require './corrections-view'
         @correctionsView?.destroy()
-        @correctionsView = new CorrectionsView(@editor, @getCorrections(marker), marker)
+        @correctionsView = new CorrectionsView(@editor, @getCorrections(marker), marker, this, @updateMisspellings)
 
-    @task.onDidSpellCheck (misspellings) =>
-      @detroyMarkers()
+    @taskWrapper.onDidSpellCheck (misspellings) =>
+      @destroyMarkers()
       @addMarkers(misspellings) if @buffer?
 
     @disposables.add @editor.onDidChangePath =>
@@ -52,14 +52,14 @@ class SpellCheckView
   destroy: ->
     @unsubscribeFromBuffer()
     @disposables.dispose()
-    @task.terminate()
+    @taskWrapper.terminate()
     @markerLayer.destroy()
     @markerLayerDecoration.destroy()
     @correctMisspellingCommand.dispose()
     @correctionsView?.remove()
 
   unsubscribeFromBuffer: ->
-    @detroyMarkers()
+    @destroyMarkers()
 
     if @buffer?
       @bufferDisposable.dispose()
@@ -77,7 +77,7 @@ class SpellCheckView
     grammar = @editor.getGrammar().scopeName
     _.contains(atom.config.get('spell-check.grammars'), grammar)
 
-  detroyMarkers: ->
+  destroyMarkers: ->
     @markerLayer.destroy()
     @markerLayerDecoration.destroy()
     @initializeMarkerLayer()
@@ -89,11 +89,22 @@ class SpellCheckView
   updateMisspellings: ->
     # Task::start can throw errors atom/atom#3326
     try
-      @task.start(@buffer.getText())
+      @taskWrapper.start @editor.buffer
     catch error
       console.warn('Error starting spell check task', error.stack ? error)
 
   getCorrections: (marker) ->
-    SpellChecker ?= require 'spellchecker'
-    misspelling = @editor.getTextInBufferRange(marker.getBufferRange())
-    corrections = SpellChecker.getCorrectionsForMisspelling(misspelling)
+    # Build up the arguments object for this buffer and text.
+    projectPath = null
+    relativePath = null
+    if @buffer?.file?.path
+      [projectPath, relativePath] = atom.project.relativizePath(@buffer.file.path)
+    args = {
+      projectPath: projectPath,
+      relativePath: relativePath
+    }
+
+    # Get the misspelled word and then request corrections.
+    instance = @getInstance()
+    misspelling = @editor.getTextInBufferRange marker.getBufferRange()
+    corrections = instance.suggest args, misspelling

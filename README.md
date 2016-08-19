@@ -19,4 +19,10 @@ To enable _Spell Check_ for your current file type: put your cursor in the file,
 
 ## Changing the dictionary
 
-Currently, only the English (US) dictionary is supported. Follow [this issue](https://github.com/atom/spell-check/issues/11) for updates.
+To change the language of the dictionary, set the "Locales" configuration option to the IEFT tag (en-US, fr-FR, etc). More than one language can be used, simply separate them by commas.
+
+For Windows 8 and 10, you must install the language using the regional settings before the language can be chosen inside Atom.
+
+## Plugins
+
+_Spell Check_ allows for plugins to provide additional spell checking functionality. See the `PLUGINS.md` file in the repository on how to write a plugin.
