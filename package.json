@@ -11,7 +11,7 @@
     "spelling-manager": "0.3.0",
     "underscore-plus": "^1"
   },
-  "repository": "https://github.com/dmoonfire/spell-check",
+  "repository": "https://github.com/atom/spell-check",
   "license": "MIT",
   "engines": {
     "atom": "*"
