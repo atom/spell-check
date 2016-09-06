@@ -25,6 +25,8 @@ How to find the scope for your desired language:
 Put your cursor in a file in this language format, open the [Command Palette](https://github.com/atom/command-palette)
 (<kbd>cmd-shift-p</kbd>), and run the `Editor: Log Cursor Scope` command. This will trigger a notification which will contain a list of scopes. The first scope that's listed is the one you should add to the list of scopes (the Grammmars box noted above) in the settings for the _Spell Check_ package. Here are some examples: `source.coffee`, `text.plain`, `text.html.basic`.
 
+(To delete file types, simply delete the scope in the Grammars box.)
+
 ## Changing the dictionary
 
 To change the language of the dictionary, set the "Locales" configuration option to the IEFT tag (en-US, fr-FR, etc). More than one language can be used, simply separate them by commas.
