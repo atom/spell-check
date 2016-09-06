@@ -22,7 +22,7 @@ How to add new file types:
 
 How to find the scope for your desired language:
 
-Put your cursor in the file, open the [Command Palette](https://github.com/atom/command-palette)
+Put your cursor in a file in this language format, open the [Command Palette](https://github.com/atom/command-palette)
 (<kbd>cmd-shift-p</kbd>), and run the `Editor: Log Cursor Scope` command. This will trigger a notification which will contain a list of scopes. The first scope that's listed is the one you should add to the list of scopes (the Grammmars box noted above) in the settings for the _Spell Check_ package. Here are some examples: `source.coffee`, `text.plain`, `text.html.basic`.
 
 ## Changing the dictionary
