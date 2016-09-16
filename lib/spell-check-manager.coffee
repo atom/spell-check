@@ -144,7 +144,6 @@ class SpellCheckerManager
     # that aren't an intersection which (hopefully) will produce a smaller list
     # with each iteration.
     intersection = null
-    index = 1
 
     for incorrect in incorrects
       if intersection is null

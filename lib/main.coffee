@@ -97,13 +97,11 @@ module.exports =
       checkerPaths = [ checkerPaths ]
 
     # Go through and add any new plugins to the list.
-    changed = false
     for checkerPath in checkerPaths
       if checkerPath not in @globalArgs.checkerPaths
         @task?.send {type: "checker", checkerPath: checkerPath}
         @instance?.addCheckerPath checkerPath
         @globalArgs.checkerPaths.push checkerPath
-        changed = true
 
   misspellingMarkersForEditor: (editor) ->
     @viewsByEditor.get(editor).markerLayer.getMarkers()
