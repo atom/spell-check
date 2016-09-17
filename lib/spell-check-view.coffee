@@ -3,7 +3,6 @@ _ = require 'underscore-plus'
 SpellCheckTask = require './spell-check-task'
 
 CorrectionsView = null
-SpellChecker = null
 
 module.exports =
 class SpellCheckView
@@ -107,4 +106,4 @@ class SpellCheckView
     # Get the misspelled word and then request corrections.
     instance = @getInstance()
     misspelling = @editor.getTextInBufferRange marker.getBufferRange()
-    corrections = instance.suggest args, misspelling
+    instance.suggest args, misspelling
