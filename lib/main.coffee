@@ -75,8 +75,8 @@ module.exports =
 
     # Clear out the known views.
     for editorId of spellCheckViews
-      view = spellCheckViews[editorId]
-      view['editor'].destroy()
+      {view} = spellCheckViews[editorId]
+      view.destroy()
     spellCheckViews = {}
 
     # While we have WeakMap.clear, it isn't a function available in ES6. So, we
