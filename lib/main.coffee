@@ -130,6 +130,8 @@ module.exports =
 
   # Internal: Toggles the spell-check activation state.
   toggle: ->
+    if not atom.workspace.getActiveTextEditor()
+      return
     editorId = atom.workspace.getActiveTextEditor().id
 
     if spellCheckViews[editorId]['active']
