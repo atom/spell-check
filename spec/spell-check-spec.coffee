@@ -181,7 +181,7 @@ describe "Spell check", ->
           atom.commands.dispatch editorElement, 'spell-check:correct-misspelling'
           expect(editorElement.querySelectorAll('.corrections').length).toBe 1
           expect(editorElement.querySelectorAll('.corrections li').length).toBe 0
-          expect(editorElement.querySelector('.corrections').textContent).toBe "No corrections"
+          expect(editorElement.querySelector('.corrections').textContent).toMatch /No corrections/
 
   describe "when the editor is destroyed", ->
     it "destroys all misspelling markers", ->
