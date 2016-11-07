@@ -183,6 +183,79 @@ describe "Spell check", ->
           expect(editorElement.querySelectorAll('.corrections li').length).toBe 0
           expect(editorElement.querySelector('.corrections').textContent).toMatch /No corrections/
 
+  describe "when a right mouse click is triggered on the editor", ->
+    describe "when the cursor touches a misspelling that has corrections", ->
+      it "displays the context menu items for the misspelling and replaces the misspelling when a correction is selected", ->
+        atom.config.set('spell-check.locales', ['en-US'])
+        editor.setText('tofether')
+        advanceClock(editor.getBuffer().getStoppedChangingDelay())
+        atom.config.set('spell-check.grammars', ['source.js'])
+
+        waitsFor ->
+          getMisspellingMarkers().length is 1
+
+        runs ->
+          expect(getMisspellingMarkers()[0].isValid()).toBe true
+
+          # Right click on the misspelling.
+          editorElement.dispatchEvent(new MouseEvent 'mousedown',
+            bubbles: true,
+            button: 2,
+          )
+
+          spellCheckView = spellCheckModule.viewsByEditor.get editor
+
+          expect(spellCheckView.contextMenuCommands.length).toBeGreaterThan 0
+          editorCommands = atom.commands.findCommands(target: editorElement)
+          correctionCommand = (command for command in editorCommands when command.name is 'spell-check:correct-misspelling-0')
+          expect(correctionCommand).toBeDefined
+
+          expect(spellCheckView.contextMenuItems.length).toBeGreaterThan 1 # There is an extra menu item for the line separating the corrections in the context menu
+          correctionMenuItem = (item for item in atom.contextMenu.itemSets when item.items[0].label is 'together')[0]
+          expect(correctionMenuItem).toBeDefined
+
+          # Select the command to do the correction.
+          atom.commands.dispatch editorElement, 'spell-check:correct-misspelling-0'
+
+          expect(editor.getText()).toBe 'together'
+          expect(editor.getCursorBufferPosition()).toEqual [0, 8]
+          expect(getMisspellingMarkers()[0].isValid()).toBe false
+
+          expect(spellCheckView.contextMenuCommands.length).toBe 0
+          editorCommands = atom.commands.findCommands(target: editorElement)
+          correctionCommand = (command for command in editorCommands when command.name is 'spell-check:correct-misspelling-0')
+          expect(correctionCommand).toBeNull
+
+          expect(spellCheckView.contextMenuItems.length).toBe 0
+          correctionMenuItem = (item for item in atom.contextMenu.itemSets when item.items[0].label is 'together')[0]
+          expect(correctionMenuItem).toBeNull
+
+    describe "when the cursor touches a misspelling that has no corrections", ->
+      it "displays a context menu item saying no corrections found", ->
+        atom.config.set('spell-check.locales', ['en-US'])
+        editor.setText('zxcasdfysyadfyasdyfasdfyasdfyasdfyasydfasdf')
+        advanceClock(editor.getBuffer().getStoppedChangingDelay())
+        atom.config.set('spell-check.grammars', ['source.js'])
+
+        waitsFor ->
+          getMisspellingMarkers().length > 0
+
+        runs ->
+          expect(getMisspellingMarkers()[0].isValid()).toBe true
+
+          editorElement.dispatchEvent(new MouseEvent 'mousedown',
+            bubbles: true,
+            button: 2,
+          )
+
+          spellCheckView = spellCheckModule.viewsByEditor.get editor
+
+          expect(spellCheckView.contextMenuCommands.length).toBe 0
+
+          expect(spellCheckView.contextMenuItems.length).toBe 2
+          correctionMenuItem = (item for item in atom.contextMenu.itemSets when item.items[0].label is 'No corrections')[0]
+          expect(correctionMenuItem).toBeDefined
+
   describe "when the editor is destroyed", ->
     it "destroys all misspelling markers", ->
       atom.config.set('spell-check.locales', ['en-US'])

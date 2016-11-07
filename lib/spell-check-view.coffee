@@ -14,6 +14,10 @@ class SpellCheckView
     @initializeMarkerLayer()
     @taskWrapper = new SpellCheckTask @task
 
+    @contextMenuCommands = []
+    @contextMenuItems = []
+    @initializeContextMenuListeners()
+
     @correctMisspellingCommand = atom.commands.add atom.views.getView(@editor), 'spell-check:correct-misspelling', =>
       if marker = @markerLayer.findMarkers({containsBufferPosition: @editor.getCursorBufferPosition()})[0]
         CorrectionsView ?= require './corrections-view'
@@ -107,3 +111,76 @@ class SpellCheckView
     instance = @getInstance()
     misspelling = @editor.getTextInBufferRange marker.getBufferRange()
     instance.suggest args, misspelling
+
+  initializeContextMenuListeners: =>
+    atom.views.getView(@editor).addEventListener 'mousedown', @addContextMenuEntries
+    # Listen for click events from other editors and clear the context menu entries if
+    # this view's editor isn't the active editor.
+    atom.document.addEventListener 'mousedown', =>
+      if @editor.id isnt atom.workspace.getActiveTextEditor().id
+        @clearContextMenuEntries()
+
+  addContextMenuEntries: (mouseEvent) =>
+    @clearContextMenuEntries()
+    # Check to see if a context menu was opened through a right mouse click.
+    if mouseEvent.button is 2
+      # Get buffer position of the right click event.
+      currentScreenPosition = atom.views.getView(@editor).component.screenPositionForMouseEvent mouseEvent
+      currentBufferPosition = @editor.bufferPositionForScreenPosition(currentScreenPosition)
+
+      # Check to see if the selected word is incorrect.
+      if marker = @markerLayer.findMarkers({containsBufferPosition: currentBufferPosition})[0]
+        @contextMenuItems.push atom.contextMenu.add {'atom-text-editor': [{type: 'separator'}]}
+
+        corrections = @getCorrections(marker)
+        if corrections.length is 0
+          @contextMenuItems.push atom.contextMenu.add {'atom-text-editor': [{label: 'No corrections '}]}
+        else
+          for correction in @getCorrections(marker)
+            # Register new command for correction.
+            do (correction) =>
+              @contextMenuCommands.push atom.commands.add atom.views.getView(@editor),
+                'spell-check:correct-misspelling-' + correction.index, =>
+                  @makeCorrection(correction, marker)
+                  @clearContextMenuEntries()
+            
+            # Add new menu item for correction.
+            @contextMenuItems.push atom.contextMenu.add {
+              'atom-text-editor': [{
+                label: correction.label,
+                command: 'spell-check:correct-misspelling-' + correction.index
+              }]
+            }
+
+  makeCorrection: (correction, marker) =>
+    if correction.isSuggestion
+      # Update the buffer with the correction.
+      @editor.setSelectedBufferRange(marker.getBufferRange())
+      @editor.insertText(correction.suggestion)
+    else
+      # Build up the arguments object for this buffer and text.
+      projectPath = null
+      relativePath = null
+      if @editor.buffer?.file?.path
+        [projectPath, relativePath] = atom.project.relativizePath(@editor.buffer.file.path)
+      args = {
+        id: @id,
+        projectPath: projectPath,
+        relativePath: relativePath
+      }
+
+      # Send the "add" request to the plugin.
+      correction.plugin.add args, correction
+
+      # Update the buffer to handle the corrections.
+      @updateMisspellings.bind(this)()
+  
+  clearContextMenuEntries: =>
+    for command in @contextMenuCommands
+      command.dispose()
+    for item in @contextMenuItems
+      item.dispose()
+
+    @contextMenuCommands = []
+    @contextMenuItems = []
+
