@@ -196,37 +196,32 @@ describe "Spell check", ->
 
         runs ->
           expect(getMisspellingMarkers()[0].isValid()).toBe true
+          editorElement.dispatchEvent(new Event 'contextmenu')
 
-          # Right click on the misspelling.
-          editorElement.dispatchEvent(new MouseEvent 'mousedown',
-            bubbles: true,
-            button: 2,
-          )
+          # Check that the proper context menu entries are created for the misspelling.
+          # A misspelling will have atleast 1 context menu item for the line separating the corrections.
+          expect(spellCheckModule.contextMenuEntries.length).toBeGreaterThan 1
 
-          spellCheckView = spellCheckModule.viewsByEditor.get editor
-
-          expect(spellCheckView.contextMenuCommands.length).toBeGreaterThan 0
           editorCommands = atom.commands.findCommands(target: editorElement)
           correctionCommand = (command for command in editorCommands when command.name is 'spell-check:correct-misspelling-0')
           expect(correctionCommand).toBeDefined
 
-          expect(spellCheckView.contextMenuItems.length).toBeGreaterThan 1 # There is an extra menu item for the line separating the corrections in the context menu
           correctionMenuItem = (item for item in atom.contextMenu.itemSets when item.items[0].label is 'together')[0]
           expect(correctionMenuItem).toBeDefined
 
-          # Select the command to do the correction.
           atom.commands.dispatch editorElement, 'spell-check:correct-misspelling-0'
 
+          # Check that the misspelling is corrected and the context menu entries are properly disposed.
           expect(editor.getText()).toBe 'together'
           expect(editor.getCursorBufferPosition()).toEqual [0, 8]
           expect(getMisspellingMarkers()[0].isValid()).toBe false
 
-          expect(spellCheckView.contextMenuCommands.length).toBe 0
+          expect(spellCheckModule.contextMenuEntries.length).toBe 0
+
           editorCommands = atom.commands.findCommands(target: editorElement)
           correctionCommand = (command for command in editorCommands when command.name is 'spell-check:correct-misspelling-0')
           expect(correctionCommand).toBeNull
 
-          expect(spellCheckView.contextMenuItems.length).toBe 0
           correctionMenuItem = (item for item in atom.contextMenu.itemSets when item.items[0].label is 'together')[0]
           expect(correctionMenuItem).toBeNull
 
@@ -243,16 +238,9 @@ describe "Spell check", ->
         runs ->
           expect(getMisspellingMarkers()[0].isValid()).toBe true
 
-          editorElement.dispatchEvent(new MouseEvent 'mousedown',
-            bubbles: true,
-            button: 2,
-          )
+          editorElement.dispatchEvent(new Event 'contextmenu')
 
-          spellCheckView = spellCheckModule.viewsByEditor.get editor
-
-          expect(spellCheckView.contextMenuCommands.length).toBe 0
-
-          expect(spellCheckView.contextMenuItems.length).toBe 2
+          expect(spellCheckModule.contextMenuEntries.length).toBe 2
           correctionMenuItem = (item for item in atom.contextMenu.itemSets when item.items[0].label is 'No corrections')[0]
           expect(correctionMenuItem).toBeDefined
 
