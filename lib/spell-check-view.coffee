@@ -114,7 +114,8 @@ class SpellCheckView
   addContextMenuEntries: (mouseEvent) =>
     @clearContextMenuEntries()
     # Get buffer position of the right click event. If the click happens outside
-    # the boundaries of any text, the method defaults to the buffer position of the cursor.
+    # the boundaries of any text, the method defaults to the buffer position of
+    # the last character in the editor.
     currentScreenPosition = atom.views.getView(@editor).component.screenPositionForMouseEvent mouseEvent
     currentBufferPosition = @editor.bufferPositionForScreenPosition(currentScreenPosition)
 
@@ -125,7 +126,8 @@ class SpellCheckView
 
       corrections = @getCorrections(marker)
       if corrections.length is 0
-        @spellCheckModule.contextMenuEntries.push atom.contextMenu.add {'atom-text-editor': [{label: 'No corrections '}]}
+        noCorrectionsMenuItem = atom.contextMenu.add {'atom-text-editor': [{label: 'No corrections '}]}
+        @spellCheckModule.contextMenuEntries.push {menuItem: noCorrectionsMenuItem}
       else
         for correction in @getCorrections(marker)
           contextMenuEntry = {}
