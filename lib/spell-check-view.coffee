@@ -127,7 +127,7 @@ class SpellCheckView
           menuItem: atom.contextMenu.add({'atom-text-editor': [{type: 'separator'}]})
         })
 
-        for correction in @getCorrections(marker)
+        for correction in corrections
           contextMenuEntry = {}
           # Register new command for correction.
           contextMenuEntry.command = do (correction, contextMenuEntry) =>
