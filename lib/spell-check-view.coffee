@@ -121,14 +121,12 @@ class SpellCheckView
 
     # Check to see if the selected word is incorrect.
     if marker = @markerLayer.findMarkers({containsBufferPosition: currentBufferPosition})[0]
-      separatorMenuItem = atom.contextMenu.add {'atom-text-editor': [{type: 'separator'}]}
-      @spellCheckModule.contextMenuEntries.push {menuItem: separatorMenuItem}
-
       corrections = @getCorrections(marker)
-      if corrections.length is 0
-        noCorrectionsMenuItem = atom.contextMenu.add {'atom-text-editor': [{label: 'No corrections '}]}
-        @spellCheckModule.contextMenuEntries.push {menuItem: noCorrectionsMenuItem}
-      else
+      if corrections.length > 0
+        @spellCheckModule.contextMenuEntries.push({
+          menuItem: atom.contextMenu.add({'atom-text-editor': [{type: 'separator'}]})
+        })
+
         for correction in @getCorrections(marker)
           contextMenuEntry = {}
           # Register new command for correction.
@@ -139,12 +137,9 @@ class SpellCheckView
                 @clearContextMenuEntries()
 
           # Add new menu item for correction.
-          contextMenuEntry.menuItem = atom.contextMenu.add {
-            'atom-text-editor': [{
-              label: correction.label,
-              command: 'spell-check:correct-misspelling-' + correction.index
-            }]
-          }
+          contextMenuEntry.menuItem = atom.contextMenu.add({
+            'atom-text-editor': [{label: correction.label, command: 'spell-check:correct-misspelling-' + correction.index}]
+          })
           @spellCheckModule.contextMenuEntries.push contextMenuEntry
 
   makeCorrection: (correction, marker) =>
@@ -169,11 +164,10 @@ class SpellCheckView
 
       # Update the buffer to handle the corrections.
       @updateMisspellings.bind(this)()
-  
+
   clearContextMenuEntries: ->
     for entry in @spellCheckModule.contextMenuEntries
       entry.command?.dispose()
       entry.menuItem?.dispose()
 
     @spellCheckModule.contextMenuEntries = []
-

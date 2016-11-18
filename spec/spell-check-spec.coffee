@@ -225,25 +225,6 @@ describe "Spell check", ->
           correctionMenuItem = (item for item in atom.contextMenu.itemSets when item.items[0].label is 'together')[0]
           expect(correctionMenuItem).toBeNull
 
-    describe "when the cursor touches a misspelling that has no corrections", ->
-      it "displays a context menu item saying no corrections found", ->
-        atom.config.set('spell-check.locales', ['en-US'])
-        editor.setText('zxcasdfysyadfyasdyfasdfyasdfyasdfyasydfasdf')
-        advanceClock(editor.getBuffer().getStoppedChangingDelay())
-        atom.config.set('spell-check.grammars', ['source.js'])
-
-        waitsFor ->
-          getMisspellingMarkers().length > 0
-
-        runs ->
-          expect(getMisspellingMarkers()[0].isValid()).toBe true
-
-          editorElement.dispatchEvent(new Event 'contextmenu')
-
-          expect(spellCheckModule.contextMenuEntries.length).toBe 2
-          correctionMenuItem = (item for item in atom.contextMenu.itemSets when item.items[0].label is 'No corrections')[0]
-          expect(correctionMenuItem).toBeDefined
-
   describe "when the editor is destroyed", ->
     it "destroys all misspelling markers", ->
       atom.config.set('spell-check.locales', ['en-US'])
