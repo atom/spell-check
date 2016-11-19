@@ -127,20 +127,26 @@ class SpellCheckView
           menuItem: atom.contextMenu.add({'atom-text-editor': [{type: 'separator'}]})
         })
 
+        correctionIndex = 0
         for correction in corrections
           contextMenuEntry = {}
           # Register new command for correction.
+          commandName = 'spell-check:correct-misspelling-' + correctionIndex
           contextMenuEntry.command = do (correction, contextMenuEntry) =>
-            atom.commands.add atom.views.getView(@editor),
-              'spell-check:correct-misspelling-' + correction.index, =>
-                @makeCorrection(correction, marker)
-                @clearContextMenuEntries()
+            atom.commands.add atom.views.getView(@editor), commandName, =>
+              @makeCorrection(correction, marker)
+              @clearContextMenuEntries()
 
           # Add new menu item for correction.
           contextMenuEntry.menuItem = atom.contextMenu.add({
-            'atom-text-editor': [{label: correction.label, command: 'spell-check:correct-misspelling-' + correction.index}]
+            'atom-text-editor': [{label: correction.label, command: commandName}]
           })
           @spellCheckModule.contextMenuEntries.push contextMenuEntry
+          correctionIndex++
+
+        @spellCheckModule.contextMenuEntries.push({
+          menuItem: atom.contextMenu.add({'atom-text-editor': [{type: 'separator'}]})
+        })
 
   makeCorrection: (correction, marker) =>
     if correction.isSuggestion
