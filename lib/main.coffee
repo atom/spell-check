@@ -48,6 +48,7 @@ module.exports =
     @commandSubscription = atom.commands.add 'atom-workspace',
         'spell-check:toggle': => @toggle()
     @viewsByEditor = new WeakMap
+    @contextMenuEntries = []
     @disposable = atom.workspace.observeTextEditors (editor) =>
       SpellCheckView ?= require './spell-check-view'
 
@@ -55,7 +56,12 @@ module.exports =
       # background checking and a cached view of the in-process manager for
       # getting corrections. We used a function to a function because scope
       # wasn't working properly.
-      spellCheckView = new SpellCheckView(editor, @task, => @getInstance @globalArgs)
+      # Each view also needs the list of added context menu entries so that
+      # they can dispose old corrections which were not created by the current
+      # active editor. A reference to this entire module is passed right now
+      # because a direct reference to @contextMenuEntries wasn't updating
+      # properly between different SpellCheckView's.
+      spellCheckView = new SpellCheckView(editor, @task, this, => @getInstance @globalArgs)
 
       # save the {editor} into a map
       editorId = editor.id

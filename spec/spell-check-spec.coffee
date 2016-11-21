@@ -183,6 +183,99 @@ describe "Spell check", ->
           expect(editorElement.querySelectorAll('.corrections li').length).toBe 0
           expect(editorElement.querySelector('.corrections').textContent).toMatch /No corrections/
 
+  describe "when a right mouse click is triggered on the editor", ->
+    describe "when the cursor touches a misspelling that has corrections", ->
+      it "displays the context menu items for the misspelling and replaces the misspelling when a correction is selected", ->
+        atom.config.set('spell-check.locales', ['en-US'])
+        editor.setText('tofether')
+        advanceClock(editor.getBuffer().getStoppedChangingDelay())
+        atom.config.set('spell-check.grammars', ['source.js'])
+
+        waitsFor ->
+          getMisspellingMarkers().length is 1
+
+        runs ->
+          expect(getMisspellingMarkers()[0].isValid()).toBe true
+          editorElement.dispatchEvent(new Event 'contextmenu')
+
+          # Check that the proper context menu entries are created for the misspelling.
+          # A misspelling will have atleast 2 context menu items for the lines separating
+          # the corrections.
+          expect(spellCheckModule.contextMenuEntries.length).toBeGreaterThan 2
+          commandName = 'spell-check:correct-misspelling-0'
+          menuItemLabel = 'together'
+
+          editorCommands = atom.commands.findCommands(target: editorElement)
+          correctionCommand = (command for command in editorCommands when command.name is commandName)
+          expect(correctionCommand).toBeDefined
+
+          correctionMenuItem = (item for item in atom.contextMenu.itemSets when item.items[0].label is menuItemLabel)[0]
+          expect(correctionMenuItem).toBeDefined
+
+          atom.commands.dispatch editorElement, commandName
+
+          # Check that the misspelling is corrected and the context menu entries are properly disposed.
+          expect(editor.getText()).toBe 'together'
+          expect(editor.getCursorBufferPosition()).toEqual [0, 8]
+          expect(getMisspellingMarkers()[0].isValid()).toBe false
+
+          expect(spellCheckModule.contextMenuEntries.length).toBe 0
+
+          editorCommands = atom.commands.findCommands(target: editorElement)
+          correctionCommand = (command for command in editorCommands when command.name is commandName)
+          expect(correctionCommand).toBeNull
+
+          correctionMenuItem = (item for item in atom.contextMenu.itemSets when item.items[0].label is menuItemLabel)[0]
+          expect(correctionMenuItem).toBeNull
+
+    describe "when the cursor touches a misspelling and adding known words is enabled", ->
+      it "displays the 'Add to Known Words' option and adds that word when the option is selected", ->
+        atom.config.set('spell-check.locales', ['en-US'])
+        editor.setText('zxcasdfysyadfyasdyfasdfyasdfyasdfyasydfasdf')
+        advanceClock(editor.getBuffer().getStoppedChangingDelay())
+        atom.config.set('spell-check.grammars', ['source.js'])
+        atom.config.set('spell-check.addKnownWords', true)
+
+        expect(atom.config.get('spell-check.knownWords').length).toBe 0
+
+        waitsFor ->
+          getMisspellingMarkers().length is 1
+
+        runs ->
+          expect(getMisspellingMarkers()[0].isValid()).toBe true
+          editorElement.dispatchEvent(new Event 'contextmenu')
+
+          # Check that the 'Add to Known Words' entry is added to the context menu.
+          # There should be 1 entry for 'Add to Known Words' and 2 entries for the line separators.
+          expect(spellCheckModule.contextMenuEntries.length).toBe 3
+          commandName = 'spell-check:correct-misspelling-0'
+          menuItemLabel = 'together'
+
+          editorCommands = atom.commands.findCommands(target: editorElement)
+          correctionCommand = (command for command in editorCommands when command.name is commandName)
+          expect(correctionCommand).toBeDefined
+
+          correctionMenuItem = (item for item in atom.contextMenu.itemSets when item.items[0].label is menuItemLabel)[0]
+          expect(correctionMenuItem).toBeDefined
+
+          atom.commands.dispatch editorElement, commandName
+
+          # Check that the misspelling is added as a known word, that there are no more misspelling
+          # markers in the editor, and that the context menu entries are properly disposed.
+          waitsFor ->
+            getMisspellingMarkers().length is 0
+
+          runs ->
+            expect(atom.config.get('spell-check.knownWords').length).toBe 1
+            expect(spellCheckModule.contextMenuEntries.length).toBe 0
+
+            editorCommands = atom.commands.findCommands(target: editorElement)
+            correctionCommand = (command for command in editorCommands when command.name is commandName)
+            expect(correctionCommand).toBeNull
+
+            correctionMenuItem = (item for item in atom.contextMenu.itemSets when item.items[0].label is menuItemLabel)[0]
+            expect(correctionMenuItem).toBeNull
+
   describe "when the editor is destroyed", ->
     it "destroys all misspelling markers", ->
       atom.config.set('spell-check.locales', ['en-US'])
