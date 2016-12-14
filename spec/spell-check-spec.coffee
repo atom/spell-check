@@ -196,7 +196,7 @@ describe "Spell check", ->
 
         runs ->
           expect(getMisspellingMarkers()[0].isValid()).toBe true
-          editorElement.dispatchEvent(new Event 'contextmenu')
+          editorElement.dispatchEvent(new MouseEvent('contextmenu'))
 
           # Check that the proper context menu entries are created for the misspelling.
           # A misspelling will have atleast 2 context menu items for the lines separating
@@ -243,7 +243,7 @@ describe "Spell check", ->
 
         runs ->
           expect(getMisspellingMarkers()[0].isValid()).toBe true
-          editorElement.dispatchEvent(new Event 'contextmenu')
+          editorElement.dispatchEvent(new MouseEvent('contextmenu'))
 
           # Check that the 'Add to Known Words' entry is added to the context menu.
           # There should be 1 entry for 'Add to Known Words' and 2 entries for the line separators.
