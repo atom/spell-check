@@ -50,6 +50,9 @@ module.exports =
     @viewsByEditor = new WeakMap
     @contextMenuEntries = []
     @disposable = atom.workspace.observeTextEditors (editor) =>
+      # For now, just don't spell check large files.
+      return if editor.largeFileMode
+
       SpellCheckView ?= require './spell-check-view'
 
       # The SpellCheckView needs both a handle for the task to handle the
