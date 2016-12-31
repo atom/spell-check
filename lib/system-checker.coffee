@@ -59,6 +59,8 @@ class SystemChecker
     if /linux/.test process.platform
       if @spellchecker.setDictionary @locale, "/usr/share/hunspell"
         return
+      if @spellchecker.setDictionary @locale, "/usr/share/myspell"
+        return
       if @spellchecker.setDictionary @locale, "/usr/share/myspell/dicts"
         return
 
