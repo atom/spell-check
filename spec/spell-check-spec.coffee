@@ -39,13 +39,12 @@ describe "Spell check", ->
     misspellingMarkers = null
     waitsFor ->
       misspellingMarkers = getMisspellingMarkers()
-      misspellingMarkers.length is 4
-
-    runs ->
-      expect(textForMarker(misspellingMarkers[0])).toEqual "thiss"
-      expect(textForMarker(misspellingMarkers[1])).toEqual "sentencts"
-      expect(textForMarker(misspellingMarkers[2])).toEqual "edn"
-      expect(textForMarker(misspellingMarkers[3])).toEqual "dsoe"
+      if misspellingMarkers.length is 4
+        expect(textForMarker(misspellingMarkers[0])).toEqual "thiss"
+        expect(textForMarker(misspellingMarkers[1])).toEqual "sentencts"
+        expect(textForMarker(misspellingMarkers[2])).toEqual "edn"
+        expect(textForMarker(misspellingMarkers[3])).toEqual "dsoe"
+        true
 
   it "decorates misspelled words with a leading space", ->
     atom.config.set('spell-check.locales', ['en-US'])
@@ -55,11 +54,10 @@ describe "Spell check", ->
     misspellingMarkers = null
     waitsFor ->
       misspellingMarkers = getMisspellingMarkers()
-      misspellingMarkers.length is 2
-
-    runs ->
-      expect(textForMarker(misspellingMarkers[0])).toEqual "chok"
-      expect(textForMarker(misspellingMarkers[1])).toEqual "bok"
+      if misspellingMarkers.length is 2
+        expect(textForMarker(misspellingMarkers[0])).toEqual "chok"
+        expect(textForMarker(misspellingMarkers[1])).toEqual "bok"
+        true
 
   it "allow entering of known words", ->
     atom.config.set('spell-check.knownWords', ['GitHub', '!github', 'codez'])
@@ -70,11 +68,9 @@ describe "Spell check", ->
     misspellingMarkers = null
     waitsFor ->
       misspellingMarkers = getMisspellingMarkers()
-      misspellingMarkers.length is 1
-
-    runs ->
-      expect(misspellingMarkers.length).toBe 1
-      expect(textForMarker(misspellingMarkers[0])).toBe "builz"
+      if misspellingMarkers.length is 1
+        expect(textForMarker(misspellingMarkers[0])).toBe "builz"
+        true
 
   it "hides decorations when a misspelled word is edited", ->
     editor.setText('notaword')
