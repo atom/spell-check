@@ -6,9 +6,6 @@ CorrectionsView = null
 
 module.exports =
 class SpellCheckView
-  @content: ->
-    @div class: 'spell-check'
-
   constructor: (@editor, @task, @spellCheckModule, @getInstance) ->
     @disposables = new CompositeDisposable
     @initializeMarkerLayer()
