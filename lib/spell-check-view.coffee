@@ -6,9 +6,6 @@ CorrectionsView = null
 
 module.exports =
 class SpellCheckView
-  @content: ->
-    @div class: 'spell-check'
-
   constructor: (@editor, @task, @spellCheckModule, @getInstance) ->
     @disposables = new CompositeDisposable
     @initializeMarkerLayer()
@@ -19,6 +16,7 @@ class SpellCheckView
         CorrectionsView ?= require './corrections-view'
         @correctionsView?.destroy()
         @correctionsView = new CorrectionsView(@editor, @getCorrections(marker), marker, this, @updateMisspellings)
+        @correctionsView.attach()
 
     atom.views.getView(@editor).addEventListener 'contextmenu', @addContextMenuEntries
 
@@ -57,7 +55,7 @@ class SpellCheckView
     @markerLayer.destroy()
     @markerLayerDecoration.destroy()
     @correctMisspellingCommand.dispose()
-    @correctionsView?.remove()
+    @correctionsView?.destroy()
     @clearContextMenuEntries()
 
   unsubscribeFromBuffer: ->
