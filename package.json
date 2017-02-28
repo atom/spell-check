@@ -4,7 +4,7 @@
   "main": "./lib/main",
   "description": "Highlights misspelled words and shows possible corrections.",
   "dependencies": {
-    "atom-select-list": "0.0.13",
+    "atom-select-list": "0.0.15",
     "multi-integer-range": "^2.0.0",
     "natural": "^0.4.0",
     "spellchecker": "3.2.3",
