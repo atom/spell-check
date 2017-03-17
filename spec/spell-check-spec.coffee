@@ -141,6 +141,7 @@ describe "Spell check", ->
         editor.setText('tofether')
         advanceClock(editor.getBuffer().getStoppedChangingDelay())
         atom.config.set('spell-check.grammars', ['source.js'])
+        correctionsElement = null
 
         waitsFor ->
           getMisspellingMarkers().length is 1
@@ -155,6 +156,10 @@ describe "Spell check", ->
           expect(correctionsElement.querySelectorAll('li').length).toBeGreaterThan 0
           expect(correctionsElement.querySelectorAll('li')[0].textContent).toBe "together"
 
+        waitsFor ->
+          correctionsElement.contains(document.activeElement)
+
+        runs ->
           atom.commands.dispatch correctionsElement, 'core:confirm'
 
           expect(editor.getText()).toBe 'together'
