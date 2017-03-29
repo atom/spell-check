@@ -87,6 +87,8 @@ class SpellCheckView
       @markerLayer.markBufferRange(misspelling, {invalidate: 'touch'})
 
   updateMisspellings: ->
+    return @destroyMarkers() if @editor.largeFileMode
+
     # Task::start can throw errors atom/atom#3326
     try
       @taskWrapper.start @editor.buffer
