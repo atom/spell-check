@@ -32,7 +32,7 @@ class SpellCheckerManager
     if @useLocales isnt data.useLocales
       @useLocales = data.useLocales
       removeLocaleCheckers = true
-    if @knownWords isnt data.knownWords
+    if not _.isEqual(@knownWords, data.knownWords)
       @knownWords = data.knownWords
       removeKnownWordsChecker = true
       changed = true
