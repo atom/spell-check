@@ -4,8 +4,6 @@ log = console.log
 module.exports =
 class SpellCheckTask
   @handler: null
-  @callbacksById: {}
-  @isBusy: false
   @queue: []
 
   constructor: (@task) ->
@@ -14,16 +12,20 @@ class SpellCheckTask
   terminate: ->
     delete @constructor.callbacksById[@id]
 
-  start: (buffer) ->
+  start: (buffer, onDidSpellCheck) ->
     # Figure out the paths since we need that for checkers that are project-specific.
     projectPath = null
     relativePath = null
     if buffer?.file?.path
       [projectPath, relativePath] = atom.project.relativizePath(buffer.file.path)
 
-    # Submit the spell check request to the background task.
+    # Ensure old unstarted work for this SpellCheckTask is removed.
+    @constructor.removeFromArray(@constructor.queue, (e) -> e.args.id is @id)
+
+    # Create an entry that contains everything we'll need to do the work.
     entry = {
       task: @task,
+      callbacks: [onDidSpellCheck],
       args: {
         id: @id,
         projectPath,
@@ -32,31 +34,44 @@ class SpellCheckTask
       }
     }
 
-    log('Pushing ' + @id, entry)
-    queue = @constructor.queue
+    if (@constructor.queue.length > 0)
+      for i in [0..@constructor.queue.length-1]
+        if (@isDuplicateRequest(@constructor.queue[i], entry))
+          log('De-duping ' + relativePath)
+          @constructor.queue[i].callbacks.push(onDidSpellCheck)
+          return
 
-    if (queue.length > 0)
-      for i in [0..queue.length-1]
-        if (queue[i].id is @id)
-          log('Ejecting previous entry at ' + i)
-          queue.splice(i, 1)
-          break
+    # Do the work now if not busy or queue it for later.
+    @constructor.queue.unshift(entry)
+    if @constructor.queue.length is 1
+      @constructor.startTask()
+    else
+      log('Queuing work ' + entry.args.id)
 
-    queue.push(entry)
-    @constructor.sendNextMaybe()
+  isDuplicateRequest: (a, b) ->
+    a.args.projectPath is b.args.projectPath and a.args.relativePath is b.args.relativePath
 
-  @sendNextMaybe: ->
-    if not @isBusy and @queue.length > 0
-      @isBusy = true
-      entry = @queue.shift()
-      log('Dispatching ' + entry.args.id + ' from queue of ' + (@queue.length + 1))
-      entry.task?.start entry.args, @dispatchMisspellings
+  @removeFromArray: (array, predicate) ->
+    if (array.length > 0)
+      for i in [0..array.length-1]
+        if (predicate(array[i]))
+          found = array[i]
+          array.splice(i, 1)
+          return found
 
-  onDidSpellCheck: (callback) ->
-    @constructor.callbacksById[@id] = callback
+  @startTask: () ->
+    entry = @queue[0]
+    log('Starting work ' + entry.args.id)
+    entry.task?.start entry.args, @dispatchMisspellings
 
   @dispatchMisspellings: (data) =>
-    log('completed ' + data.id, data)
-    @callbacksById[data.id]?(data.misspellings)
-    @isBusy = false
-    @sendNextMaybe()
+    log('Completed work ' + data.id)
+    entry = @removeFromArray(@queue, (e) -> e.args.id is data.id)
+    console.log(entry)
+    for callback in entry.callbacks
+      callback(data.misspellings)
+
+    if @queue.length > 0
+      @startTask()
+    else
+      log('Queue is empty')

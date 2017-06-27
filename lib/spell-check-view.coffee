@@ -20,10 +20,6 @@ class SpellCheckView
 
     atom.views.getView(@editor).addEventListener 'contextmenu', @addContextMenuEntries
 
-    @taskWrapper.onDidSpellCheck (misspellings) =>
-      @destroyMarkers()
-      @addMarkers(misspellings) if @buffer?
-
     @disposables.add @editor.onDidChangePath =>
       @subscribeToBuffer()
 
@@ -89,7 +85,10 @@ class SpellCheckView
   updateMisspellings: ->
     # Task::start can throw errors atom/atom#3326
     try
-      @taskWrapper.start @editor.buffer
+      @taskWrapper.start @editor.buffer, (misspellings) =>
+        @destroyMarkers()
+        @addMarkers(misspellings) if @buffer?
+
     catch error
       console.warn('Error starting spell check task', error.stack ? error)
 
