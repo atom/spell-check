@@ -1,16 +1,15 @@
 idCounter = 0
-log = console.log
 
 module.exports =
 class SpellCheckTask
   @handler: null
-  @queue: []
+  @jobs: []
 
   constructor: (@task) ->
     @id = idCounter++
 
   terminate: ->
-    delete @constructor.callbacksById[@id]
+    @constructor.removeFromArray(@constructor.jobs, (j) -> j.args.id is @id)
 
   start: (buffer, onDidSpellCheck) ->
     # Figure out the paths since we need that for checkers that are project-specific.
@@ -19,11 +18,11 @@ class SpellCheckTask
     if buffer?.file?.path
       [projectPath, relativePath] = atom.project.relativizePath(buffer.file.path)
 
-    # Ensure old unstarted work for this SpellCheckTask is removed.
-    @constructor.removeFromArray(@constructor.queue, (e) -> e.args.id is @id)
+    # Remove old jobs for this SpellCheckTask from the shared jobs list.
+    @constructor.removeFromArray(@constructor.jobs, (j) -> j.args.id is @id)
 
-    # Create an entry that contains everything we'll need to do the work.
-    entry = {
+    # Create an job that contains everything we'll need to do the work.
+    job = {
       task: @task,
       callbacks: [onDidSpellCheck],
       args: {
@@ -34,19 +33,19 @@ class SpellCheckTask
       }
     }
 
-    if (@constructor.queue.length > 0)
-      for i in [0..@constructor.queue.length-1]
-        if (@isDuplicateRequest(@constructor.queue[i], entry))
-          log('De-duping ' + relativePath)
-          @constructor.queue[i].callbacks.push(onDidSpellCheck)
+    if (@constructor.jobs.length > 0)
+      for i in [0..@constructor.jobs.length-1]
+        if (@isDuplicateRequest(@constructor.jobs[i], job))
+          console.log('De-duping ' + relativePath)
+          @constructor.jobs[i].callbacks.push(onDidSpellCheck)
           return
 
     # Do the work now if not busy or queue it for later.
-    @constructor.queue.unshift(entry)
-    if @constructor.queue.length is 1
-      @constructor.startTask()
+    @constructor.jobs.unshift(job)
+    if @constructor.jobs.length is 1
+      @constructor.startNextJob()
     else
-      log('Queuing work ' + entry.args.id)
+      console.log('Queuing work ' + job.args.id)
 
   isDuplicateRequest: (a, b) ->
     a.args.projectPath is b.args.projectPath and a.args.relativePath is b.args.relativePath
@@ -59,19 +58,18 @@ class SpellCheckTask
           array.splice(i, 1)
           return found
 
-  @startTask: () ->
-    entry = @queue[0]
-    log('Starting work ' + entry.args.id)
-    entry.task?.start entry.args, @dispatchMisspellings
+  @startNextJob: () ->
+    job = @jobs[0]
+    console.log('Starting work ' + job.args.id)
+    job.task?.start job.args, @dispatchMisspellings
 
   @dispatchMisspellings: (data) =>
-    log('Completed work ' + data.id)
-    entry = @removeFromArray(@queue, (e) -> e.args.id is data.id)
-    console.log(entry)
-    for callback in entry.callbacks
+    console.log('Completed work ' + data.id)
+    job = @removeFromArray(@jobs, (j) -> j.args.id is data.id)
+    for callback in job.callbacks
       callback(data.misspellings)
 
-    if @queue.length > 0
-      @startTask()
+    if @jobs.length > 0
+      @startNextJob()
     else
-      log('Queue is empty')
+      console.log('Queue is empty')
