@@ -6,11 +6,11 @@ CorrectionsView = null
 
 module.exports =
 class SpellCheckView
-  constructor: (@editor, @spellCheckModule, manager) ->
+  constructor: (@editor, @spellCheckModule, @manager) ->
     @disposables = new CompositeDisposable
     @initializeMarkerLayer()
 
-    @taskWrapper = new SpellCheckTask manager
+    @taskWrapper = new SpellCheckTask @manager
 
     @correctMisspellingCommand = atom.commands.add atom.views.getView(@editor), 'spell-check:correct-misspelling', =>
       if marker = @markerLayer.findMarkers({containsBufferPosition: @editor.getCursorBufferPosition()})[0]
@@ -100,9 +100,8 @@ class SpellCheckView
     }
 
     # Get the misspelled word and then request corrections.
-    instance = @getInstance()
     misspelling = @editor.getTextInBufferRange marker.getBufferRange()
-    instance.suggest args, misspelling
+    @manager.suggest args, misspelling
 
   addContextMenuEntries: (mouseEvent) =>
     @clearContextMenuEntries()
