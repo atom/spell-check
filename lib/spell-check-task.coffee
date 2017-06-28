@@ -5,7 +5,7 @@ class SpellCheckTask
   @handler: null
   @jobs: []
 
-  constructor: (@task) ->
+  constructor: (@manager) ->
     @id = idCounter++
 
   terminate: ->
@@ -22,16 +22,14 @@ class SpellCheckTask
     @constructor.removeFromArray(@constructor.jobs, (j) -> j.args.id is @id)
 
     # Create an job that contains everything we'll need to do the work.
-    job = {
-      task: @task,
-      callbacks: [onDidSpellCheck],
-      args: {
-        id: @id,
-        projectPath,
-        relativePath,
+    job =
+      manager: @manager
+      callbacks: [onDidSpellCheck]
+      args:
+        id: @id
+        projectPath: projectPath
+        relativePath: relativePath
         text: buffer.getText()
-      }
-    }
 
     # If we already have a job for this work piggy-back on it with our callback.
     return if @constructor.piggybackExistingJob(job)
@@ -41,10 +39,9 @@ class SpellCheckTask
     @constructor.startNextJob() if @constructor.jobs.length is 1
 
   @piggybackExistingJob: (newJob) ->
-    if (@jobs.length > 0)
-      for i in [0..@jobs.length-1]
-        job = @jobs[i]
-        if (@isDuplicateRequest(job, newJob))
+    if @jobs.length > 0
+      for job in @jobs
+        if @isDuplicateRequest(job, newJob)
           job.callbacks = job.callbacks.concat(newJob.callbacks)
           return true
     return false
@@ -62,11 +59,8 @@ class SpellCheckTask
 
   @startNextJob: ->
     job = @jobs[0]
-    job.task?.start job.args, @dispatchMisspellings
+    job.manager.check(job.args, job.args.text).then (results) =>
+      @removeFromArray(@jobs, (j) -> j.args.id is job.args.id)
+      callback(results.misspellings) for callback in job.callbacks
 
-  @dispatchMisspellings: (data) =>
-    job = @removeFromArray(@jobs, (j) -> j.args.id is data.id)
-    for callback in job.callbacks
-      callback(data.misspellings)
-
-    @startNextJob() if @jobs.length > 0
+      @startNextJob() if @jobs.length > 0
