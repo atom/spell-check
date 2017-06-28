@@ -38,17 +38,13 @@ class SpellCheckTask
 
     # Do the work now if not busy or queue it for later.
     @constructor.jobs.unshift(job)
-    if @constructor.jobs.length is 1
-      @constructor.startNextJob()
-    else
-      console.log('Queuing work ' + job.args.id)
+    @constructor.startNextJob() if @constructor.jobs.length is 1
 
   @piggybackExistingJob: (newJob) ->
     if (@jobs.length > 0)
       for i in [0..@jobs.length-1]
         job = @jobs[i]
         if (@isDuplicateRequest(job, newJob))
-          console.log('Piggybacking ' + job.args.relativePath + ' on ' + job.args.id)
           job.callbacks = job.callbacks.concat(newJob.callbacks)
           return true
     return false
@@ -66,16 +62,11 @@ class SpellCheckTask
 
   @startNextJob: () ->
     job = @jobs[0]
-    console.log('Starting work ' + job.args.id)
     job.task?.start job.args, @dispatchMisspellings
 
   @dispatchMisspellings: (data) =>
-    console.log('Completed work ' + data.id)
     job = @removeFromArray(@jobs, (j) -> j.args.id is data.id)
     for callback in job.callbacks
       callback(data.misspellings)
 
-    if @jobs.length > 0
-      @startNextJob()
-    else
-      console.log('Queue is empty')
+    @startNextJob() if @jobs.length > 0
