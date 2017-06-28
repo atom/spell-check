@@ -33,12 +33,8 @@ class SpellCheckTask
       }
     }
 
-    if (@constructor.jobs.length > 0)
-      for i in [0..@constructor.jobs.length-1]
-        if (@isDuplicateRequest(@constructor.jobs[i], job))
-          console.log('De-duping ' + relativePath)
-          @constructor.jobs[i].callbacks.push(onDidSpellCheck)
-          return
+    # If we already have a job for this work piggy-back on it with our callback.
+    return if @constructor.piggybackExistingJob(job)
 
     # Do the work now if not busy or queue it for later.
     @constructor.jobs.unshift(job)
@@ -47,7 +43,17 @@ class SpellCheckTask
     else
       console.log('Queuing work ' + job.args.id)
 
-  isDuplicateRequest: (a, b) ->
+  @piggybackExistingJob: (newJob) ->
+    if (@jobs.length > 0)
+      for i in [0..@jobs.length-1]
+        job = @jobs[i]
+        if (@isDuplicateRequest(job, newJob))
+          console.log('Piggybacking ' + job.args.relativePath + ' on ' + job.args.id)
+          job.callbacks = job.callbacks.concat(newJob.callbacks)
+          return true
+    return false
+
+  @isDuplicateRequest: (a, b) ->
     a.args.projectPath is b.args.projectPath and a.args.relativePath is b.args.relativePath
 
   @removeFromArray: (array, predicate) ->
