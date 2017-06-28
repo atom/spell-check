@@ -1,9 +1,14 @@
-language: objective-c
+sudo: false
+os: osx
 
 notifications:
   email:
     on_success: never
     on_failure: change
+
+env:
+  CXX: g++-4.8
+  CC: gcc-4.8
 
 script: 'curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh'
 
