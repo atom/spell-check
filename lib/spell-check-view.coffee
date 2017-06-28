@@ -84,7 +84,7 @@ class SpellCheckView
       @markerLayer.markBufferRange(misspelling, {invalidate: 'touch'})
 
   updateMisspellings: ->
-    @taskWrapper.start @editor.buffer, (misspellings) =>
+    @taskWrapper.start @editor, (misspellings) =>
       @destroyMarkers()
       @addMarkers(misspellings) if @buffer?
 

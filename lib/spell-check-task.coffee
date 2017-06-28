@@ -11,8 +11,9 @@ class SpellCheckTask
   terminate: ->
     @constructor.removeFromArray(@constructor.jobs, (j) -> j.args.id is @id)
 
-  start: (buffer, onDidSpellCheck) ->
+  start: (editor, onDidSpellCheck) ->
     # Figure out the paths since we need that for checkers that are project-specific.
+    buffer = editor.getBuffer()
     projectPath = null
     relativePath = null
     if buffer?.file?.path
@@ -25,6 +26,7 @@ class SpellCheckTask
     job =
       manager: @manager
       callbacks: [onDidSpellCheck]
+      editorId: editor.id
       args:
         id: @id
         projectPath: projectPath
@@ -58,7 +60,9 @@ class SpellCheckTask
           return found
 
   @startNextJob: ->
-    job = @jobs[0]
+    activeEditorId = atom.workspace.getActiveTextEditor()?.id
+    job = @jobs.find((j) => j.editorId is activeEditorId) or @jobs[0]
+
     job.manager.check(job.args, job.args.text).then (results) =>
       @removeFromArray(@jobs, (j) -> j.args.id is job.args.id)
       callback(results.misspellings) for callback in job.callbacks
