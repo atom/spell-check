@@ -8,7 +8,6 @@ class SpellCheckerManager
   knownWords: []
   addKnownWords: false
   knownWordsChecker: null
-  isTask: false
 
   setGlobalArgs: (data) ->
     # We need underscore to do the array comparisons.
@@ -16,7 +15,6 @@ class SpellCheckerManager
 
     # Check to see if any values have changed. When they have, they clear out
     # the applicable checker which forces a reload.
-    changed = false
     removeLocaleCheckers = false
     removeKnownWordsChecker = false
 
@@ -35,11 +33,9 @@ class SpellCheckerManager
     if not _.isEqual(@knownWords, data.knownWords)
       @knownWords = data.knownWords
       removeKnownWordsChecker = true
-      changed = true
     if @addKnownWords isnt data.addKnownWords
       @addKnownWords = data.addKnownWords
       removeKnownWordsChecker = true
-      # We don't update `changed` since it doesn't affect the plugins.
 
     # If we made a change to the checkers, we need to remove them from the
     # system so they can be reinitialized.
@@ -48,22 +44,10 @@ class SpellCheckerManager
       for checker in checkers
         @removeSpellChecker checker
       @localeCheckers = null
-      changed = true
 
     if removeKnownWordsChecker and @knownWordsChecker
       @removeSpellChecker @knownWordsChecker
       @knownWordsChecker = null
-      changed = true
-
-    # If we had any change to the system, we need to send a message back to the
-    # main process so it can trigger a recheck which then calls `init` which
-    # then locales any changed locales or known words checker.
-    if changed
-      @emitSettingsChanged()
-
-  emitSettingsChanged: ->
-    if @isTask
-      emit("spell-check:settings-changed")
 
   addCheckerPath: (checkerPath) ->
     checker = require checkerPath
@@ -72,10 +56,6 @@ class SpellCheckerManager
   addPluginChecker: (checker) ->
     # Add the spell checker to the list.
     @addSpellChecker checker
-
-    # We only emit a settings change for plugins since the core checkers are
-    # handled in a different manner.
-    @emitSettingsChanged()
 
   addSpellChecker: (checker) ->
     @checkers.push checker
