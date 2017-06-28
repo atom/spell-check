@@ -104,8 +104,7 @@ module.exports =
       if view['active']
         view['view'].updateMisspellings()
 
-  # Retrieves, creating if required, a spelling manager for use with
-  # synchronous operations such as retrieving corrections.
+  # Retrieves, creating if required, the single SpellingManager instance.
   getInstance: (globalArgs) ->
     if not @instance
       SpellCheckerManager = require './spell-check-manager'
