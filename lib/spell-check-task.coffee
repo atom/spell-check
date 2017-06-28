@@ -60,7 +60,7 @@ class SpellCheckTask
           array.splice(i, 1)
           return found
 
-  @startNextJob: () ->
+  @startNextJob: ->
     job = @jobs[0]
     job.task?.start job.args, @dispatchMisspellings
 
