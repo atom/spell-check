@@ -60,10 +60,10 @@ module.exports =
 
       # save the {editor} into a map
       editorId = editor.id
-      spellCheckViews[editorId] = {}
-      spellCheckViews[editorId]['view'] = spellCheckView
-      spellCheckViews[editorId]['active'] = true
-      spellCheckViews[editorId]['editor'] = editor
+      spellCheckViews[editorId] =
+        view: spellCheckView
+        active: true
+        editor: editor
       @viewsByEditor.set editor, spellCheckView
 
   deactivate: ->
