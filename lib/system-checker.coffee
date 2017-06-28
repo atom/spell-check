@@ -30,7 +30,7 @@ class SystemChecker
 
   check: (args, text) ->
     @deferredInit()
-    @spellchecker.checkSpellingAsync(text).then (incorrect) =>
+    @spellchecker.checkSpellingAsync(text).then (incorrect) ->
       {invertIncorrectAsCorrect: true, incorrect}
 
   suggest: (args, word) ->
