@@ -6,10 +6,11 @@ CorrectionsView = null
 
 module.exports =
 class SpellCheckView
-  constructor: (@editor, @task, @spellCheckModule, @getInstance) ->
+  constructor: (@editor, @spellCheckModule, manager) ->
     @disposables = new CompositeDisposable
     @initializeMarkerLayer()
-    @taskWrapper = new SpellCheckTask @task
+
+    @taskWrapper = new SpellCheckTask manager
 
     @correctMisspellingCommand = atom.commands.add atom.views.getView(@editor), 'spell-check:correct-misspelling', =>
       if marker = @markerLayer.findMarkers({containsBufferPosition: @editor.getCursorBufferPosition()})[0]
@@ -83,14 +84,9 @@ class SpellCheckView
       @markerLayer.markBufferRange(misspelling, {invalidate: 'touch'})
 
   updateMisspellings: ->
-    # Task::start can throw errors atom/atom#3326
-    try
-      @taskWrapper.start @editor.buffer, (misspellings) =>
-        @destroyMarkers()
-        @addMarkers(misspellings) if @buffer?
-
-    catch error
-      console.warn('Error starting spell check task', error.stack ? error)
+    @taskWrapper.start @editor.buffer, (misspellings) =>
+      @destroyMarkers()
+      @addMarkers(misspellings) if @buffer?
 
   getCorrections: (marker) ->
     # Build up the arguments object for this buffer and text.

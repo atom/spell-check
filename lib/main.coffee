@@ -56,7 +56,7 @@ module.exports =
       # active editor. A reference to this entire module is passed right now
       # because a direct reference to @contextMenuEntries wasn't updating
       # properly between different SpellCheckView's.
-      spellCheckView = new SpellCheckView(editor, @task, this, => @getInstance @globalArgs)
+      spellCheckView = new SpellCheckView(editor, this, manager)
 
       # save the {editor} into a map
       editorId = editor.id
