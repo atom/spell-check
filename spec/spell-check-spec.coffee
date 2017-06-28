@@ -1,3 +1,5 @@
+SpellCheckTask = require '../lib/spell-check-task'
+
 describe "Spell check", ->
   [workspaceElement, editor, editorElement, spellCheckModule] = []
 
@@ -30,6 +32,9 @@ describe "Spell check", ->
       jasmine.attachToDOM(workspaceElement)
       editor = atom.workspace.getActiveTextEditor()
       editorElement = atom.views.getView(editor)
+
+  afterEach ->
+    SpellCheckTask.clear()
 
   it "decorates all misspelled words", ->
     atom.config.set('spell-check.locales', ['en-US'])

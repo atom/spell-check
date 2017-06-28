@@ -64,3 +64,6 @@ class SpellCheckTask
       callback(results.misspellings) for callback in job.callbacks
 
       @startNextJob() if @jobs.length > 0
+
+  @clear: ->
+    @jobs = []
