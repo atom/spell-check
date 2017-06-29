@@ -7,8 +7,10 @@ notifications:
     on_failure: change
 
 env:
-  CXX: g++-4.8
-  CC: gcc-4.8
+  global:
+  - npm_config_clang=1
+  - CC=clang
+  - CXX=clang++
 
 script: 'curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh'
 
