@@ -61,7 +61,7 @@ class SpellCheckTask
 
   @startNextJob: ->
     activeEditorId = atom.workspace.getActiveTextEditor()?.id
-    job = @jobs.find((j) => j.editorId is activeEditorId) or @jobs[0]
+    job = @jobs.find((j) -> j.editorId is activeEditorId) or @jobs[0]
 
     job.manager.check(job.args, job.args.text).then (results) =>
       @removeFromArray(@jobs, (j) -> j.args.id is job.args.id)
