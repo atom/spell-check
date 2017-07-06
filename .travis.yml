@@ -1,9 +1,17 @@
-language: objective-c
+language: bash
+sudo: false
+os: osx
 
 notifications:
   email:
     on_success: never
     on_failure: change
+
+env:
+  global:
+  - npm_config_clang=1
+  - CC=clang
+  - CXX=clang++
 
 script: 'curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh'
 
