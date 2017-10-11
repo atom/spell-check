@@ -80,8 +80,14 @@ class SpellCheckView
     @initializeMarkerLayer()
 
   addMarkers: (misspellings) ->
+    excludedGrammars = atom.config.get('spell-check.excludedGrammars')
     for misspelling in misspellings
-      @markerLayer.markBufferRange(misspelling, {invalidate: 'touch'})
+      misspelling_scopes = @editor.scopeDescriptorForBufferPosition(misspelling[0]).getScopesArray()
+      matches = misspelling_scopes.filter (scope) ->
+        excludedGrammars.filter (excluded) ->
+          new RegExp(excluded).test(scope)
+        .length > 0
+      if matches.length is 0 then @markerLayer.markBufferRange(misspelling, {invalidate: 'touch'})
 
   updateMisspellings: ->
     @taskWrapper.start @editor, (misspellings) =>
