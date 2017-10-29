@@ -417,3 +417,34 @@ describe "Spell check", ->
       runs ->
         editor.destroy()
         expect(getMisspellingMarkers().length).toBe 0
+
+    it "treats unknown Unicode words as incorrect", ->
+      spellCheckModule.consumeSpellCheckers require.resolve('./eot-spec-checker.coffee')
+      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', true)
+      editor.setText('こんいちば eot')
+      atom.config.set('spell-check.grammars', ['source.js'])
+      expect(atom.config.get('spell-check.knownWords').length).toBe 0
+
+      waitsFor ->
+        getMisspellingMarkers().length is 2
+
+      runs ->
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe 0
+
+    it "treats known Unicode words as correct", ->
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-unicode-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./eot-spec-checker.coffee')
+      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', true)
+      editor.setText('こんいちば eot')
+      atom.config.set('spell-check.grammars', ['source.js'])
+      expect(atom.config.get('spell-check.knownWords').length).toBe 0
+
+      waitsFor ->
+        getMisspellingMarkers().length is 1
+
+      runs ->
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe 0
