@@ -1,4 +1,5 @@
 SpellCheckTask = require '../lib/spell-check-task'
+{sep} = require 'path'
 
 describe "Spell check", ->
   [workspaceElement, editor, editorElement, spellCheckModule] = []
@@ -19,7 +20,7 @@ describe "Spell check", ->
       atom.packages.activatePackage('language-javascript')
 
     waitsForPromise ->
-      atom.workspace.open('sample.js')
+      atom.workspace.open("#{__dirname}#{sep}sample.js")
 
     waitsForPromise ->
       atom.packages.activatePackage('spell-check').then ({mainModule}) ->
