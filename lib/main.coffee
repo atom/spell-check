@@ -42,6 +42,8 @@ module.exports =
     @viewsByEditor = new WeakMap
     @contextMenuEntries = []
     @subs.add atom.workspace.observeTextEditors (editor) =>
+      return if @viewsByEditor.has(editor)
+
       # For now, just don't spell check large files.
       return if editor.largeFileMode
 
