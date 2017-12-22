@@ -66,6 +66,14 @@ module.exports =
         view: spellCheckView
         active: true
         editor: editor
+
+      # Make sure that the view is cleaned up on editor destruction.
+      destroySub = editor.onDidDestroy () =>
+        spellCheckView.destroy()
+        delete spellCheckViews[editorId]
+        @subs.remove destroySub
+      @subs.add destroySub
+
       @viewsByEditor.set editor, spellCheckView
 
   deactivate: ->

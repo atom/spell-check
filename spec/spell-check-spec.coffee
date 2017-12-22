@@ -290,6 +290,8 @@ describe "Spell check", ->
       runs ->
         editor.destroy()
         expect(getMisspellingMarkers().length).toBe 0
+        # Check that all the views have been cleaned up.
+        expect(spellCheckModule.updateViews().length).toBe 0
 
   describe "when using checker plugins", ->
     it "no opinion on input means correctly spells", ->
