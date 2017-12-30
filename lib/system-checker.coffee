@@ -74,8 +74,7 @@ class SystemChecker
 
     # Try the packaged library inside the node_modules. `getDictionaryPath` is
     # not available, so we have to fake it. This will only work for en-US.
-    path = require 'path'
-    vendor = path.join __dirname, "..", "node_modules", "spellchecker", "vendor", "hunspell_dictionaries"
+    vendor = spellchecker.getDictionaryPath()
     if @spellchecker.setDictionary @locale, vendor
       return
 
