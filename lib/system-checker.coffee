@@ -72,8 +72,6 @@ class SystemChecker
       if @spellchecker.setDictionary @locale, "/System/Library/Spelling"
         return
 
-    # Try the packaged library inside the node_modules. `getDictionaryPath` is
-    # not available, so we have to fake it. This will only work for en-US.
     vendor = spellchecker.getDictionaryPath()
     if @spellchecker.setDictionary @locale, vendor
       return
