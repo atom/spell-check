@@ -68,7 +68,7 @@ module.exports =
         editor: editor
 
       # Make sure that the view is cleaned up on editor destruction.
-      destroySub = editor.onDidDestroy () =>
+      destroySub = editor.onDidDestroy =>
         spellCheckView.destroy()
         delete spellCheckViews[editorId]
         @subs.remove destroySub
