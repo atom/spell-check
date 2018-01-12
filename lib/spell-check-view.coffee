@@ -81,7 +81,9 @@ class SpellCheckView
 
   addMarkers: (misspellings) ->
     for misspelling in misspellings
-      @markerLayer.markBufferRange(misspelling, {invalidate: 'touch'})
+      scope = @editor.scopeDescriptorForBufferPosition(misspelling[0])
+      unless @scopeIsExcluded(scope)
+        @markerLayer.markBufferRange(misspelling, {invalidate: 'touch'})
 
   updateMisspellings: ->
     @taskWrapper.start @editor, (misspellings) =>
@@ -169,3 +171,9 @@ class SpellCheckView
       entry.menuItem?.dispose()
 
     @spellCheckModule.contextMenuEntries = []
+
+  scopeIsExcluded: (scopeDescriptor, excludedScopes) ->
+    @spellCheckModule.excludedScopeRegexLists.some (regexList) ->
+      scopeDescriptor.scopes.some (scopeName) ->
+        regexList.every (regex) ->
+          regex.test(scopeName)

@@ -20,6 +20,13 @@ module.exports =
 
     manager = @getInstance @globalArgs
 
+    @excludedScopeRegexLists = []
+    @subs.add atom.config.onDidChange 'spell-check.excludedScopes', ({newValue}) =>
+      @excludedScopeRegexLists = newValue.map (excludedScope) ->
+        for className in excludedScope.split(/\s+/)[0].split('.') when className
+          new RegExp("\\b#{className}\\b")
+      @updateViews()
+
     @subs.add atom.config.onDidChange 'spell-check.locales', ({newValue, oldValue}) =>
       @globalArgs.locales = newValue
       manager.setGlobalArgs @globalArgs
