@@ -27,13 +27,22 @@
         "text.plain.null-grammar"
       ],
       "description": "List of scopes for languages which will be checked for misspellings. See [the README](https://github.com/atom/spell-check#spell-check-package) for more information on finding the correct scope for a specific language.",
-      "order": "1"
+      "order": 1
+    },
+    "excludedScopes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of sub-scopes that will be ignored. Specify the most detailed scope to avoid ignoring otherwise relevant text. The scopes will be parsed as regular expressions. See [the README](https://github.com/atom/spell-check#spell-check-package-) for more information on finding the correct scope for a specific language.",
+      "order": 2
     },
     "useLocales": {
       "type": "boolean",
       "default": "true",
       "description": "If unchecked, then the locales below will not be used for spell-checking and no spell-checking using system dictionaries will be provided.",
-      "order": "2"
+      "order": 3
     },
     "locales": {
       "type": "array",
@@ -42,7 +51,7 @@
         "type": "string"
       },
       "description": "List of locales to use for the system spell-checking. Examples would be `en-US` or `de-DE`. For Windows, the appropriate language must be installed using *Region and language settings*. If this is blank, then the default language for the user will be used.",
-      "order": 3
+      "order": 4
     },
     "localePaths": {
       "type": "array",
@@ -51,19 +60,19 @@
         "type": "string"
       },
       "description": "List of additional paths to search for dictionary files. If a locale cannot be found in these, the internal code will attempt to find it using common search paths. This is used for Linux and OS X.",
-      "order": 4
+      "order": 5
     },
     "knownWords": {
       "type": "array",
       "default": [],
       "description": "List words that are considered correct even if they do not appear in any other dictionary. Words with capitals or ones that start with `!` are case-sensitive.",
-      "order": 5
+      "order": 6
     },
     "addKnownWords": {
       "type": "boolean",
       "default": false,
       "description": "If checked, then the suggestions will include options to add to the known words list above.",
-      "order": 6
+      "order": 7
     }
   },
   "devDependencies": {

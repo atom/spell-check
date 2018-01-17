@@ -64,6 +64,56 @@ describe "Spell check", ->
         expect(textForMarker(misspellingMarkers[1])).toEqual "bok"
         true
 
+  it "allows certains scopes to be excluded from spell checking", ->
+    editor.setText("""
+      speledWrong = 5;
+      function speledWrong() {}
+      class SpeledWrong {}
+    """)
+
+    atom.config.set('spell-check.grammars', ['source.js'])
+    atom.config.set('spell-check.excludedScopes', ['.function.entity'])
+
+    markers = []
+    waitsFor 'initial markers to appear', ->
+      markers = getMisspellingMarkers()
+      markers.length > 0
+
+    runs ->
+      expect(markers.map (marker) -> marker.getBufferRange()).toEqual([
+        [[0, 0], [0, 11]],
+        [[2, 6], [2, 17]]
+      ])
+
+    runs ->
+      atom.config.set('spell-check.excludedScopes', ['.functio.entity'])
+
+    waitsFor 'markers to update', ->
+      markers = getMisspellingMarkers()
+      markers.length is 3
+
+    runs ->
+      expect(markers.map (marker) -> marker.getBufferRange()).toEqual([
+        [[0, 0], [0, 11]],
+        [[1, 9], [1, 20]],
+        [[2, 6], [2, 17]]
+      ])
+
+    runs ->
+      atom.config.set('spell-check.excludedScopes', [
+        '.meta.class'
+      ])
+
+    waitsFor 'markers to update', ->
+      markers = getMisspellingMarkers()
+      markers.length is 2
+
+    runs ->
+      expect(markers.map (marker) -> marker.getBufferRange()).toEqual([
+        [[0, 0], [0, 11]],
+        [[1, 9], [1, 20]],
+      ])
+
   it "allow entering of known words", ->
     atom.config.set('spell-check.knownWords', ['GitHub', '!github', 'codez'])
     atom.config.set('spell-check.locales', ['en-US'])
