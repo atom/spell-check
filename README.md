@@ -21,7 +21,7 @@ To enable _Spell Check_ for your current file type: put your cursor in the file,
 
 To change the language of the dictionary, set the "Locales" configuration option to the IETF tag (en-US, fr-FR, etc). More than one language can be used, simply separate them by commas.
 
-For Windows 8 and 10, you must install the language using the regional settings before the language can be chosen inside Atom.
+For Windows 8 and 10, this package uses the Windows spell checker, so you must install the language using the regional settings before the language can be chosen inside Atom. Otherwise you can set the `SPELLCHECKER_PREFER_HUNSPELL` environment variable to request the use of the built-in hunspell spell checking library.
 
 ## Plugins
 
