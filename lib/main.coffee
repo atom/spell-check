@@ -20,6 +20,13 @@ module.exports =
 
     manager = @getInstance @globalArgs
 
+    @excludedScopeRegexLists = []
+    @subs.add atom.config.onDidChange 'spell-check.excludedScopes', ({newValue}) =>
+      @excludedScopeRegexLists = newValue.map (excludedScope) ->
+        for className in excludedScope.split(/\s+/)[0].split('.') when className
+          new RegExp("\\b#{className}\\b")
+      @updateViews()
+
     @subs.add atom.config.onDidChange 'spell-check.locales', ({newValue, oldValue}) =>
       @globalArgs.locales = newValue
       manager.setGlobalArgs @globalArgs
@@ -42,6 +49,8 @@ module.exports =
     @viewsByEditor = new WeakMap
     @contextMenuEntries = []
     @subs.add atom.workspace.observeTextEditors (editor) =>
+      return if @viewsByEditor.has(editor)
+
       # For now, just don't spell check large files.
       return if editor.largeFileMode
 
@@ -64,6 +73,14 @@ module.exports =
         view: spellCheckView
         active: true
         editor: editor
+
+      # Make sure that the view is cleaned up on editor destruction.
+      destroySub = editor.onDidDestroy =>
+        spellCheckView.destroy()
+        delete spellCheckViews[editorId]
+        @subs.remove destroySub
+      @subs.add destroySub
+
       @viewsByEditor.set editor, spellCheckView
 
   deactivate: ->
