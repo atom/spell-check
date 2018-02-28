@@ -1,3 +1,6 @@
+# This is functionally identical to the known words checker except that it
+# is intended to be immutable while running tests. This means the constructor
+# adds the words instead of calling `add` directly.
 class SpecChecker
   spelling: null
   checker: null

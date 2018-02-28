@@ -1,4 +1,5 @@
 SpellCheckTask = require '../lib/spell-check-task'
+{sep} = require 'path'
 
 describe "Spell check", ->
   [workspaceElement, editor, editorElement, spellCheckModule] = []
@@ -19,7 +20,7 @@ describe "Spell check", ->
       atom.packages.activatePackage('language-javascript')
 
     waitsForPromise ->
-      atom.workspace.open('sample.js')
+      atom.workspace.open("#{__dirname}#{sep}sample.js")
 
     waitsForPromise ->
       atom.packages.activatePackage('spell-check').then ({mainModule}) ->
@@ -71,6 +72,7 @@ describe "Spell check", ->
       class SpeledWrong {}
     """)
 
+    atom.config.set('spell-check.locales', ['en-US'])
     atom.config.set('spell-check.grammars', ['source.js'])
     atom.config.set('spell-check.excludedScopes', ['.function.entity'])
 
@@ -130,6 +132,7 @@ describe "Spell check", ->
   it "hides decorations when a misspelled word is edited", ->
     editor.setText('notaword')
     advanceClock(editor.getBuffer().getStoppedChangingDelay())
+    atom.config.set('spell-check.locales', ['en-US'])
     atom.config.set('spell-check.grammars', ['source.js'])
 
     waitsFor ->
@@ -465,6 +468,41 @@ describe "Spell check", ->
 
       waitsFor ->
         getMisspellingMarkers().length is 2
+
+      runs ->
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe 0
+
+    it "treats unknown Unicode words as incorrect", ->
+      spellCheckModule.consumeSpellCheckers require.resolve('./eot-spec-checker.coffee')
+      atom.config.set('spell-check.locales', ['en-US', 'ru-RU'])
+      atom.config.set('spell-check.useLocales', true)
+      editor.setText('абырг eot')
+      atom.config.set('spell-check.grammars', ['source.js'])
+      expect(atom.config.get('spell-check.knownWords').length).toBe 0
+
+      markers = null
+      waitsFor ->
+        (markers = getMisspellingMarkers()).length > 0
+
+      runs ->
+        expect(markers[0].getBufferRange()).toEqual([[0, 0], [0, 5]])
+
+      runs ->
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe 0
+
+    it "treats known Unicode words as correct", ->
+      spellCheckModule.consumeSpellCheckers require.resolve('./known-unicode-spec-checker.coffee')
+      spellCheckModule.consumeSpellCheckers require.resolve('./eot-spec-checker.coffee')
+      atom.config.set('spell-check.locales', ['en-US', 'ru-RU'])
+      atom.config.set('spell-check.useLocales', true)
+      editor.setText('абырг eot')
+      atom.config.set('spell-check.grammars', ['source.js'])
+      expect(atom.config.get('spell-check.knownWords').length).toBe 0
+
+      waitsFor ->
+        getMisspellingMarkers().length is 1
 
       runs ->
         editor.destroy()
