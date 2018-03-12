@@ -11,7 +11,6 @@ describe('Spell check', function () {
 
   beforeEach(async function () {
     jasmine.useRealClock()
-    atom.config.set('core.useTreeSitterParsers', false)
 
     workspaceElement = atom.views.getView(atom.workspace)
     await atom.packages.activatePackage('language-text')
