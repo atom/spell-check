@@ -9,6 +9,9 @@ const path = require('path')
 // webworker-threads is a dependency of natural, which is a dependency of
 // spelling-manager, which is a dependency of this package.
 // See: https://github.com/atom/spell-check/issues/67#issuecomment-380298141
+//
+// TODO Revert bceff78 once the spelling-manager module no longer depends on
+// natural. See https://github.com/atom/spell-check/issues/67#issuecomment-380471302.
 const webworkerThreadsPath = path.join('node_modules', 'webworker-threads')
 const rimraf = require('rimraf')
 rimraf.sync(webworkerThreadsPath)
