@@ -7,6 +7,7 @@
     "atom-select-list": "^0.7.0",
     "multi-integer-range": "^2.0.0",
     "natural": "^0.4.0",
+    "rimraf": "^2.6.2",
     "spellchecker": "^3.4.4",
     "spelling-manager": "^1.0.0",
     "underscore-plus": "^1"
@@ -84,5 +85,8 @@
         "^1.0.0": "consumeSpellCheckers"
       }
     }
+  },
+  "scripts": {
+    "postinstall": "node script/postinstall.js"
   }
 }
