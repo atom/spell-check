@@ -45,42 +45,50 @@ class SystemChecker
     # Initialize the spell checker which can take some time.
     @spellchecker = new spellchecker.Spellchecker
 
+    # Build up a list of paths we are checking so we can report them fully
+    # to the user if we fail.
+    searchPaths = []
+
     # Windows uses its own API and the paths are unimportant, only attempting
     # to load it works.
     if /win32/.test process.platform
-      if @spellchecker.setDictionary @locale, "C:\\"
-        return
+      searchPaths.push "C:\\"
 
     # Check the paths supplied by the user.
     for path in @paths
-      if @spellchecker.setDictionary @locale, path
-        return
+      searchPaths.push path
 
     # For Linux, we have to search the directory paths to find the dictionary.
     if /linux/.test process.platform
-      if @spellchecker.setDictionary @locale, "/usr/share/hunspell"
-        return
-      if @spellchecker.setDictionary @locale, "/usr/share/myspell"
-        return
-      if @spellchecker.setDictionary @locale, "/usr/share/myspell/dicts"
-        return
+      searchPaths.push "/usr/share/hunspell"
+      searchPaths.push "/usr/share/myspell"
+      searchPaths.push "/usr/share/myspell/dicts"
 
     # OS X uses the following paths.
     if /darwin/.test process.platform
-      if @spellchecker.setDictionary @locale, "/"
-        return
-      if @spellchecker.setDictionary @locale, "/System/Library/Spelling"
-        return
+      searchPaths.push "/"
+      searchPaths.push "/System/Library/Spelling"
 
     # Try the packaged library inside the node_modules. `getDictionaryPath` is
     # not available, so we have to fake it. This will only work for en-US.
-    vendor = spellchecker.getDictionaryPath()
-    if @spellchecker.setDictionary @locale, vendor
-      return
+    searchPaths.push spellchecker.getDictionaryPath()
+
+    # Attempt to load all the paths for the dictionary until we find one.
+    for path in searchPaths
+      if @spellchecker.setDictionary @locale, path
+        return
 
     # If we fell through all the if blocks, then we couldn't load the dictionary.
     @enabled = false
-    @reason = "Cannot find dictionary for " + @locale + "."
-    console.log @getId(), "Can't load " + @locale + ": " + @reason
+    @reason = "Cannot load the system dictionary for `" + @locale + "`."
+    message = @reason \
+      + " Checked the following paths for dictionary files:\n* " \
+      + searchPaths.join("\n* ")
+    noticesMode = atom.config.get('spell-check.noticesMode')
+
+    if noticesMode is "console" or noticesMode is "both"
+      console.log @getId(), message
+    if noticesMode is "popup" or noticesMode is "both"
+      atom.notifications.addError message
 
 module.exports = SystemChecker
