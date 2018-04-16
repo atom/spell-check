@@ -73,6 +73,17 @@
       "default": false,
       "description": "If checked, then the suggestions will include options to add to the known words list above.",
       "order": 7
+    },
+    "noticesMode": {
+      "type": "string",
+      "default": "both",
+      "description": "Choose where loading errors and other notices are displayed: popup, console, or both.",
+      "order": 8,
+      "enum": [
+        { "value": "both", "description": "Display notices in popups and in the console" },
+        { "value": "popup", "description": "Display notices only in popups" },
+        { "value": "console", "description": "Display notices only on the console" }
+      ]
     }
   },
   "devDependencies": {
