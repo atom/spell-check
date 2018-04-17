@@ -4,6 +4,7 @@
   "main": "./lib/main",
   "description": "Highlights misspelled words and shows possible corrections.",
   "dependencies": {
+    "atom-pathspec": "^0.0.0",
     "atom-select-list": "^0.7.0",
     "multi-integer-range": "^2.0.0",
     "natural": "^0.4.0",
@@ -80,9 +81,18 @@
       "description": "Choose where loading errors and other notices are displayed: popup, console, or both.",
       "order": 8,
       "enum": [
-        { "value": "both", "description": "Display notices in popups and in the console" },
-        { "value": "popup", "description": "Display notices only in popups" },
-        { "value": "console", "description": "Display notices only on the console" }
+        {
+          "value": "both",
+          "description": "Display notices in popups and in the console"
+        },
+        {
+          "value": "popup",
+          "description": "Display notices only in popups"
+        },
+        {
+          "value": "console",
+          "description": "Display notices only on the console"
+        }
       ]
     }
   },

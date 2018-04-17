@@ -1,4 +1,5 @@
 spellchecker = require 'spellchecker'
+pathspec = require 'atom-pathspec'
 
 class SystemChecker
   spellchecker: null
@@ -56,7 +57,7 @@ class SystemChecker
 
     # Check the paths supplied by the user.
     for path in @paths
-      searchPaths.push path
+      searchPaths.push pathspec.getPath(path)
 
     # For Linux, we have to search the directory paths to find the dictionary.
     if /linux/.test process.platform
