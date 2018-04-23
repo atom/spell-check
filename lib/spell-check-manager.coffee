@@ -50,7 +50,16 @@ class SpellCheckerManager
       @knownWordsChecker = null
 
   addCheckerPath: (checkerPath) ->
+    # Load the given path via require.
     checker = require checkerPath
+
+    # If this a ES6 module, then we need to construct it. We require
+    # the coders to export it as `default` since we don't have another
+    # way of figuring out which object to instantiate.
+    if checker.default
+       checker = new checker.default()
+
+    # Add in the resulting checker.
     @addPluginChecker checker
 
   addPluginChecker: (checker) ->
