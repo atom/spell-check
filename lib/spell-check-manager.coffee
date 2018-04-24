@@ -57,7 +57,7 @@ class SpellCheckerManager
     # the coders to export it as `default` since we don't have another
     # way of figuring out which object to instantiate.
     if checker.default
-       checker = new checker.default()
+      checker = new checker.default()
 
     # Add in the resulting checker.
     @addPluginChecker checker
