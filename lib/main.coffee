@@ -21,8 +21,8 @@ module.exports =
     manager = @getInstance @globalArgs
 
     @excludedScopeRegexLists = []
-    @subs.add atom.config.onDidChange 'spell-check.excludedScopes', ({newValue}) =>
-      @excludedScopeRegexLists = newValue.map (excludedScope) ->
+    @subs.add atom.config.observe 'spell-check.excludedScopes', (excludedScopes) =>
+      @excludedScopeRegexLists = excludedScopes.map (excludedScope) ->
         for className in excludedScope.split(/\s+/)[0].split('.') when className
           new RegExp("\\b#{className}\\b")
       @updateViews()

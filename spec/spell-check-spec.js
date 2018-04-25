@@ -58,7 +58,7 @@ describe('Spell check', function () {
       'class SpeledWrong {}'
     )
     atom.config.set('spell-check.locales', ['en-US'])
-    atom.config.set('spell-check.grammars', ['source.js'])
+    atom.config.set('spell-check.grammars', ['source.js', 'text.plain.null-grammar'])
     atom.config.set('spell-check.excludedScopes', ['.function.entity'])
 
     {
@@ -88,6 +88,17 @@ describe('Spell check', function () {
       expect(markers.map(marker => marker.getBufferRange())).toEqual([
         [[0, 0], [0, 11]],
         [[1, 9], [1, 20]]
+      ])
+    }
+
+    {
+      atom.grammars.assignLanguageMode(editor, null)
+      await conditionPromise(() => getMisspellingMarkers().length === 3)
+      const markers = getMisspellingMarkers()
+      expect(markers.map(marker => marker.getBufferRange())).toEqual([
+        [[0, 0], [0, 11]],
+        [[1, 9], [1, 20]],
+        [[2, 6], [2, 17]]
       ])
     }
   })
