@@ -1,6 +1,6 @@
 {
   "name": "spell-check",
-  "version": "0.73.3",
+  "version": "0.73.4",
   "main": "./lib/main",
   "description": "Highlights misspelled words and shows possible corrections.",
   "dependencies": {
@@ -80,9 +80,18 @@
       "description": "Choose where loading errors and other notices are displayed: popup, console, or both.",
       "order": 8,
       "enum": [
-        { "value": "both", "description": "Display notices in popups and in the console" },
-        { "value": "popup", "description": "Display notices only in popups" },
-        { "value": "console", "description": "Display notices only on the console" }
+        {
+          "value": "both",
+          "description": "Display notices in popups and in the console"
+        },
+        {
+          "value": "popup",
+          "description": "Display notices only in popups"
+        },
+        {
+          "value": "console",
+          "description": "Display notices only on the console"
+        }
       ]
     }
   },
