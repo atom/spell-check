@@ -67,7 +67,10 @@ class SpellCheckView
 
     if @spellCheckCurrentGrammar()
       @buffer = @editor.getBuffer()
-      @bufferDisposable = @buffer.onDidStopChanging => @updateMisspellings()
+      @bufferDisposable = new CompositeDisposable(
+        @buffer.onDidStopChanging => @updateMisspellings(),
+        @editor.onDidTokenize => @updateMisspellings()
+      )
       @updateMisspellings()
 
   spellCheckCurrentGrammar: ->
