@@ -82,14 +82,34 @@ class SystemChecker
     # If we fell through all the if blocks, then we couldn't load the dictionary.
     @enabled = false
     @reason = "Cannot load the system dictionary for `" + @locale + "`."
-    message = @reason \
-      + " Checked the following paths for dictionary files:\n* " \
+    message = "The package `spell-check` cannot load the " \
+      + "system dictionary for `" \
+      + @locale + "`." \
+      + " See the settings for ways of changing the languages used, " \
+      + " resolving missing dictionaries, or hiding this warning."
+
+    searches = "\n\nThe plugin checked the following paths for dictionary files:\n* " \
       + searchPaths.join("\n* ")
+
+    if /(win32|darwin)/.test process.platform and not process.env.SPELLCHECKER_PREFER_HUNSPELL
+      searches = "\n\nThe plugin tried to use the system dictionaries to find the locale."
+
     noticesMode = atom.config.get('spell-check.noticesMode')
 
     if noticesMode is "console" or noticesMode is "both"
-      console.log @getId(), message
+      console.log @getId(), (message + searches)
     if noticesMode is "popup" or noticesMode is "both"
-      atom.notifications.addError message
+      atom.notifications.addWarning(
+        message,
+        {
+          buttons: [
+            {
+              className: "btn",
+              onDidClick: -> atom.workspace.open("atom://config/packages/spell-check"),
+              text: "Settings"
+            }
+          ]
+        }
+      )
 
 module.exports = SystemChecker
