@@ -11,14 +11,28 @@ module.exports =
     # arguments and pass them into the task. Whenever these change, we'll update
     # the object with the parameters and resend it to the task.
     @globalArgs =
+      # These are the settings that are part of the main `spell-check` package.
       locales: atom.config.get('spell-check.locales'),
       localePaths: atom.config.get('spell-check.localePaths'),
       useLocales: atom.config.get('spell-check.useLocales'),
       knownWords: atom.config.get('spell-check.knownWords'),
       addKnownWords: atom.config.get('spell-check.addKnownWords'),
+
+      # Collection of all the absolute paths to checkers which will be
+      # `require` on the process side to load the checker. We have to do this
+      # because we can't pass the actual objects from the main Atom process to
+      # the background safely.
       checkerPaths: []
 
     manager = @getInstance @globalArgs
+
+    # Hook up changes to the configuration settings.
+    @excludedScopeRegexLists = []
+    @subs.add atom.config.observe 'spell-check.excludedScopes', (excludedScopes) =>
+      @excludedScopeRegexLists = excludedScopes.map (excludedScope) ->
+        for className in excludedScope.split(/\s+/)[0].split('.') when className
+          new RegExp("\\b#{className}\\b")
+      @updateViews()
 
     @subs.add atom.config.onDidChange 'spell-check.locales', ({newValue, oldValue}) =>
       @globalArgs.locales = newValue
@@ -42,9 +56,13 @@ module.exports =
     @viewsByEditor = new WeakMap
     @contextMenuEntries = []
     @subs.add atom.workspace.observeTextEditors (editor) =>
+      return if @viewsByEditor.has(editor)
+
       # For now, just don't spell check large files.
       return if editor.largeFileMode
 
+      # Defer loading the spell check view if we actually need it. This also
+      # avoids slowing down Atom's startup by getting it loaded on demand.
       SpellCheckView ?= require './spell-check-view'
 
       # The SpellCheckView needs both a handle for the task to handle the
@@ -64,6 +82,14 @@ module.exports =
         view: spellCheckView
         active: true
         editor: editor
+
+      # Make sure that the view is cleaned up on editor destruction.
+      destroySub = editor.onDidDestroy =>
+        spellCheckView.destroy()
+        delete spellCheckViews[editorId]
+        @subs.remove destroySub
+      @subs.add destroySub
+
       @viewsByEditor.set editor, spellCheckView
 
   deactivate: ->
