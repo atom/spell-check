@@ -11,6 +11,7 @@ By default spell check is enabled for the following files:
 * GitHub Markdown
 * Git Commit Message
 * AsciiDoc
+* reStructuredText
 
 You can override this from the _Spell Check_ settings in the Settings View (<kbd>cmd-,</kbd>). The Grammars config option is a list of scopes for which the package will check for spelling errors.
 
