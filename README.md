@@ -22,7 +22,61 @@ To enable _Spell Check_ for your current file type: put your cursor in the file,
 
 To change the language of the dictionary, set the "Locales" configuration option to the IETF tag (en-US, fr-FR, etc). More than one language can be used, simply separate them by commas.
 
-For Windows 8 and 10, this package uses the Windows spell checker, so you must install the language using the regional settings before the language can be chosen inside Atom. Otherwise you can set the `SPELLCHECKER_PREFER_HUNSPELL` environment variable to request the use of the built-in hunspell spell checking library.
+### Missing Languages
+
+This plugin uses the existing system dictionaries. If a locale is selected that is not installed, a warning will pop up when a document that would be spell-checked is loaded. To disable this, either remove the incorrect language from the "Locales" configuration or clear the check on "Use Locales" to disable it entirely.
+
+To get the search paths used to look for a dictionary, make sure the "Notices Mode" is set to "console" or "both", then reload Atom. The developer's console will have the directory list.
+
+#### Windows 8 and Higher
+
+For Windows 8 and 10, this package uses the Windows spell checker, so you must install the language using the regional settings before the language can be chosen inside Atom.
+
+![Windows 10 Language and Regions](docs/windows-10-language-settings.jpg)
+
+Once the additional language is added, Atom will need to be restarted.
+
+You can set the `SPELLCHECKER_PREFER_HUNSPELL` environment variable to request the use of the built-in hunspell spell checking library instead of the system dictionaries. If the environment variable is not set, then the `en-US` dictionaries found in the Atom's installation directory will not be used.
+
+### Debian, Ubuntu, and Mint
+
+On Ubuntu, installing "Language Support" may solve problems with the dictionaries. For other distributions (or if Language Support doesn't work), you may use `apt` to install the dictionaries.
+
+```
+sudo apt-get install hunspell-en-gb
+sudo apt-get install myspell-en-gb
+```
+
+On RedHat, the following should work for Italian:
+
+```
+sudo dnf install hunspell
+sudo dnf install hunspell-it
+```
+
+You can get a list of currently installed languages with:
+
+```
+/usr/bin/hunspell -D
+```
+
+Atom may require a restart to pick up newly installed dictionaries.
+
+### Arch Linux
+
+A language may be installed by running:
+
+```
+pacman -S hunspell-en_GB
+```
+
+For the time being, a soft link may be required if the dictionary provided is "large".
+
+```
+cd /usr/share/hunspell
+sudo ln -s en_GB-large.dic en_GB.dic
+sudo ln -s en_GB-large.aff en_GB.aff
+```
 
 ## Plugins
 
