@@ -3,6 +3,8 @@
 SpellCheckView = null
 spellCheckViews = {}
 
+LARGE_FILE_SIZE = 2 * 1024 * 1024
+
 module.exports =
   activate: ->
     @subs = new CompositeDisposable
@@ -59,7 +61,7 @@ module.exports =
       return if @viewsByEditor.has(editor)
 
       # For now, just don't spell check large files.
-      return if editor.largeFileMode
+      return if editor.getBuffer().getLength() > LARGE_FILE_SIZE
 
       # Defer loading the spell check view if we actually need it. This also
       # avoids slowing down Atom's startup by getting it loaded on demand.
