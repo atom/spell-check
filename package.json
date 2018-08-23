@@ -24,6 +24,7 @@
         "source.asciidoc",
         "source.gfm",
         "text.git-commit",
+        "text.md",
         "text.plain",
         "text.plain.null-grammar",
         "source.rst",
