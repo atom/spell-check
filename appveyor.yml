@@ -15,6 +15,7 @@ environment:
   APM_TEST_PACKAGES:
 
   matrix:
+  - ATOM_CHANNEL: dev
   - ATOM_CHANNEL: stable
   - ATOM_CHANNEL: beta
 
