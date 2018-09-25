@@ -150,6 +150,10 @@ module.exports =
       return
     editorId = atom.workspace.getActiveTextEditor().id
 
+    if not spellCheckViews.hasOwnProperty(editorId)
+      # The editor was never registered with a view, ignore it
+      return
+
     if spellCheckViews[editorId]['active']
       # deactivate spell check for this {editor}
       spellCheckViews[editorId]['active'] = false
