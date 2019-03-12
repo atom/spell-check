@@ -32,7 +32,13 @@ To get the search paths used to look for a dictionary, make sure the "Notices Mo
 
 For Windows 8 and 10, this package uses the Windows spell checker, so you must install the language using the regional settings before the language can be chosen inside Atom.
 
-![Windows 10 Language and Regions](docs/windows-10-language-settings.jpg)
+![Add the language from the Language and Regions settings panel](docs/windows-10-language-settings.png)
+
+If your Windows user does not have Administration privileges, you'll need to do an extra step once the language has been added to enable the spell checker. To do so, you need to install the "Basic typing" language option by following the next steps (you'll be asked for your administrator password):
+
+![Click on the "Options" button on the added language](docs/windows-10-language-settings-2.png)
+
+![Download the "Basic Typing" language option](docs/windows-10-language-settings-3.png)
 
 Once the additional language is added, Atom will need to be restarted.
 
