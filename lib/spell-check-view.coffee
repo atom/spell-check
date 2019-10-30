@@ -67,7 +67,10 @@ class SpellCheckView
 
     if @spellCheckCurrentGrammar()
       @buffer = @editor.getBuffer()
-      @bufferDisposable = @buffer.onDidStopChanging => @updateMisspellings()
+      @bufferDisposable = new CompositeDisposable(
+        @buffer.onDidStopChanging => @updateMisspellings(),
+        @editor.onDidTokenize => @updateMisspellings()
+      )
       @updateMisspellings()
 
   spellCheckCurrentGrammar: ->
@@ -81,10 +84,12 @@ class SpellCheckView
 
   addMarkers: (misspellings) ->
     for misspelling in misspellings
-      @markerLayer.markBufferRange(misspelling, {invalidate: 'touch'})
+      scope = @editor.scopeDescriptorForBufferPosition(misspelling[0])
+      unless @scopeIsExcluded(scope)
+        @markerLayer.markBufferRange(misspelling, {invalidate: 'touch'})
 
   updateMisspellings: ->
-    @taskWrapper.start @editor.buffer, (misspellings) =>
+    @taskWrapper.start @editor, (misspellings) =>
       @destroyMarkers()
       @addMarkers(misspellings) if @buffer?
 
@@ -169,3 +174,9 @@ class SpellCheckView
       entry.menuItem?.dispose()
 
     @spellCheckModule.contextMenuEntries = []
+
+  scopeIsExcluded: (scopeDescriptor, excludedScopes) ->
+    @spellCheckModule.excludedScopeRegexLists.some (regexList) ->
+      scopeDescriptor.scopes.some (scopeName) ->
+        regexList.every (regex) ->
+          regex.test(scopeName)

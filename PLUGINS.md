@@ -15,12 +15,16 @@ The `nameOfFunctionToProvideSpellCheck` function may return either a single `req
     provideSpellCheck: ->
       require.resolve './project-checker.coffee'
 
-The path given must resolve to a singleton instance of a class.
+The path given must either resolve to a singleton instance of a class or a default export in a ES6 module.
 
     class ProjectChecker
       # Magical code
     checker = new ProjectChecker()
     module.exports = checker
+
+For a default using Typescript:
+
+    export default class ProjectChecker {}
 
 See the `spell-check-project` for an example implementation.
 
