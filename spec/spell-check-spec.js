@@ -1,4 +1,5 @@
 const SpellCheckTask = require('../lib/spell-check-task')
+const env = require('../lib/checker-env')
 const {sep} = require('path')
 const {it, fit, ffit, beforeEach, afterEach, conditionPromise, timeoutPromise} = require('./async-spec-helpers')
 
@@ -18,8 +19,16 @@ describe('Spell check', function () {
     await atom.workspace.open(`${__dirname}${sep}sample.js`)
     const package = await atom.packages.activatePackage('spell-check')
     spellCheckModule = package.mainModule
+
+    // Disable the grammers so nothing is done until we turn it back on.
     atom.config.set('spell-check.grammars', [])
 
+    // Set the settings to a specific setting to avoid side effects.
+    atom.config.set('spell-check.useSystem', false)
+    atom.config.set('spell-check.useLocales', false)
+    atom.config.set('spell-check.locales', ['en-US'])
+
+    // Attach everything and ready to test.
     jasmine.attachToDOM(workspaceElement)
     editor = atom.workspace.getActiveTextEditor()
     editorElement = atom.views.getView(editor)
@@ -28,7 +37,7 @@ describe('Spell check', function () {
   afterEach(() => SpellCheckTask.clear())
 
   it('decorates all misspelled words', async function () {
-    atom.config.set('spell-check.locales', ['en-US'])
+    atom.config.set('spell-check.useLocales', true)
     editor.insertText("This middle of thiss\nsentencts\n\nhas issues and the \"edn\" 'dsoe' too")
     atom.config.set('spell-check.grammars', ['source.js'])
 
@@ -41,7 +50,7 @@ describe('Spell check', function () {
   })
 
   it('decorates misspelled words with a leading space', async function () {
-    atom.config.set('spell-check.locales', ['en-US'])
+    atom.config.set('spell-check.useLocales', true)
     editor.setText('\nchok bok')
     atom.config.set('spell-check.grammars', ['source.js'])
 
@@ -57,7 +66,7 @@ describe('Spell check', function () {
       'function speledWrong() {}\n' +
       'class SpeledWrong {}'
     )
-    atom.config.set('spell-check.locales', ['en-US'])
+    atom.config.set('spell-check.useLocales', true)
     atom.config.set('spell-check.grammars', ['source.js', 'text.plain.null-grammar'])
     atom.config.set('spell-check.excludedScopes', ['.function.entity'])
 
@@ -105,7 +114,7 @@ describe('Spell check', function () {
 
   it('allow entering of known words', async function () {
     atom.config.set('spell-check.knownWords', ['GitHub', '!github', 'codez'])
-    atom.config.set('spell-check.locales', ['en-US'])
+    atom.config.set('spell-check.useLocales', true)
     editor.setText('GitHub (aka github): Where codez are builz.')
     atom.config.set('spell-check.grammars', ['source.js'])
 
@@ -117,7 +126,7 @@ describe('Spell check', function () {
   it('hides decorations when a misspelled word is edited', async function () {
     editor.setText('notaword')
     advanceClock(editor.getBuffer().getStoppedChangingDelay())
-    atom.config.set('spell-check.locales', ['en-US'])
+    atom.config.set('spell-check.useLocales', true)
     atom.config.set('spell-check.grammars', ['source.js'])
     await conditionPromise(() => getMisspellingMarkers().length === 1)
 
@@ -131,7 +140,7 @@ describe('Spell check', function () {
 
   describe('when spell checking for a grammar is removed', () =>
     it('removes all the misspellings', async function () {
-      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', true)
       editor.setText('notaword')
       atom.config.set('spell-check.grammars', ['source.js'])
       await conditionPromise(() => getMisspellingMarkers().length === 1)
@@ -143,7 +152,7 @@ describe('Spell check', function () {
 
   describe('when spell checking for a grammar is toggled off', () =>
     it('removes all the misspellings', async function () {
-      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', true)
       editor.setText('notaword')
       atom.config.set('spell-check.grammars', ['source.js'])
       await conditionPromise(() => getMisspellingMarkers().length === 1)
@@ -155,7 +164,7 @@ describe('Spell check', function () {
 
   describe("when the editor's grammar changes to one that does not have spell check enabled", () =>
     it('removes all the misspellings', async function () {
-      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', true)
       editor.setText('notaword')
       atom.config.set('spell-check.grammars', ['source.js'])
 
@@ -169,7 +178,7 @@ describe('Spell check', function () {
   describe("when 'spell-check:correct-misspelling' is triggered on the editor", function () {
     describe('when the cursor touches a misspelling that has corrections', () =>
       it('displays the corrections for the misspelling and replaces the misspelling when a correction is selected', async function () {
-        atom.config.set('spell-check.locales', ['en-US'])
+        atom.config.set('spell-check.useLocales', true)
         editor.setText('tofether')
         atom.config.set('spell-check.grammars', ['source.js'])
         let correctionsElement = null
@@ -194,7 +203,7 @@ describe('Spell check', function () {
 
     describe('when the cursor touches a misspelling that has no corrections', () =>
       it('displays a message saying no corrections found', async function () {
-        atom.config.set('spell-check.locales', ['en-US'])
+        atom.config.set('spell-check.useLocales', true)
         editor.setText('zxcasdfysyadfyasdyfasdfyasdfyasdfyasydfasdf')
         atom.config.set('spell-check.grammars', ['source.js'])
         await conditionPromise(() => getMisspellingMarkers().length > 0)
@@ -210,7 +219,7 @@ describe('Spell check', function () {
   describe('when a right mouse click is triggered on the editor', function () {
     describe('when the cursor touches a misspelling that has corrections', () =>
       it('displays the context menu items for the misspelling and replaces the misspelling when a correction is selected', async function () {
-        atom.config.set('spell-check.locales', ['en-US'])
+        atom.config.set('spell-check.useLocales', true)
         editor.setText('tofether')
         advanceClock(editor.getBuffer().getStoppedChangingDelay())
         atom.config.set('spell-check.grammars', ['source.js'])
@@ -253,7 +262,7 @@ describe('Spell check', function () {
 
     describe('when the cursor touches a misspelling and adding known words is enabled', () =>
       it("displays the 'Add to Known Words' option and adds that word when the option is selected", async function () {
-        atom.config.set('spell-check.locales', ['en-US'])
+        atom.config.set('spell-check.useLocales', true)
         editor.setText('zxcasdfysyadfyasdyfasdfyasdfyasdfyasydfasdf')
         advanceClock(editor.getBuffer().getStoppedChangingDelay())
         atom.config.set('spell-check.grammars', ['source.js'])
@@ -301,7 +310,7 @@ describe('Spell check', function () {
 
   describe('when the editor is destroyed', () =>
     it('destroys all misspelling markers', async function () {
-      atom.config.set('spell-check.locales', ['en-US'])
+      atom.config.set('spell-check.useLocales', true)
       editor.setText('mispelling')
       atom.config.set('spell-check.grammars', ['source.js'])
 
@@ -320,8 +329,6 @@ describe('Spell check', function () {
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-3-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-4-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./eot-spec-checker.coffee'))
-      atom.config.set('spell-check.locales', ['en-US'])
-      atom.config.set('spell-check.useLocales', false)
       editor.setText('eot')
       atom.config.set('spell-check.grammars', ['source.js'])
 
@@ -336,11 +343,8 @@ describe('Spell check', function () {
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-3-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-4-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./eot-spec-checker.coffee'))
-      atom.config.set('spell-check.locales', ['en-US'])
-      atom.config.set('spell-check.useLocales', false)
       editor.setText('k1a eot')
       atom.config.set('spell-check.grammars', ['source.js'])
-
       await conditionPromise(() => getMisspellingMarkers().length === 1)
       editor.destroy()
       expect(getMisspellingMarkers().length).toBe(0)
@@ -352,8 +356,6 @@ describe('Spell check', function () {
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-3-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-4-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./eot-spec-checker.coffee'))
-      atom.config.set('spell-check.locales', ['en-US'])
-      atom.config.set('spell-check.useLocales', false)
       editor.setText('k2a eot')
       atom.config.set('spell-check.grammars', ['source.js'])
 
@@ -368,8 +370,6 @@ describe('Spell check', function () {
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-3-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-4-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./eot-spec-checker.coffee'))
-      atom.config.set('spell-check.locales', ['en-US'])
-      atom.config.set('spell-check.useLocales', false)
       editor.setText('k2a good eot')
       atom.config.set('spell-check.grammars', ['source.js'])
 
@@ -384,8 +384,6 @@ describe('Spell check', function () {
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-3-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-4-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./eot-spec-checker.coffee'))
-      atom.config.set('spell-check.locales', ['en-US'])
-      atom.config.set('spell-check.useLocales', false)
       editor.setText('k0a eot')
       atom.config.set('spell-check.grammars', ['source.js'])
 
@@ -400,8 +398,6 @@ describe('Spell check', function () {
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-3-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-4-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./eot-spec-checker.coffee'))
-      atom.config.set('spell-check.locales', ['en-US'])
-      atom.config.set('spell-check.useLocales', false)
       editor.setText('k0b eot')
       atom.config.set('spell-check.grammars', ['source.js'])
 
@@ -416,8 +412,6 @@ describe('Spell check', function () {
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-3-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-4-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./eot-spec-checker.coffee'))
-      atom.config.set('spell-check.locales', ['en-US'])
-      atom.config.set('spell-check.useLocales', false)
       editor.setText('k0c eot')
       atom.config.set('spell-check.grammars', ['source.js'])
 
@@ -428,15 +422,15 @@ describe('Spell check', function () {
 
     it('treats unknown Unicode words as incorrect', async function () {
       spellCheckModule.consumeSpellCheckers(require.resolve('./eot-spec-checker.coffee'))
-      atom.config.set('spell-check.locales', ['en-US', 'ru-RU'])
-      atom.config.set('spell-check.useLocales', true)
       editor.setText('абырг eot')
       atom.config.set('spell-check.grammars', ['source.js'])
       expect(atom.config.get('spell-check.knownWords').length).toBe(0)
 
       await conditionPromise(() => getMisspellingMarkers().length > 0)
       const markers = getMisspellingMarkers()
-      expect(markers[0].getBufferRange()).toEqual([[0, 0], [0, 5]])
+      expect(markers[0].getBufferRange()).toEqual({
+        start: { row: 0, column: 6 },
+        end: { row : 0, column : 9 } })
 
       editor.destroy()
       expect(getMisspellingMarkers().length).toBe(0)
@@ -445,8 +439,6 @@ describe('Spell check', function () {
     it('treats known Unicode words as correct', async function () {
       spellCheckModule.consumeSpellCheckers(require.resolve('./known-unicode-spec-checker.coffee'))
       spellCheckModule.consumeSpellCheckers(require.resolve('./eot-spec-checker.coffee'))
-      atom.config.set('spell-check.locales', ['en-US', 'ru-RU'])
-      atom.config.set('spell-check.useLocales', true)
       editor.setText('абырг eot')
       atom.config.set('spell-check.grammars', ['source.js'])
       expect(atom.config.get('spell-check.knownWords').length).toBe(0)
@@ -456,4 +448,51 @@ describe('Spell check', function () {
       expect(getMisspellingMarkers().length).toBe(0)
     })
   })
+
+  // These tests are only run on Macs because the CI for Windows doesn't have
+  // spelling provided.
+  if (env.isSystemSupported() && env.isDarwin())
+  {
+    describe('when using system checker plugin', function () {
+      it('marks chzz as not a valid word but cheese is', async function () {
+        atom.config.set('spell-check.useSystem', true)
+        editor.setText('cheese chzz')
+        atom.config.set('spell-check.grammars', ['source.js'])
+
+        await conditionPromise(() => {
+          markers = getMisspellingMarkers()
+          return markers.length === 1
+            && markers[0].getBufferRange().start.column === 7
+            && markers[0].getBufferRange().end.column === 11
+        })
+
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe(0)
+      })
+
+      it('marks multiple words as wrong', async function () {
+        atom.config.set('spell-check.useSystem', true)
+        editor.setText('cheese chz chzz chzzz')
+        atom.config.set('spell-check.grammars', ['source.js'])
+
+        await conditionPromise(() => {
+          markers = getMisspellingMarkers()
+          return markers.length === 3
+            && markers[0].getBufferRange().start.column === 7
+            && markers[0].getBufferRange().end.column === 10
+            && markers[1].getBufferRange().start.column === 11
+            && markers[1].getBufferRange().end.column === 15
+            && markers[2].getBufferRange().start.column === 16
+            && markers[2].getBufferRange().end.column === 21
+        })
+
+        editor.destroy()
+        expect(getMisspellingMarkers().length).toBe(0)
+      })
+    })
+  }
+  else
+  {
+    console.log("Skipping system checker tests because they don't run on Windows CI or Linux")
+  }
 })

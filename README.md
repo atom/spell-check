@@ -42,7 +42,9 @@ If your Windows user does not have Administration privileges, you'll need to do 
 
 Once the additional language is added, Atom will need to be restarted.
 
-You can set the `SPELLCHECKER_PREFER_HUNSPELL` environment variable to request the use of the built-in hunspell spell checking library instead of the system dictionaries. If the environment variable is not set, then the `en-US` dictionaries found in the Atom's installation directory will not be used.
+*Previously, setting `SPELLCHECKER_PREFER_HUNSPELL` environment variable would change how checking works. Now this is controlled by the system and locale checker to use the operating system version or Hunspell respectively.*
+
+If locale is not set, Atom will attempt to use the current locale from the environment variable; if that is missing, `en-US` will be used. The dictionary for `en-US` is shipping with Atom but all other locale-based checkers will need to be downloaded from another source.
 
 ### Debian, Ubuntu, and Mint
 

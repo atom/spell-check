@@ -28,10 +28,11 @@ class KnownWordsChecker
   check: (args, text) ->
     ranges = []
     checked = @checker.check text
+    id = @getId()
     for token in checked
       if token.status is 1
         ranges.push {start: token.start, end: token.end}
-    {correct: ranges}
+    {id, correct: ranges}
 
   suggest: (args, word) ->
     @spelling.suggest word

@@ -16,6 +16,7 @@ module.exports =
       # These are the settings that are part of the main `spell-check` package.
       locales: atom.config.get('spell-check.locales'),
       localePaths: atom.config.get('spell-check.localePaths'),
+      useSystem: atom.config.get('spell-check.useSystem'),
       useLocales: atom.config.get('spell-check.useLocales'),
       knownWords: atom.config.get('spell-check.knownWords'),
       addKnownWords: atom.config.get('spell-check.addKnownWords'),
@@ -41,6 +42,9 @@ module.exports =
       manager.setGlobalArgs @globalArgs
     @subs.add atom.config.onDidChange 'spell-check.localePaths', ({newValue, oldValue}) =>
       @globalArgs.localePaths = newValue
+      manager.setGlobalArgs @globalArgs
+    @subs.add atom.config.onDidChange 'spell-check.useSystem', ({newValue, oldValue}) =>
+      @globalArgs.useSystem = newValue
       manager.setGlobalArgs @globalArgs
     @subs.add atom.config.onDidChange 'spell-check.useLocales', ({newValue, oldValue}) =>
       @globalArgs.useLocales = newValue

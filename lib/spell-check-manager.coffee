@@ -4,19 +4,50 @@ class SpellCheckerManager
   locales: []
   localePaths: []
   useLocales: false
+  systemChecker: null
+  knownWordsChecker: null
   localeCheckers: null
   knownWords: []
   addKnownWords: false
-  knownWordsChecker: null
 
   setGlobalArgs: (data) ->
     # We need underscore to do the array comparisons.
     _ = require "underscore-plus"
 
-    # Check to see if any values have changed. When they have, they clear out
-    # the applicable checker which forces a reload.
-    removeLocaleCheckers = false
+    # Check to see if any values have changed. When they have, then clear out
+    # the applicable checker which forces a reload. We have three basic
+    # checkers that are packaged in this:
+    # - system: Used for the built-in checkers for Windows and Mac
+    # - knownWords: For a configuration-based collection of known words
+    # - locale: For linux or when SPELLCHECKER_PREFER_HUNSPELL is set
+
+    # Handle known words checker.
     removeKnownWordsChecker = false
+
+    if not _.isEqual(@knownWords, data.knownWords)
+      @knownWords = data.knownWords
+      removeKnownWordsChecker = true
+    if @addKnownWords isnt data.addKnownWords
+      @addKnownWords = data.addKnownWords
+      removeKnownWordsChecker = true
+
+    if removeKnownWordsChecker and @knownWordsChecker
+      @removeSpellChecker @knownWordsChecker
+      @knownWordsChecker = null
+
+    # Handle system checker.
+    removeSystemChecker = false
+
+    if @useSystem isnt data.useSystem
+      @useSystem = data.useSystem
+      removeSystemChecker = true
+
+    if removeSystemChecker and @systemChecker
+      @removeSpellChecker @systemChecker
+      @systemChecker = undefined
+
+    # Handle locale checkers.
+    removeLocaleCheckers = false
 
     if not _.isEqual(@locales, data.locales)
       # If the locales is blank, then we always create a default one. However,
@@ -30,24 +61,12 @@ class SpellCheckerManager
     if @useLocales isnt data.useLocales
       @useLocales = data.useLocales
       removeLocaleCheckers = true
-    if not _.isEqual(@knownWords, data.knownWords)
-      @knownWords = data.knownWords
-      removeKnownWordsChecker = true
-    if @addKnownWords isnt data.addKnownWords
-      @addKnownWords = data.addKnownWords
-      removeKnownWordsChecker = true
 
-    # If we made a change to the checkers, we need to remove them from the
-    # system so they can be reinitialized.
     if removeLocaleCheckers and @localeCheckers
       checkers = @localeCheckers
       for checker in checkers
         @removeSpellChecker checker
       @localeCheckers = null
-
-    if removeKnownWordsChecker and @knownWordsChecker
-      @removeSpellChecker @knownWordsChecker
-      @knownWordsChecker = null
 
   addCheckerPath: (checkerPath) ->
     # Load the given path via require.
@@ -76,7 +95,8 @@ class SpellCheckerManager
     # Make sure our deferred initialization is done.
     @init()
 
-    # We need a couple packages.
+    # We need a couple packages but we want to lazy load them to
+    # reduce load time.
     multirange = require 'multi-integer-range'
 
     # For every registered spellchecker, we need to find out the ranges in the
@@ -86,8 +106,8 @@ class SpellCheckerManager
     # from the misspelled ones.
     correct = new multirange.MultiRange([])
     incorrects = []
-
     promises = []
+
     for checker in @checkers
       # We only care if this plugin contributes to checking spelling.
       if not checker.isEnabled() or not checker.providesSpelling(args)
@@ -296,59 +316,67 @@ class SpellCheckerManager
     ])
 
   init: ->
-    # See if we need to initialize the system checkers.
-    if @localeCheckers is null
-      # Initialize the collection. If we aren't using any, then stop doing anything.
-      @localeCheckers = []
+    # Set up the system checker.
+    if @useSystem and @systemChecker is null
+      SystemChecker = require './system-checker'
+      @systemChecker = new SystemChecker
+      @addSpellChecker @systemChecker
 
-      if @useLocales
-        # If we have a blank location, use the default based on the process. If
-        # set, then it will be the best language.
-        if not @locales.length
-          defaultLocale = process.env.LANG
-          if defaultLocale
-            @locales = [defaultLocale.split('.')[0]]
-
-        # If we can't figure out the language from the process, check the
-        # browser. After testing this, we found that this does not reliably
-        # produce a proper IEFT tag for languages; on OS X, it was providing
-        # "English" which doesn't work with the locale selection. To avoid using
-        # it, we use some tests to make sure it "looks like" an IEFT tag.
-        if not @locales.length
-          defaultLocale = navigator.language
-          if defaultLocale and defaultLocale.length is 5
-            separatorChar = defaultLocale.charAt(2)
-            if separatorChar is '_' or separatorChar is '-'
-              @locales = [defaultLocale]
-
-        # If we still can't figure it out, use US English. It isn't a great
-        # choice, but it is a reasonable default not to mention is can be used
-        # with the fallback path of the `spellchecker` package.
-        if not @locales.length
-          @locales = ['en_US']
-
-        # Go through the new list and create new locale checkers.
-        SystemChecker = require "./system-checker"
-        for locale in @locales
-          checker = new SystemChecker locale, @localePaths
-          @addSpellChecker checker
-          @localeCheckers.push checker
-
-    # See if we need to reload the known words.
+    # Set up the known words.
     if @knownWordsChecker is null
       KnownWordsChecker = require './known-words-checker'
       @knownWordsChecker = new KnownWordsChecker @knownWords
       @knownWordsChecker.enableAdd = @addKnownWords
       @addSpellChecker @knownWordsChecker
 
+    # See if we need to initialize the built-in checkers.
+    if @useLocales and @localeCheckers is null
+      # Set up the locale checkers.
+      @localeCheckers = []
+
+      # If we have a blank location, use the default based on the process. If
+      # set, then it will be the best language.
+      if not @locales.length
+        defaultLocale = process.env.LANG
+        if defaultLocale
+          @locales = [defaultLocale.split('.')[0]]
+
+      # If we can't figure out the language from the process, check the
+      # browser. After testing this, we found that this does not reliably
+      # produce a proper IEFT tag for languages; on OS X, it was providing
+      # "English" which doesn't work with the locale selection. To avoid using
+      # it, we use some tests to make sure it "looks like" an IEFT tag.
+      if not @locales.length
+        defaultLocale = navigator.language
+        if defaultLocale and defaultLocale.length is 5
+          separatorChar = defaultLocale.charAt(2)
+          if separatorChar is '_' or separatorChar is '-'
+            @locales = [defaultLocale]
+
+      # If we still can't figure it out, use US English. It isn't a great
+      # choice, but it is a reasonable default not to mention is can be used
+      # with the fallback path of the `spellchecker` package.
+      if not @locales.length
+        @locales = ['en_US']
+
+      # Go through the new list and create new locale checkers.
+      LocaleChecker = require "./locale-checker"
+      for locale in @locales
+        checker = new LocaleChecker locale, @localePaths
+        @addSpellChecker checker
+        @localeCheckers.push checker
+
   deactivate: ->
     @checkers = []
     @locales = []
     @localePaths = []
-    @useLocales=  false
-    @localeCheckers = null
+    @useSystem = false
+    @useLocales =  false
     @knownWords = []
     @addKnownWords = false
+
+    @systemChecker = null
+    @localeCheckers = null
     @knownWordsChecker = null
 
   reloadLocales: ->

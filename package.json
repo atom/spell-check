@@ -8,7 +8,7 @@
     "atom-select-list": "^0.7.0",
     "multi-integer-range": "^2.0.0",
     "natural": "^0.4.0",
-    "spellchecker": "^3.6.0",
+    "spellchecker": "^3.7.0",
     "spelling-manager": "^1.1.0",
     "underscore-plus": "^1"
   },
@@ -41,11 +41,17 @@
       "description": "List of sub-scopes that will be ignored. Specify the most detailed scope to avoid ignoring otherwise relevant text. The scopes will be parsed as regular expressions. See [the README](https://github.com/atom/spell-check#spell-check-package-) for more information on finding the correct scope for a specific language.",
       "order": 2
     },
+    "useSystem": {
+      "type": "boolean",
+      "default": true,
+      "description": "If checked, use the built-in spell checking on macOS and some versions of Windows. This setting is ignored on Linux, even if checked.",
+      "order": 3
+    },
     "useLocales": {
       "type": "boolean",
-      "default": "true",
-      "description": "If unchecked, then the locales below will not be used for spell-checking and no spell-checking using system dictionaries will be provided.",
-      "order": 3
+      "default": true,
+      "description": "If checked, then the locales below will be used to check words using Hunspell.",
+      "order": 4
     },
     "locales": {
       "type": "array",
@@ -53,8 +59,8 @@
       "items": {
         "type": "string"
       },
-      "description": "List of locales to use for the system spell-checking. Examples would be `en-US` or `de-DE`. For Windows, the appropriate language must be installed using *Region and language settings*. If this is blank, then the default language for the user will be used.",
-      "order": 4
+      "description": "List of locales to use for the system spell-checking. Examples would be `en-US` or `de-DE`. If this is blank, then the default language for the user will be used.",
+      "order": 5
     },
     "localePaths": {
       "type": "array",
@@ -62,26 +68,26 @@
       "items": {
         "type": "string"
       },
-      "description": "List of additional paths to search for dictionary files. If a locale cannot be found in these, the internal code will attempt to find it using common search paths. This is used for Linux and OS X.",
-      "order": 5
+      "description": "List of additional paths to search for dictionary files when checking using locales. If a locale cannot be found in these, the internal code will attempt to find it using common search paths.",
+      "order": 6
     },
     "knownWords": {
       "type": "array",
       "default": [],
       "description": "List words that are considered correct even if they do not appear in any other dictionary. Words with capitals or ones that start with `!` are case-sensitive.",
-      "order": 6
+      "order": 7
     },
     "addKnownWords": {
       "type": "boolean",
       "default": false,
       "description": "If checked, then the suggestions will include options to add to the known words list above.",
-      "order": 7
+      "order": 8
     },
     "noticesMode": {
       "type": "string",
       "default": "both",
       "description": "Choose where loading errors and other notices are displayed: popup, console, or both.",
-      "order": 8,
+      "order": 9,
       "enum": [
         {
           "value": "both",
