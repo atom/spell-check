@@ -40,7 +40,7 @@ class SystemChecker
     if @isEnabled()
       # We use the default checker here and not the locale-specific one so it
       # will check all languages at the same time.
-      instance.checkSpellingAsync(text).then (incorrect) ->
+      instance.checkSpellingAsync(text).then (incorrect) =>
         @log 'check', text, incorrect
         {id, invertIncorrectAsCorrect: true, incorrect}
     else
