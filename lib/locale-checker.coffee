@@ -1,6 +1,7 @@
 spellchecker = require 'spellchecker'
 pathspec = require 'atom-pathspec'
 env = require './checker-env'
+debug = require 'debug'
 
 # The locale checker is a checker that takes a locale string (`en-US`) and
 # optionally a path and then checks it.
@@ -15,7 +16,8 @@ class LocaleChecker
     @locale = locale
     @paths = paths
     @enabled = true
-    #console.log @getId(), "enabled", @isEnabled()
+    @log = debug('spell-check:locale-checker').extend(locale)
+    @log 'enabled', @isEnabled()
 
   deactivate: ->
     return
@@ -89,8 +91,10 @@ class LocaleChecker
     searchPaths.push spellchecker.getDictionaryPath()
 
     # Attempt to load all the paths for the dictionary until we find one.
+    @log 'checking paths', searchPaths
     for path in searchPaths
       if @spellchecker.setDictionary @locale, path
+        @log 'found checker', path
         return
 
     # If we fell through all the if blocks, then we couldn't load the dictionary.

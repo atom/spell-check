@@ -1,4 +1,5 @@
 {CompositeDisposable} = require 'atom'
+debug = require 'debug'
 
 SpellCheckView = null
 spellCheckViews = {}
@@ -7,6 +8,9 @@ LARGE_FILE_SIZE = 2 * 1024 * 1024
 
 module.exports =
   activate: ->
+    log = debug('spell-check')
+    log('initializing')
+
     @subs = new CompositeDisposable
 
     # Since the spell-checking is done on another process, we gather up all the
