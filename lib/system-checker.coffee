@@ -37,6 +37,11 @@ class SystemChecker
 
   check: (args, text) ->
     id = @getId()
+
+    instance1 = new spellchecker.Spellchecker
+    instance1.checkSpellingAsync(text).then (incorrect) =>
+      @log 'check2', text, incorrect
+
     if @isEnabled()
       # We use the default checker here and not the locale-specific one so it
       # will check all languages at the same time.
