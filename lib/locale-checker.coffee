@@ -39,7 +39,9 @@ class LocaleChecker
     @deferredInit()
     id = @getId()
     if @enabled
-      @spellchecker.checkSpellingAsync(text).then (incorrect) ->
+      @spellchecker.checkSpellingAsync(text).then (incorrect) =>
+        if @log.enabled
+          @log 'check', incorrect
         {id, invertIncorrectAsCorrect: true, incorrect}
     else
       {id, status: @getStatus()}
