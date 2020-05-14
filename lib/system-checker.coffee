@@ -1,6 +1,7 @@
 spellchecker = require 'spellchecker'
 pathspec = require 'atom-pathspec'
 env = require './checker-env'
+debug = require 'debug'
 
 # Initialize the global spell checker which can take some time. We also force
 # the use of the system or operating system library instead of Hunspell.
@@ -14,7 +15,8 @@ instance.setSpellcheckerType spellchecker.ALWAYS_USE_SYSTEM
 # due to some memory bug.
 class SystemChecker
   constructor: ->
-    #console.log @getId(), "enabled", @isEnabled()
+    @log = debug('spell-check:system-checker')
+    @log 'enabled', @isEnabled(), @getStatus()
 
   deactivate: ->
     return
@@ -25,9 +27,9 @@ class SystemChecker
   isEnabled: -> env.isSystemSupported()
   getStatus: ->
     if env.isSystemSupported()
-      "Working correctly"
+      "working correctly"
     else
-      "Disabled on Linux"
+      "disabled on Linux"
 
   providesSpelling: (args) -> @isEnabled()
   providesSuggestions: (args) -> @isEnabled()
@@ -35,10 +37,12 @@ class SystemChecker
 
   check: (args, text) ->
     id = @getId()
+
     if @isEnabled()
       # We use the default checker here and not the locale-specific one so it
       # will check all languages at the same time.
-      instance.checkSpellingAsync(text).then (incorrect) ->
+      instance.checkSpellingAsync(text).then (incorrect) =>
+        @log 'check', text, incorrect
         {id, invertIncorrectAsCorrect: true, incorrect}
     else
       {id, status: @getStatus()}
