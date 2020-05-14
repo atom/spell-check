@@ -26,6 +26,10 @@ If "Use Locales" is set, those dictionaries will always be based on individual `
 
 You can use "Use System" and "Use Locales" at the same time.
 
+## Windows
+
+On Windows, "Use Locales" is needed to use the built-in Windows Spelling API because you can enable or disable checking based on desired language.
+
 ## Changing the dictionary
 
 To change the language of the dictionary, set the "Locales" configuration option to the IETF tag (en-US, fr-FR, etc). More than one language can be used, simply separate them by commas.
