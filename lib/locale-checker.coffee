@@ -95,9 +95,9 @@ class LocaleChecker
       systemChecker = new spellchecker.Spellchecker
       systemChecker.setSpellcheckerType spellchecker.ALWAYS_USE_SYSTEM
       if systemChecker.setDictionary @locale, ""
-          @log 'using Windows Spell API'
-          @spellchecker = systemChecker
-          return
+        @log 'using Windows Spell API'
+        @spellchecker = systemChecker
+        return
 
     # If all else fails, try the packaged en-US dictionary in the `spellcheck`
     # library.
