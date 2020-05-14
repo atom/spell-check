@@ -10,6 +10,8 @@ class LocaleChecker
   enabled: true
   reason: null
   paths: null
+  checkDictionaryPath: true
+  checkDefaultPaths: true
 
   constructor: (locale, paths) ->
     @locale = locale
@@ -64,7 +66,7 @@ class LocaleChecker
 
     # Windows uses its own API and the paths are unimportant, only attempting
     # to load it works.
-    if env.isWindows()
+    if @checkDefaultPaths and env.isWindows()
       #if env.useWindowsSystemDictionary()
       #  return
       searchPaths.push "C:\\"
@@ -74,19 +76,20 @@ class LocaleChecker
       searchPaths.push pathspec.getPath(path)
 
     # For Linux, we have to search the directory paths to find the dictionary.
-    if env.isLinux()
+    if @checkDefaultPaths and env.isLinux()
       searchPaths.push "/usr/share/hunspell"
       searchPaths.push "/usr/share/myspell"
       searchPaths.push "/usr/share/myspell/dicts"
 
     # OS X uses the following paths.
-    if env.isDarwin()
+    if @checkDefaultPaths and env.isDarwin()
       searchPaths.push "/"
       searchPaths.push "/System/Library/Spelling"
 
     # Try the packaged library inside the node_modules. `getDictionaryPath` is
     # not available, so we have to fake it. This will only work for en-US.
-    searchPaths.push spellchecker.getDictionaryPath()
+    if @checkDictionaryPath
+      searchPaths.push spellchecker.getDictionaryPath()
 
     # Attempt to load all the paths for the dictionary until we find one.
     for path in searchPaths
