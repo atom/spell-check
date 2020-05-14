@@ -5,8 +5,14 @@ debug = require 'debug'
 
 # Initialize the global spell checker which can take some time. We also force
 # the use of the system or operating system library instead of Hunspell.
-instance = new spellchecker.Spellchecker
-instance.setSpellcheckerType spellchecker.ALWAYS_USE_SYSTEM
+if env.isSystemSupported()
+  instance = new spellchecker.Spellchecker
+  instance.setSpellcheckerType spellchecker.ALWAYS_USE_SYSTEM
+
+  if not instance.setDictionary("", "")
+    instance = undefined
+else
+  instance = undefined
 
 # The `SystemChecker` is a special case to use the built-in system spell-checking
 # provided by some platforms, such as Windows 8+ and macOS. This also doesn't have
@@ -24,12 +30,12 @@ class SystemChecker
   getId: -> "spell-check:system"
   getName: -> "System Checker"
   getPriority: -> 110
-  isEnabled: -> env.isSystemSupported()
+  isEnabled: -> instance
   getStatus: ->
-    if env.isSystemSupported()
+    if instance
       "working correctly"
     else
-      "disabled on Linux"
+      "not supported on platform"
 
   providesSpelling: (args) -> @isEnabled()
   providesSuggestions: (args) -> @isEnabled()

@@ -153,6 +153,10 @@ class SpellCheckerManager
 
       # If we don't have any incorrect spellings, then there is nothing to worry
       # about, so just return and stop processing.
+      if @log.enabled
+        @log "merged correct ranges", correct
+        @log "merged incorrect ranges", incorrects
+
       if incorrects.length is 0
         @log "no spelling errors"
         return {misspellings: []}
