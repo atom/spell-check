@@ -1,3 +1,4 @@
+debug = require 'debug'
 env = require './checker-env'
 
 class SpellCheckerManager
@@ -123,6 +124,9 @@ class SpellCheckerManager
       promises.push Promise.resolve checker.check(args, text)
 
     Promise.all(promises).then (allResults) =>
+      if @log.enabled
+        @log "check results", allResults, text
+
       for results in allResults
         if results.invertIncorrectAsCorrect and results.incorrect
           # We need to add the opposite of the incorrect as correct elements in
@@ -150,6 +154,7 @@ class SpellCheckerManager
       # If we don't have any incorrect spellings, then there is nothing to worry
       # about, so just return and stop processing.
       if incorrects.length is 0
+        @log "no spelling errors"
         return {misspellings: []}
 
       # Build up an intersection of all the incorrect ranges. We only treat a word
@@ -169,6 +174,7 @@ class SpellCheckerManager
 
       # If we have no intersection, then nothing to report as a problem.
       if intersection.length is 0
+        @log "no spelling after intersections"
         return {misspellings: []}
 
       # Remove all of the confirmed correct words from the resulting incorrect
@@ -176,6 +182,9 @@ class SpellCheckerManager
       # incorrect providers.
       if correct.ranges.length > 0
         intersection.subtract(correct)
+
+      if @log.enabled
+        @log "check intersections", intersection
 
       # Convert the text ranges (index into the string) into Atom buffer
       # coordinates ( row and column).
@@ -320,6 +329,9 @@ class SpellCheckerManager
     ])
 
   init: ->
+    # Set up logging.
+    @log = debug "spell-check:spell-check-manager"
+
     # Set up the system checker.
     hasSystemChecker = @useSystem and env.isSystemSupported()
     if @useSystem and @systemChecker is null
