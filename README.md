@@ -42,7 +42,7 @@ To get the search paths used to look for a dictionary, make sure the "Notices Mo
 
 #### Hunspell Dictionaries
 
-For all platforms, a Hunspell-compatible dictionary is supported. To use this, a `.dic` and `.aff` need to be located in one of the default search directories or in a directory entered into "Locale paths" (multiples may be entered with commas separating them). If the appropriate files are found for the locale and "Use Locales" is checked, then the dictionary will be used.
+For all platforms, a Hunspell-compatible dictionary is also supported. To use this, a `.dic` and `.aff` need to be located in one of the default search directories or in a directory entered into "Locale paths" (multiples may be entered with commas separating them). If the appropriate files are found for the locale and "Use Locales" is checked, then the dictionary will be used.
 
 For example, if the following is set, then `/usr/share/hunspell/en_US.dic` will be used:
 
@@ -83,7 +83,9 @@ Once the additional language is added, Atom will need to be restarted.
 
 *Previously, setting `SPELLCHECKER_PREFER_HUNSPELL` environment variable would change how checking works. Now this is controlled by the system and locale checker to use the operating system version or Hunspell respectively.*
 
-If locale is not set, Atom will attempt to use the current locale from the environment variable; if that is missing, `en-US` will be used. The dictionary for `en-US` is shipping with Atom but all other locale-based dictionaries will need to be downloaded from another source.
+If locale is not set, Atom will attempt to use the current locale from the environment variable and use the Windows checking if available; if that is missing, `en-US` will be used. The dictionary for `en-US` is shipping with Atom but all other locale-based dictionaries will need to be downloaded from another source.
+
+If a Hunspell dictionary is found on a path, it will be used in favor of the Windows API.
 
 ### Debian, Ubuntu, and Mint
 
