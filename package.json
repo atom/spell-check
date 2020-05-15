@@ -51,7 +51,7 @@
     "useLocales": {
       "type": "boolean",
       "default": true,
-      "description": "If checked, then the locales below will be used to check words using Hunspell.",
+      "description": "If checked, then the locales below will be used for checking.",
       "order": 4
     },
     "locales": {
