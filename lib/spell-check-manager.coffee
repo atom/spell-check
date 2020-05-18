@@ -1,3 +1,6 @@
+debug = require 'debug'
+env = require './checker-env'
+
 class SpellCheckerManager
   checkers: []
   checkerPaths: []
@@ -35,20 +38,22 @@ class SpellCheckerManager
       @removeSpellChecker @knownWordsChecker
       @knownWordsChecker = null
 
-    # Handle system checker.
+    # Handle system checker. We also will remove the locale checkers if we
+    # change the system checker because we show different messages if we cannot
+    # find a locale based on the use of the system checker.
     removeSystemChecker = false
+    removeLocaleCheckers = false
 
     if @useSystem isnt data.useSystem
       @useSystem = data.useSystem
       removeSystemChecker = true
+      removeLocaleCheckers = true
 
     if removeSystemChecker and @systemChecker
       @removeSpellChecker @systemChecker
       @systemChecker = undefined
 
     # Handle locale checkers.
-    removeLocaleCheckers = false
-
     if not _.isEqual(@locales, data.locales)
       # If the locales is blank, then we always create a default one. However,
       # any new data.locales will remain blank.
@@ -119,6 +124,9 @@ class SpellCheckerManager
       promises.push Promise.resolve checker.check(args, text)
 
     Promise.all(promises).then (allResults) =>
+      if @log.enabled
+        @log "check results", allResults, text
+
       for results in allResults
         if results.invertIncorrectAsCorrect and results.incorrect
           # We need to add the opposite of the incorrect as correct elements in
@@ -145,7 +153,12 @@ class SpellCheckerManager
 
       # If we don't have any incorrect spellings, then there is nothing to worry
       # about, so just return and stop processing.
+      if @log.enabled
+        @log "merged correct ranges", correct
+        @log "merged incorrect ranges", incorrects
+
       if incorrects.length is 0
+        @log "no spelling errors"
         return {misspellings: []}
 
       # Build up an intersection of all the incorrect ranges. We only treat a word
@@ -165,6 +178,7 @@ class SpellCheckerManager
 
       # If we have no intersection, then nothing to report as a problem.
       if intersection.length is 0
+        @log "no spelling after intersections"
         return {misspellings: []}
 
       # Remove all of the confirmed correct words from the resulting incorrect
@@ -172,6 +186,9 @@ class SpellCheckerManager
       # incorrect providers.
       if correct.ranges.length > 0
         intersection.subtract(correct)
+
+      if @log.enabled
+        @log "check intersections", intersection
 
       # Convert the text ranges (index into the string) into Atom buffer
       # coordinates ( row and column).
@@ -316,7 +333,11 @@ class SpellCheckerManager
     ])
 
   init: ->
+    # Set up logging.
+    @log = debug "spell-check:spell-check-manager"
+
     # Set up the system checker.
+    hasSystemChecker = @useSystem and env.isSystemSupported()
     if @useSystem and @systemChecker is null
       SystemChecker = require './system-checker'
       @systemChecker = new SystemChecker
@@ -335,10 +356,14 @@ class SpellCheckerManager
       @localeCheckers = []
 
       # If we have a blank location, use the default based on the process. If
-      # set, then it will be the best language.
+      # set, then it will be the best language. We keep track if we are using
+      # the default locale to control error messages.
+      inferredLocale = false
+
       if not @locales.length
         defaultLocale = process.env.LANG
         if defaultLocale
+          inferredLocale = true
           @locales = [defaultLocale.split('.')[0]]
 
       # If we can't figure out the language from the process, check the
@@ -351,18 +376,20 @@ class SpellCheckerManager
         if defaultLocale and defaultLocale.length is 5
           separatorChar = defaultLocale.charAt(2)
           if separatorChar is '_' or separatorChar is '-'
+            inferredLocale = true
             @locales = [defaultLocale]
 
       # If we still can't figure it out, use US English. It isn't a great
       # choice, but it is a reasonable default not to mention is can be used
       # with the fallback path of the `spellchecker` package.
       if not @locales.length
+        inferredLocale = true
         @locales = ['en_US']
 
       # Go through the new list and create new locale checkers.
       LocaleChecker = require "./locale-checker"
       for locale in @locales
-        checker = new LocaleChecker locale, @localePaths
+        checker = new LocaleChecker locale, @localePaths, hasSystemChecker, inferredLocale
         @addSpellChecker checker
         @localeCheckers.push checker
 

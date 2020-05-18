@@ -20,7 +20,11 @@ To enable _Spell Check_ for your current file type: put your cursor in the file,
 
 ## Changing the dictionary
 
-To change the language of the dictionary, set the "Locales" configuration option to the IETF tag (en-US, fr-FR, etc). More than one language can be used, simply separate them by commas.
+Except for Mac, Atom needs to know what language to use to perform spell-checking. To list these, set the "Locales" configuration option to the IETF tag (en-US, fr-FR, etc). More than one language can be used, simply separate them by commas.
+
+If no locale is given, then Atom will attempt to infer the language based on environment variables and settings.
+
+If any value is given for the "Locales", then Atom will not automatically add the browser language. So, if your browser is United States English (`en-US`), leaving this blank will still do US English checking. However, if it the "Locales" is set to French (`fr-FR`), then the checker will only check French. If the "Locales" is set to `en-US, fr-FR`, then both languages will be checked.
 
 ### Missing Languages
 
@@ -28,7 +32,13 @@ This plugin uses the existing system dictionaries. If a locale is selected that 
 
 To get the search paths used to look for a dictionary, make sure the "Notices Mode" is set to "console" or "both", then reload Atom. The developer's console will have the directory list.
 
-#### Windows 8 and Higher
+## Mac
+
+On the Mac, checking "Use System" will use the operating system's spellchecking library. This uses all of the user's loaded dictionaries and doesn't require any customization within Atom.
+
+Checking "Use Locales" and providing locales would use Hunspell as additional dictionaries. Having "Use Locales" checked but no locales given will do nothing.
+
+## Windows 8 and Higher
 
 For Windows 8 and 10, this package uses the Windows spell checker, so you must install the language using the regional settings before the language can be chosen inside Atom.
 
@@ -40,11 +50,13 @@ If your Windows user does not have Administration privileges, you'll need to do 
 
 ![Download the "Basic Typing" language option](docs/windows-10-language-settings-3.png)
 
-Once the additional language is added, Atom will need to be restarted.
+Once the additional language is added, Atom will need to be restarted and configured to use it. Add the IEFT tag into the "Locales" setting for the language to be set.
 
-*Previously, setting `SPELLCHECKER_PREFER_HUNSPELL` environment variable would change how checking works. Now this is controlled by the system and locale checker to use the operating system version or Hunspell respectively.*
+If a Hunspell dictionary is found on a path (see below), it will be used in favor of the Windows API.
 
-If locale is not set, Atom will attempt to use the current locale from the environment variable; if that is missing, `en-US` will be used. The dictionary for `en-US` is shipping with Atom but all other locale-based checkers will need to be downloaded from another source.
+## Linux
+
+For all Linux-based operating systems, "Use System" does nothing. It can remained checked but has no impact. "Use Locales" is required for spell-checking.
 
 ### Debian, Ubuntu, and Mint
 
@@ -86,6 +98,27 @@ sudo ln -s en_GB-large.dic en_GB.dic
 sudo ln -s en_GB-large.aff en_GB.aff
 ```
 
-## Plugins
+## Hunspell Dictionaries
 
-_Spell Check_ allows for plugins to provide additional spell checking functionality. See the `PLUGINS.md` file in the repository on how to write a plugin.
+For all platforms, a Hunspell-compatible dictionary is also supported. To use this, a `.dic` and `.aff` need to be located in one of the default search directories or in a directory entered into "Locale paths" (multiples may be entered with commas separating them). If the appropriate files are found for the locale and "Use Locales" is checked, then the dictionary will be used.
+
+For example, if the following is set, then `/usr/share/hunspell/en_US.dic` will be used:
+
+- Use Locales: checked
+- Locales: `en-US`
+- Locale Paths: `/usr/share/hunspell`
+
+If "Locales" is not provided, then the user's current language will be inferred from environmental settings.
+
+In addition to what is provided, the following paths are checked:
+
+- `/usr/share/hunspell` (Linux only)
+- `/usr/share/myspell` (Linux only)
+- `/usr/share/myspell/dicts` (Linux only)
+- `/` (Mac only)
+- `/System/Library/Spelling` (Mac only)
+- `C:\` (Windows only)
+
+Dictionaries can be downloaded from various sites (such as [wooorm's repository](https://github.com/wooorm/dictionaries) or [LibreOffice's](https://github.com/LibreOffice/dictionaries)), but the file has to be renamed `locale.dic` and `locale.aff`.
+
+*Example locations to download are not an endorsement.*

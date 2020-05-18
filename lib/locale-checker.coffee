@@ -1,6 +1,7 @@
 spellchecker = require 'spellchecker'
 pathspec = require 'atom-pathspec'
 env = require './checker-env'
+debug = require 'debug'
 
 # The locale checker is a checker that takes a locale string (`en-US`) and
 # optionally a path and then checks it.
@@ -10,12 +11,17 @@ class LocaleChecker
   enabled: true
   reason: null
   paths: null
+  checkDictionaryPath: true
+  checkDefaultPaths: true
 
-  constructor: (locale, paths) ->
+  constructor: (locale, paths, hasSystemChecker, inferredLocale) ->
     @locale = locale
     @paths = paths
     @enabled = true
-    #console.log @getId(), "enabled", @isEnabled()
+    @hasSystemChecker = hasSystemChecker
+    @inferredLocale = inferredLocale
+    @log = debug('spell-check:locale-checker').extend(locale)
+    @log 'enabled', @isEnabled(), 'hasSystemChecker', @hasSystemChecker, 'inferredLocale', @inferredLocale
 
   deactivate: ->
     return
@@ -33,7 +39,9 @@ class LocaleChecker
     @deferredInit()
     id = @getId()
     if @enabled
-      @spellchecker.checkSpellingAsync(text).then (incorrect) ->
+      @spellchecker.checkSpellingAsync(text).then (incorrect) =>
+        if @log.enabled
+          @log 'check', incorrect
         {id, invertIncorrectAsCorrect: true, incorrect}
     else
       {id, status: @getStatus()}
@@ -43,11 +51,6 @@ class LocaleChecker
     @spellchecker.getCorrectionsForMisspelling(word)
 
   deferredInit: ->
-    # The system checker is not enabled for Linux platforms (no built-in checker).
-    if not @enabled
-      @reason = "Darwin does not use locale-based checking without SPELLCHECKER_PREFER_HUNSPELL set."
-      return
-
     # If we already have a spellchecker, then we don't have to do anything.
     if @spellchecker
       return
@@ -55,47 +58,69 @@ class LocaleChecker
     # Initialize the spell checker which can take some time. We also force
     # the use of the Hunspell library even on Mac OS X. The "system checker"
     # is the one that uses the built-in dictionaries from the operating system.
-    @spellchecker = new spellchecker.Spellchecker
-    @spellchecker.setSpellcheckerType spellchecker.ALWAYS_USE_HUNSPELL
+    checker = new spellchecker.Spellchecker
+    checker.setSpellcheckerType spellchecker.ALWAYS_USE_HUNSPELL
 
     # Build up a list of paths we are checking so we can report them fully
     # to the user if we fail.
     searchPaths = []
-
-    # Windows uses its own API and the paths are unimportant, only attempting
-    # to load it works.
-    if env.isWindows()
-      #if env.useWindowsSystemDictionary()
-      #  return
-      searchPaths.push "C:\\"
-
-    # Check the paths supplied by the user.
     for path in @paths
       searchPaths.push pathspec.getPath(path)
 
-    # For Linux, we have to search the directory paths to find the dictionary.
-    if env.isLinux()
-      searchPaths.push "/usr/share/hunspell"
-      searchPaths.push "/usr/share/myspell"
-      searchPaths.push "/usr/share/myspell/dicts"
+    # Add operating system specific paths to the search list.
+    if @checkDefaultPaths
+      if env.isLinux()
+        searchPaths.push "/usr/share/hunspell"
+        searchPaths.push "/usr/share/myspell"
+        searchPaths.push "/usr/share/myspell/dicts"
 
-    # OS X uses the following paths.
-    if env.isDarwin()
-      searchPaths.push "/"
-      searchPaths.push "/System/Library/Spelling"
+      if env.isDarwin()
+        searchPaths.push "/"
+        searchPaths.push "/System/Library/Spelling"
 
-    # Try the packaged library inside the node_modules. `getDictionaryPath` is
-    # not available, so we have to fake it. This will only work for en-US.
-    searchPaths.push spellchecker.getDictionaryPath()
+      if env.isWindows()
+        searchPaths.push "C:\\"
 
     # Attempt to load all the paths for the dictionary until we find one.
+    @log 'checking paths', searchPaths
     for path in searchPaths
-      if @spellchecker.setDictionary @locale, path
+      if checker.setDictionary @locale, path
+        @log 'found checker', path
+        @spellchecker = checker
         return
+
+    # On Windows, if we can't find the dictionary using the paths, then we also
+    # try the spelling API. This uses system checker with the given locale, but
+    # doesn't provide a path. We do this at the end to let Hunspell be used if
+    # the user provides that.
+    if env.isWindows()
+      systemChecker = new spellchecker.Spellchecker
+      systemChecker.setSpellcheckerType spellchecker.ALWAYS_USE_SYSTEM
+      if systemChecker.setDictionary @locale, ""
+        @log 'using Windows Spell API'
+        @spellchecker = systemChecker
+        return
+
+    # If all else fails, try the packaged en-US dictionary in the `spellcheck`
+    # library.
+    if @checkDictionaryPath
+      if checker.setDictionary @locale, spellchecker.getDictionaryPath()
+        @log 'using packaged locale', path
+        @spellchecker = checker
+        return
+
+    # If we are using the system checker and we infered the locale, then we
+    # don't want to show an error. This is because the system checker may have
+    # handled it already.
+    if @hasSystemChecker and @inferredLocale
+      @log 'giving up quietly because of system checker and inferred locale'
+      @enabled = false
+      @reason = "Cannot load the locale dictionary for `" + @locale + "`. No warning because system checker is in use and locale is inferred."
+      return
 
     # If we fell through all the if blocks, then we couldn't load the dictionary.
     @enabled = false
-    @reason = "Cannot load the system dictionary for `" + @locale + "`."
+    @reason = "Cannot load the locale dictionary for `" + @locale + "`."
     message = "The package `spell-check` cannot load the " \
       + "checker for `" \
       + @locale + "`." \
