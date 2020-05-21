@@ -7,16 +7,26 @@ Use <kbd>cmd-shift-:</kbd> to bring up the list of corrections when your cursor 
 
 By default spell check is enabled for the following files:
 
-* Plain Text
-* GitHub Markdown
+* Plain Text (*.txt)
+* GitHub Markdown (*.md)
 * Git Commit Message
 * AsciiDoc
 * reStructuredText
 
-You can override this from the _Spell Check_ settings in the Settings View (<kbd>cmd-,</kbd>). The Grammars config option is a list of scopes for which the package will check for spelling errors.
+How to add new file types:
 
-To enable _Spell Check_ for your current file type: put your cursor in the file, open the [Command Palette](https://github.com/atom/command-palette)
-(<kbd>cmd-shift-p</kbd>), and run the `Editor: Log Cursor Scope` command. This will trigger a notification which will contain a list of scopes. The first scope that's listed is the one you should add to the list of scopes in the settings for the _Spell Check_ package. Here are some examples: `source.coffee`, `text.plain`, `text.html.basic`.
+* Open Atom Preferences (<kbd>cmd-,</kbd>)
+* Find the "spell-check" package in "Packages"
+* Click on "Settings" to open this package's settings
+* Find the "Grammars" box under the Settings header (you may need to scroll up or down)
+* Add the language scope for the language you want to add (i.e. HTML, JavaScript) according to the directions below.
+
+How to find the scope for your desired language:
+
+Put your cursor in a file in this language format, open the [Command Palette](https://github.com/atom/command-palette)
+(<kbd>cmd-shift-p</kbd>), and run the `Editor: Log Cursor Scope` command. This will trigger a notification which will contain a list of scopes. The first scope that's listed is the one you should add to the list of scopes (the Grammmars box noted above) in the settings for the _Spell Check_ package. Here are some examples: `source.coffee`, `text.plain`, `text.html.basic`.
+
+(To delete file types, simply delete the scope in the Grammars box.)
 
 ## Changing the dictionary
 
