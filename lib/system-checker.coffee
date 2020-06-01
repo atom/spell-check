@@ -61,6 +61,55 @@ class SystemChecker
 >>>>>>> origin/aw-async-check
 
   suggest: (args, word) ->
+<<<<<<< HEAD
     instance.getCorrectionsForMisspelling(word)
+=======
+    @deferredInit()
+    @spellchecker.getCorrectionsForMisspelling(word)
+
+  deferredInit: ->
+    # If we already have a spellchecker, then we don't have to do anything.
+    if @spellchecker
+      return
+
+    # Initialize the spell checker which can take some time.
+    @spellchecker = new spellchecker.Spellchecker
+
+    # Windows uses its own API and the paths are unimportant, only attempting
+    # to load it works.
+    if /win32/.test process.platform
+      if @spellchecker.setDictionary @locale, "C:\\"
+        return
+
+    # Check the paths supplied by the user.
+    for path in @paths
+      if @spellchecker.setDictionary @locale, path
+        return
+
+    # For Linux, we have to search the directory paths to find the dictionary.
+    if /linux/.test process.platform
+      if @spellchecker.setDictionary @locale, "/usr/share/hunspell"
+        return
+      if @spellchecker.setDictionary @locale, "/usr/share/myspell"
+        return
+      if @spellchecker.setDictionary @locale, "/usr/share/myspell/dicts"
+        return
+
+    # OS X uses the following paths.
+    if /darwin/.test process.platform
+      if @spellchecker.setDictionary @locale, "/"
+        return
+      if @spellchecker.setDictionary @locale, "/System/Library/Spelling"
+        return
+
+    vendor = spellchecker.getDictionaryPath()
+    if @spellchecker.setDictionary @locale, vendor
+      return
+
+    # If we fell through all the if blocks, then we couldn't load the dictionary.
+    @enabled = false
+    @reason = "Cannot find dictionary for " + @locale + "."
+    console.log @getId(), "Can't load " + @locale + ": " + @reason
+>>>>>>> origin/pr-233
 
 module.exports = SystemChecker
