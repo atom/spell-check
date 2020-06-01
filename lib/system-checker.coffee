@@ -42,6 +42,7 @@ class SystemChecker
   providesAdding: (args) -> false # Users can't add yet.
 
   check: (args, text) ->
+<<<<<<< HEAD
     id = @getId()
 
     if @isEnabled()
@@ -53,6 +54,11 @@ class SystemChecker
         {id, invertIncorrectAsCorrect: true, incorrect}
     else
       {id, status: @getStatus()}
+=======
+    @deferredInit()
+    @spellchecker.checkSpellingAsync(text).then (incorrect) ->
+      {invertIncorrectAsCorrect: true, incorrect}
+>>>>>>> origin/aw-async-check
 
   suggest: (args, word) ->
     instance.getCorrectionsForMisspelling(word)
