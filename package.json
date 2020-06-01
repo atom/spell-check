@@ -1,6 +1,10 @@
 {
   "name": "spell-check",
+<<<<<<< HEAD
   "version": "0.76.1",
+=======
+  "version": "0.73.5",
+>>>>>>> origin/dw-fix-appveyor
   "main": "./lib/main",
   "description": "Highlights misspelled words and shows possible corrections.",
   "dependencies": {
