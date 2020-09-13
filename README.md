@@ -20,7 +20,7 @@ To enable _Spell Check_ for your current file type: put your cursor in the file,
 
 ## Changing the dictionary
 
-Except for Mac, Atom needs to know what language to use to perform spell-checking. To list these, set the "Locales" configuration option to the IETF tag (en-US, fr-FR, etc). More than one language can be used, simply separate them by commas.
+Except for Mac, Atom needs to know what language to use to perform spell-checking. To list these, set the "Locales" configuration option to the [IETF tag](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) (en-US, fr-FR, etc). More than one language can be used, simply separate them by commas.
 
 If no locale is given, then Atom will attempt to infer the language based on environment variables and settings.
 
