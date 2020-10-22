@@ -42,7 +42,7 @@ exports.conditionPromise = async function (condition, description = condition.to
       return
     }
 
-    if (Date.now() - startTime > 5000) {
+    if (Date.now() - startTime > 120000) {
       throw new Error('Timed out waiting on ' + description)
     }
   }
