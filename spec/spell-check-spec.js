@@ -461,6 +461,7 @@ describe('Spell check', function () {
 
         await conditionPromise(() => {
           markers = getMisspellingMarkers()
+          console.log(markers)
           return markers.length === 1
             && markers[0].getBufferRange().start.column === 7
             && markers[0].getBufferRange().end.column === 11
