@@ -13,10 +13,17 @@
     "spelling-manager": "^1.1.0",
     "underscore-plus": "^1"
   },
+  "devDependencies": {
+    "husky": "^4.2.5",
+    "prettier": "^2.1.1"
+  },
   "repository": "https://github.com/atom/spell-check",
   "license": "MIT",
   "engines": {
     "atom": "*"
+  },
+  "scripts": {
+    "format": "prettier --write \"spec/*.js\" \"lib/**/*.js\" \"script/*.js\" --loglevel warn"
   },
   "configSchema": {
     "grammars": {
@@ -105,14 +112,17 @@
       ]
     }
   },
-  "devDependencies": {
-    "coffeelint": "^1.9.7"
-  },
   "consumedServices": {
     "spell-check": {
       "versions": {
         "^1.0.0": "consumeSpellCheckers"
       }
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run format",
+      "pre-push": "npm run format"
     }
   }
 }

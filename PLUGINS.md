@@ -13,7 +13,7 @@ The `spell-check` allows for additional dictionaries to be used at the same time
 The `nameOfFunctionToProvideSpellCheck` function may return either a single `require`able path or an array of them. This must be an absolute path to a class that provides a checker instance (below).
 
     provideSpellCheck: ->
-      require.resolve './project-checker.coffee'
+      require.resolve './project-checker'
 
 The path given must either resolve to a singleton instance of a class or a default export in a ES6 module.
 
