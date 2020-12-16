@@ -110,6 +110,12 @@
           "description": "Display notices only on the console"
         }
       ]
+    },
+    "enableDebug": {
+      "type": "boolean",
+      "default": false,
+      "title": "Enable debug information for spell check",
+      "order": 10
     }
   },
   "consumedServices": {
