@@ -1,5 +1,5 @@
 # Spell Check package
-[![OS X Build Status](https://travis-ci.org/atom/spell-check.svg?branch=master)](https://travis-ci.org/atom/spell-check) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/1620a5reqw6kdolv/branch/master?svg=true)](https://ci.appveyor.com/project/Atom/spell-check/branch/master) [![Dependency Status](https://david-dm.org/atom/spell-check.svg)](https://david-dm.org/atom/spell-check)
+[![CI](https://github.com/atom/spell-check/actions/workflows/ci.yml/badge.svg)](https://github.com/atom/spell-check/actions/workflows/ci.yml)
 
 Highlights misspelling in Atom and shows possible corrections.
 
