@@ -8,7 +8,7 @@ Use <kbd>cmd-shift-:</kbd> for Mac or <kbd>ctrl-shift-:</kbd> for Windows or Lin
 By default spell check is enabled for the following files:
 
 * Plain Text
-* GitHub Markdown
+* Markdown
 * Git Commit Message
 * AsciiDoc
 * reStructuredText
