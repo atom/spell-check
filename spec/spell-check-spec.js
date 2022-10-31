@@ -241,9 +241,8 @@ describe('Spell check', function () {
                     editorElement,
                     'spell-check:correct-misspelling'
                 );
-                correctionsElement = editorElement.querySelector(
-                    '.corrections'
-                );
+                correctionsElement =
+                    editorElement.querySelector('.corrections');
                 expect(correctionsElement).toBeDefined();
                 expect(
                     correctionsElement.querySelectorAll('li').length
